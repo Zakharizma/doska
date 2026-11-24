@@ -552,33 +552,40 @@ function pdfScript(src){
     document.head.appendChild(s);
   });
 }
+/* Любое ожидание ограничиваем по времени. Иначе при медленной сети
+   экран навсегда остаётся с надписью «Открываю PDF…». */
+function withTimeout(p,ms,msg){
+  return Promise.race([p, new Promise((_,rj)=>setTimeout(()=>rj(new Error(msg||'превышено время')),ms))]);
+}
 /* Загружаем библиотеку И код воркера обычными скриптами.
    Тогда PDF.js видит globalThis.pdfjsWorker и рисует в основном потоке —
-   без Worker, без blob-адресов, без ограничений безопасности.
-   Именно на воркере всё и зависало: браузер его не создавал. */
+   без Worker, без blob-адресов, без ограничений безопасности. */
 function loadPdfjs(){
   if(window.pdfjsLib && window.pdfjsWorker) return Promise.resolve(window.pdfjsLib);
   if(pdfjsP) return pdfjsP;
-  pdfjsP=(async()=>{
+  pdfjsP=withTimeout((async()=>{
     await pdfScript(PDFJS_BASE+'pdf.min.js');
     await pdfScript(PDFJS_BASE+'pdf.worker.min.js');
     return window.pdfjsLib;
-  })();
+  })(), 25000, 'библиотека не загрузилась за 25 с');
   return pdfjsP;
+}
+/* Заранее подтягиваем библиотеку, чтобы открытие было мгновенным.
+   Ошибку здесь глотаем: если сеть недоступна — сработает обычный путь. */
+function pdfPreload(){
+  if(window.pdfjsLib && window.pdfjsWorker) return;
+  loadPdfjs().catch(()=>{ pdfjsP=null; });
 }
 
 /* Рисует страницы PDF в canvas. wrap — уже существующая обёртка .vwrap,
    чтобы разметка PDF и картинки была одинаковой. */
 async function renderPdf(wrap,url,onErr){
   try{
-    const lib=await loadPdfjs();
-    const data=new Uint8Array(await (await fetch(url)).arrayBuffer());
-    /* страховка от зависания: раньше разбор файла мог встать навсегда
-       и человек видел пустую область без всякого сообщения */
-    const doc=await Promise.race([
-      lib.getDocument({data:data}).promise,
-      new Promise((_,rj)=>setTimeout(()=>rj(new Error('разбор занял больше 20 с')),20000))
-    ]);
+    const lib=await withTimeout(loadPdfjs(), 25000, 'библиотека не загрузилась');
+    const data=new Uint8Array(await withTimeout(
+      fetch(url).then(r=>r.arrayBuffer()), 30000, 'файл не скачался за 30 с'));
+    const doc=await withTimeout(
+      lib.getDocument({data:data}).promise, 20000, 'разбор файла занял больше 20 с');
 
     wrap.innerHTML='';
     const avail=Math.max(240, wrap.clientWidth-24);
@@ -3314,6 +3321,9 @@ try{
     };
     setTimeout(boot,300);
     setTimeout(boot,2500);            /* повтор, если сеть ещё не поднялась */
+    /* библиотеку для PDF тянем заранее, в фоне — чтобы открытие файла
+       было мгновенным, а не с ожиданием загрузки на глазах */
+    setTimeout(pdfPreload,4000);
     setInterval(()=>{ if(!syncBusy&&syncOn()) syncPull(true); },60000);
     document.addEventListener('visibilitychange',()=>{
       if(!document.hidden&&syncOn()) syncPull(true);
