@@ -160,30 +160,34 @@ canvas{display:block;position:fixed;inset:0;cursor:default;
   border-radius:12px 12px 0 0;padding:10px 12px;flex:none}
 .vname{font-size:13px;color:var(--tx);font-weight:600;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.vact{display:flex;align-items:center;gap:12px;flex:none}
-.vdl{font-size:12.5px;color:var(--acc);text-decoration:none;
-  border:1px solid var(--line2);border-radius:8px;padding:5px 10px}
-.vdl:hover{background:#26344a}
-.vx{cursor:pointer;font-size:15px;color:var(--tx2);padding:2px 4px}
+.vact{display:flex;align-items:center;gap:8px;flex:none}
+.vdl,.vopen{font-size:12.5px;color:var(--acc);text-decoration:none;
+  border:1px solid var(--line2);border-radius:8px;padding:5px 10px;white-space:nowrap}
+.vdl:hover,.vopen:hover{background:#26344a}
+.vx{cursor:pointer;font-size:15px;color:var(--tx2);padding:2px 6px;flex:none}
 .vx:hover{color:var(--tx)}
+/* тело: содержимое сверху, подсказка снизу — друг под другом, не в ряд */
 .vbody{flex:1;min-height:0;background:#0d131c;border:1px solid var(--line2);
   border-top:none;border-radius:0 0 12px 12px;overflow:hidden;
-  display:flex;align-items:center;justify-content:center;position:relative}
-/* картинка заполняет область целиком и вписывается внутрь — так она
-   всегда по центру и никогда не выходит за края */
-.vimg{width:100%;height:100%;object-fit:contain;display:block}
+  display:flex;flex-direction:column}
+.vstage{flex:1;min-height:0;position:relative;overflow:hidden;
+  display:flex;align-items:center;justify-content:center}
+.vimg{max-width:100%;max-height:100%;width:auto;height:auto;
+  object-fit:contain;display:block}
 .vpdf{width:100%;height:100%;border:0;background:#fff;display:block}
 .vload{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-  font-size:13px;color:var(--tx3);background:#0d131c}
-.vhint{font-size:11.5px;color:var(--tx3);padding:8px;text-align:center;
-  border-top:1px solid var(--line);flex:none}
+  font-size:13px;color:var(--tx3);background:#0d131c;pointer-events:none}
+.vhint{font-size:11.5px;color:var(--tx3);padding:7px 10px;text-align:center;
+  border-top:1px solid var(--line);flex:none;line-height:1.5}
+.vhint:empty{display:none}
 .vhint a{color:var(--acc)}
 .vmsg{font-size:13px;color:var(--tx2);text-align:center;line-height:1.9;padding:24px}
 .vmsg a{color:var(--acc)}
 @media(max-width:640px){
   #viewer{padding:8px}
   .vname{font-size:12px}
-  .vdl{font-size:11.5px;padding:4px 8px}
+  .vdl,.vopen{font-size:11.5px;padding:4px 8px}
+  .vhint{font-size:11px;padding:6px 8px}
 }
 </style>
 </head>
@@ -479,12 +483,16 @@ function attImg(att){
   return (o.complete&&o.naturalWidth)?o:null;
 }
 /* ================= ПРОСМОТР ВЛОЖЕНИЙ =================
-   Файл открывается внутри доски, а не скачивается. GitHub отдаёт
-   PDF как application/octet-stream, поэтому браузер по прямой ссылке
-   сохраняет его на диск — на телефоне это лишний шаг и путаница.
-   Здесь PDF показываем через встроенный просмотрщик браузера,
-   картинки — как картинки, остальное предлагаем скачать. */
+   Одно окно на всю доску. Раньше здесь была ошибка раскладки: рамка PDF
+   и подсказка лежали в одном ряду, поэтому PDF сжимался, а подсказка
+   наезжала сверху — выглядело как несколько наложенных окон.
+   Теперь содержимое и подсказка идут друг под другом.
+   Адреса — через jsDelivr: GitHub отдаёт файлы с X-Frame-Options: deny,
+   из-за чего в рамке было пусто. */
 function viewerEl(){
+  /* страховка: если по какой-то причине окно размножилось — оставляем одно */
+  const all=document.querySelectorAll('#viewer');
+  for(let i=1;i<all.length;i++) all[i].remove();
   let v=document.getElementById('viewer');
   if(v) return v;
   v=document.createElement('div');
@@ -493,19 +501,28 @@ function viewerEl(){
     '<div class="vhead">'+
       '<span class="vname"></span>'+
       '<span class="vact">'+
-        '<a class="vdl" target="_blank" rel="noopener">Скачать</a>'+
-        '<span class="vx">✕</span>'+
+        '<a class="vopen" target="_blank" rel="noopener">Открыть</a>'+
+        '<a class="vdl" download>Скачать</a>'+
+        '<span class="vx" title="Закрыть">✕</span>'+
       '</span>'+
     '</div>'+
-    '<div class="vbody"></div>';
+    '<div class="vbody">'+
+      '<div class="vstage"></div>'+
+      '<div class="vhint"></div>'+
+    '</div>';
   document.body.appendChild(v);
-  v.querySelector('.vx').addEventListener('click',()=>{ closeViewer(); });
+  v.querySelector('.vx').addEventListener('click',e=>{ e.stopPropagation(); closeViewer(); });
   v.addEventListener('click',ev=>{ if(ev.target===v) closeViewer(); });
   return v;
 }
 function closeViewer(){
   const v=document.getElementById('viewer');
-  if(v){ v.classList.remove('show'); v.querySelector('.vbody').innerHTML=''; }
+  if(!v) return;
+  v.classList.remove('show');
+  const st=v.querySelector('.vstage');
+  if(st) st.innerHTML='';
+  const h=v.querySelector('.vhint');
+  if(h) h.innerHTML='';
 }
 document.addEventListener('keydown',ev=>{
   if(ev.key==='Escape') closeViewer();
@@ -516,56 +533,67 @@ function openAtt(att){
   const url=attUrl(att);
   if(!url){ toast('Нет адреса файла'); return; }
 
-  /* ссылка на внешнее хранилище (Яндекс Диск и подобное) — открываем в новой вкладке */
+  /* ссылка на внешнее хранилище (Яндекс Диск и подобное) — в новой вкладке */
   if(att.link){
     try{ window.open(url,'_blank','noopener'); }catch(e){ toast('Не удалось открыть'); }
     return;
   }
 
   const v=viewerEl();
-  const body=v.querySelector('.vbody');
+  const stage=v.querySelector('.vstage');
+  const hint=v.querySelector('.vhint');
   const nm=v.querySelector('.vname');
   const dl=v.querySelector('.vdl');
+  const op=v.querySelector('.vopen');
   nm.textContent=att.name||'Файл';
+  nm.title=att.name||'';
   dl.href=url;
   dl.setAttribute('download', att.name||'');
-  body.innerHTML='';
+  op.href=url;
+  stage.innerHTML='';
+  hint.innerHTML='';
 
   const kind=att.kind||'file';
+  v.classList.add('show');
+
+  const fail=(txt)=>{
+    stage.innerHTML='<div class="vmsg">'+txt+'<br>'+
+      '<a href="'+url+'" target="_blank" rel="noopener">Открыть в новой вкладке</a></div>';
+  };
 
   if(kind==='img'){
     const im=document.createElement('img');
     im.className='vimg';
     im.alt=att.name||'';
+    im.addEventListener('load',()=>{ const l=stage.querySelector('.vload'); if(l) l.remove(); });
+    im.addEventListener('error',()=>{ fail('Картинка не загрузилась.'); });
     im.src=url;
-    im.addEventListener('error',()=>{
-      body.innerHTML='<div class="vmsg">Картинка не загрузилась.<br>'+
-        '<a href="'+url+'" target="_blank" rel="noopener">Открыть отдельно</a></div>';
-    });
-    body.appendChild(im);
+    stage.appendChild(im);
+    if(!im.complete){
+      const l=document.createElement('div');
+      l.className='vload'; l.textContent='Загружаю…';
+      stage.appendChild(l);
+    }
 
   }else if(kind==='pdf'){
-    /* Встроенный просмотрщик браузера. Если он недоступен (часто на телефоне),
-       ниже остаётся кнопка «Скачать» и ссылка на отдельное открытие. */
     const fr=document.createElement('iframe');
     fr.className='vpdf';
-    fr.src=url;
     fr.title=att.name||'PDF';
-    body.appendChild(fr);
-    const hint=document.createElement('div');
-    hint.className='vhint';
-    hint.innerHTML='Не видно содержимое? '+
-      '<a href="'+url+'" target="_blank" rel="noopener">Открыть в новой вкладке</a> '+
-      'или нажми «Скачать» справа сверху.';
-    body.appendChild(hint);
+    fr.src=url;
+    stage.appendChild(fr);
+    const l=document.createElement('div');
+    l.className='vload'; l.textContent='Открываю PDF…';
+    stage.appendChild(l);
+    /* рамка грузится без события load для PDF, поэтому убираем плашку
+       по таймауту; если пусто — подсказка уже видна снизу */
+    setTimeout(()=>{ const x=stage.querySelector('.vload'); if(x) x.remove(); },2500);
+    hint.innerHTML='Если страницы не видно — нажми '+
+      '<a href="'+url+'" target="_blank" rel="noopener">«Открыть»</a> сверху справа.';
 
   }else{
-    body.innerHTML='<div class="vmsg">Этот формат браузер показать не умеет.<br>'+
-      '<a href="'+url+'" target="_blank" rel="noopener">Открыть в новой вкладке</a><br>'+
-      '<span style="opacity:.6">или нажми «Скачать» справа сверху</span></div>';
+    fail('Этот формат браузер не показывает.');
+    hint.textContent='Можно скачать и открыть в программе на устройстве.';
   }
-
-  v.classList.add('show');
 }
 
 /* ================= ПОВТОРЫ =================
