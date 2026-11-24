@@ -179,9 +179,9 @@ canvas{display:block;position:fixed;inset:0;cursor:default;
 /* общий размер для картинки и страницы PDF */
 .vimg{display:block;width:auto;height:auto;
   max-width:100%;max-height:calc(100vh - 170px);object-fit:contain}
-/* страницы PDF — отдельные canvas, друг под другом */
-.pcv{display:block;max-width:100%;height:auto;background:#fff;
-  box-shadow:0 2px 14px rgba(0,0,0,.55);border-radius:2px}
+/* рамка PDF растягивается на всю область — так удобнее читать */
+.vpdf{display:block;width:100%;height:calc(100vh - 170px);
+  border:0;background:#2b2b2b;border-radius:2px}
 .vload{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
   font-size:13px;color:var(--tx3);background:#0d131c;pointer-events:none}
 .vhint{flex:0 0 auto;font-size:11.5px;color:var(--tx3);padding:8px 10px;
@@ -199,6 +199,7 @@ canvas{display:block;position:fixed;inset:0;cursor:default;
   .vdl,.vopen{font-size:11.5px;padding:4px 8px}
   .vhint{font-size:11px;padding:6px 8px}
   .vimg{max-height:calc(100vh - 150px)}
+  .vpdf{height:calc(100vh - 150px)}
 }
 </style>
 </head>
@@ -524,72 +525,6 @@ function viewerEl(){
   v.addEventListener('click',ev=>{ if(ev.target===v) closeViewer(); });
   return v;
 }
-/* ---------- ПРОСМОТР PDF ----------
-   Своя отрисовка через PDF.js, файлы библиотеки лежат рядом с доской
-   (папка files/), а не на чужом CDN. Причина: встроенный просмотрщик
-   PDF есть в обычном браузере, но ОТСУТСТВУЕТ в Electron — поэтому
-   во встроенной панели harness рамка оставалась серой заливкой.
-   Рисуем страницы в canvas сами — тогда вид одинаков везде. */
-const PDFJS_BASE='files/';
-let pdfjsP=null;
-function pdfScript(src){
-  return new Promise((res,rej)=>{
-    const s=document.createElement('script');
-    s.src=src;
-    s.onload=()=>res();
-    s.onerror=()=>rej(new Error('не загрузилось: '+src));
-    document.head.appendChild(s);
-  });
-}
-function loadPdfjs(){
-  if(window.pdfjsLib && window.pdfjsWorker) return Promise.resolve(window.pdfjsLib);
-  if(pdfjsP) return pdfjsP;
-  pdfjsP=(async()=>{
-    await pdfScript(PDFJS_BASE+'pdf.min.js');
-    /* второй скрипт делает PDF.js видимым как pdfjsWorker — тогда он
-       работает в основном потоке и не пытается создать Worker */
-    await pdfScript(PDFJS_BASE+'pdf.worker.min.js');
-    return window.pdfjsLib;
-  })();
-  return pdfjsP;
-}
-/* Рисует страницы в canvas внутри wrap. Плашка живёт ВНУТРИ wrap,
-   поэтому первый же innerHTML='' её гарантированно убирает —
-   раньше она лежала отдельным слоем и оставалась навсегда. */
-async function renderPdf(wrap,url,onErr){
-  try{
-    const lib=await loadPdfjs();
-    const buf=await (await fetch(url)).arrayBuffer();
-    const doc=await lib.getDocument({data:new Uint8Array(buf)}).promise;
-
-    wrap.innerHTML='';
-    const avail=Math.max(240, (wrap.clientWidth||window.innerWidth)-24);
-    const dpr=Math.min(window.devicePixelRatio||1, 2);
-
-    for(let n=1;n<=doc.numPages;n++){
-      const page=await doc.getPage(n);
-      const base=page.getViewport({scale:1});
-      const sc=Math.max(0.4, Math.min(avail/base.width, 3));
-      const vp=page.getViewport({scale:sc*dpr});
-      const cv=document.createElement('canvas');
-      cv.className='pcv';
-      cv.width=Math.round(vp.width);
-      cv.height=Math.round(vp.height);
-      cv.style.width=Math.round(vp.width/dpr)+'px';
-      cv.style.height=Math.round(vp.height/dpr)+'px';
-      const ctx=cv.getContext('2d');
-      ctx.fillStyle='#fff';
-      ctx.fillRect(0,0,cv.width,cv.height);
-      wrap.appendChild(cv);
-      await page.render({canvasContext:ctx, viewport:vp}).promise;
-    }
-    return doc.numPages;
-  }catch(e){
-    onErr(e);
-    return 0;
-  }
-}
-
 function closeViewer(){
   const v=document.getElementById('viewer');
   if(!v) return;
@@ -651,22 +586,15 @@ function openAtt(att){
     hint.textContent='Клик по фону, крестик или Esc — закрыть.';
 
   }else if(kind==='pdf'){
-    /* своя отрисовка: работает и в браузере, и в панели harness */
-    const l=document.createElement('div');
-    l.className='vload'; l.textContent='Открываю PDF…';
-    wrap.appendChild(l);
+    /* Рамка браузера, файл с того же домена. Никаких наложений и плашек:
+       если браузер PDF не покажет, человек просто нажмёт «Открыть». */
+    const fr=document.createElement('iframe');
+    fr.className='vpdf';
+    fr.title=att.name||'PDF';
+    fr.src=url;
+    wrap.appendChild(fr);
     hint.innerHTML='Если страницы не видно — нажми '+
       '<a href="'+url+'" target="_blank" rel="noopener">«Открыть»</a> сверху справа.';
-
-    renderPdf(wrap,url,(e)=>{
-      /* не вышло — честно говорим и даём кнопку, но не оставляем пустоту */
-      wrap.innerHTML='<div class="vmsg">Показать внутри не удалось.<br>'+
-        '<span style="opacity:.65">'+(e&&e.message?e.message:'неизвестная причина')+'</span><br><br>'+
-        '<a class="vbig" href="'+url+'" target="_blank" rel="noopener">Открыть PDF</a></div>';
-      hint.textContent='Файл откроется в новой вкладке.';
-    }).then(n=>{
-      if(n) hint.textContent='Страниц: '+n+' · листай колесом или пальцем';
-    });
 
   }else{
     fail('Этот формат браузер не показывает.');
