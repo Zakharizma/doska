@@ -2,6 +2,9 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="pragma" content="no-cache">
+<meta http-equiv="expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2545,26 +2548,19 @@ const SYNC_DEFAULT={
 };
 
 (function syncLoad(){
+  /* Доступ ставим СРАЗУ и безусловно — вшитый, единственный.
+     Панели настройки больше нет, менять доступ нечем, поэтому любые
+     сохранённые в браузере старые значения только вредили: отключённый
+     флаг блокировал файлы, а просроченный ключ давал отказ 401.
+     Если браузер вообще запрещает хранилище, обращение к localStorage
+     бросает исключение — поэтому всё, что от него зависит, идёт ниже
+     и в try. */
+  SYNC.tok=SYNC_DEFAULT.tok;
+  SYNC.owner=SYNC_DEFAULT.owner;
+  SYNC.repo=SYNC_DEFAULT.repo;
+  SYNC.off=false;
+
   try{
-    const raw=localStorage.getItem(SYNC_KEY);
-    let saved=null;
-    if(raw){
-      const p=JSON.parse(raw);
-      if(p&&typeof p==='object') saved=p;
-    }
-    /* Доступ всегда берём вшитый. Раньше здесь уважалась галочка «отключено»,
-       оставшаяся от старой панели, — и доска навсегда застревала без
-       синхронизации, а включить было нечем: панели больше нет.
-       Теперь застрявший флаг лечится сам. */
-    if(saved && saved.tok && !saved.off){
-      SYNC.tok=saved.tok; SYNC.owner=saved.owner||SYNC_DEFAULT.owner;
-      SYNC.repo=saved.repo||SYNC_DEFAULT.repo;
-    }else{
-      SYNC.tok=SYNC_DEFAULT.tok;
-      SYNC.owner=SYNC_DEFAULT.owner;
-      SYNC.repo=SYNC_DEFAULT.repo;
-    }
-    SYNC.off=false;
     const d=localStorage.getItem('board.del.v1');
     if(d){ const p=JSON.parse(d); if(p&&typeof p==='object') DEL=p; }
   }catch(e){}
@@ -2956,9 +2952,17 @@ async function uploadFile(path,f,silent){
   }
 
   if(!syncOn()){
-    /* сюда попадаем только если облако недоступно совсем */
-    if(local){ if(!silent) toast('Прикреплено: '+f.name); return true; }
-    toast('Не удалось ни сохранить, ни отправить. Проверь связь');
+    /* Сюда попадаем, только если облачный доступ почему-то не подставился.
+       Молча отказывать нельзя: сначала пробуем сохранить локально,
+       а в сообщении показываем причину — иначе неясно, что чинить. */
+    let saved=false;
+    try{ saved=await attachLocal(path,f); }catch(e){}
+    if(saved){
+      if(!silent) toast('Файл сохранён на этом устройстве: '+f.name);
+      return true;
+    }
+    toast('Не вышло: облако '+(SYNC.tok?'есть':'НЕТ')+', место '+
+          (f.size>MAXLOCAL?'мало':'есть')+'. Обнови страницу (Ctrl+F5)');
     return false;
   }
   if(f.size>MAXATT){
@@ -3060,6 +3064,7 @@ loop();
 </script>
 </body>
 </html>
+
 
 
 
