@@ -177,9 +177,11 @@ canvas{display:block;position:fixed;inset:0;cursor:default;
 .vwrap{min-height:100%;display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:12px;padding:12px}
 /* общий размер для картинки и страницы PDF */
-.vimg,.pcv{display:block;width:auto;height:auto;
+.vimg{display:block;width:auto;height:auto;
   max-width:100%;max-height:calc(100vh - 170px);object-fit:contain}
-.pcv{background:#fff;box-shadow:0 2px 14px rgba(0,0,0,.55)}
+/* рамка PDF растягивается на всю область — так удобнее читать */
+.vpdf{display:block;width:100%;height:calc(100vh - 170px);
+  border:0;background:#2b2b2b;border-radius:2px}
 .vload{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
   font-size:13px;color:var(--tx3);background:#0d131c;pointer-events:none}
 .vhint{flex:0 0 auto;font-size:11.5px;color:var(--tx3);padding:8px 10px;
@@ -196,7 +198,8 @@ canvas{display:block;position:fixed;inset:0;cursor:default;
   .vname{font-size:12px}
   .vdl,.vopen{font-size:11.5px;padding:4px 8px}
   .vhint{font-size:11px;padding:6px 8px}
-  .vimg,.pcv{max-height:calc(100vh - 150px)}
+  .vimg{max-height:calc(100vh - 150px)}
+  .vpdf{height:calc(100vh - 150px)}
 }
 </style>
 </head>
@@ -461,24 +464,24 @@ function lattSet(path,att){ LATT[path]=att; return lattSave(); }
 function lattDel(path){ delete LATT[path]; lattSave(); }
 
 const IMGC={};
-/* Адрес вложения. GitHub отдаёт файлы как application/octet-stream,
-   из-за чего браузер PDF не показывает, а скачивает. jsDelivr — тот же
-   файл из того же репозитория, но с правильным типом по расширению,
-   поэтому PDF и картинки открываются прямо в просмотрщике.
-   Старые записи с raw.githubusercontent переписываем на лету —
-   так уже прикреплённые файлы начинают работать без переприкрепления. */
-function cdnUrl(p){
+/* Адрес вложения берём с ТОГО ЖЕ домена, где лежит доска.
+   Файлы репозитория отдаются по относительному пути files/имя —
+   GitHub Pages отдаёт их с правильным типом (application/pdf),
+   поэтому браузер показывает PDF прямо в рамке.
+   Старые записи с чужих доменов (raw.githubusercontent, jsDelivr)
+   приводим к относительному пути на лету — прикреплять заново не нужно. */
+function relPath(p){
   if(!p) return '';
-  const m=/^https?:\/\/raw\.githubusercontent\.com\/([^/]+)\/([^/]+)\/([^/]+)\/(.+)$/.exec(p);
-  if(m){
-    return 'https://cdn.jsdelivr.net/gh/'+m[1]+'/'+m[2]+'@'+m[3]+'/'+m[4];
-  }
+  let m=/^https?:\/\/cdn\.jsdelivr\.net\/gh\/[^/]+\/[^/@]+@[^/]+\/(.+)$/.exec(p);
+  if(m) return m[1];
+  m=/^https?:\/\/raw\.githubusercontent\.com\/[^/]+\/[^/]+\/[^/]+\/(.+)$/.exec(p);
+  if(m) return m[1];
   return p;
 }
 function attUrl(att){
   if(!att||!att.path) return '';
   if(att.path.startsWith('data:')) return att.path;
-  const p=cdnUrl(att.path);
+  const p=relPath(att.path);
   try{ return new URL(p, location.href).href; }catch(e){ return p; }
 }
 function attImg(att){
@@ -522,98 +525,12 @@ function viewerEl(){
   v.addEventListener('click',ev=>{ if(ev.target===v) closeViewer(); });
   return v;
 }
-let VPDFURL=null;
-/* Скачивает PDF и отдаёт локальный адрес. Своя копия нужна потому,
-   что Chrome не рисует чужой PDF внутри рамки — область остаётся белой. */
-async function pdfLocal(url){
-  if(VPDFURL){ try{ URL.revokeObjectURL(VPDFURL); }catch(e){} VPDFURL=null; }
-  const r=await fetch(url,{mode:'cors',credentials:'omit',cache:'force-cache'});
-  if(!r.ok) throw new Error('HTTP '+r.status);
-  const b=await r.blob();
-  if(!b.size) throw new Error('пусто');
-  VPDFURL=URL.createObjectURL(new Blob([b],{type:'application/pdf'}));
-  return VPDFURL;
-}
-
-/* ---------- СВОЙ ПРОСМОТРЩИК PDF ----------
-   Chrome на компьютере не показывает PDF внутри рамки: область остаётся
-   пустой. Поэтому рисуем страницы сами через PDF.js — это canvas, он
-   работает в любом браузере и не зависит от настроек PDF в системе.
-   Библиотека подгружается только при первом открытии PDF. */
-const PDFJS_VER='3.11.174';
-const PDFJS_BASE='https://cdn.jsdelivr.net/npm/pdfjs-dist@'+PDFJS_VER+'/build/';
-let pdfjsP=null;
-function pdfScript(src){
-  return new Promise((res,rej)=>{
-    const s=document.createElement('script');
-    s.src=src;
-    s.onload=()=>res();
-    s.onerror=()=>rej(new Error('не загрузилось: '+src.split('/').pop()));
-    document.head.appendChild(s);
-  });
-}
-/* Любое ожидание ограничиваем по времени. Иначе при медленной сети
-   экран навсегда остаётся с надписью «Открываю PDF…». */
-function withTimeout(p,ms,msg){
-  return Promise.race([p, new Promise((_,rj)=>setTimeout(()=>rj(new Error(msg||'превышено время')),ms))]);
-}
-/* Загружаем библиотеку И код воркера обычными скриптами.
-   Тогда PDF.js видит globalThis.pdfjsWorker и рисует в основном потоке —
-   без Worker, без blob-адресов, без ограничений безопасности. */
-function loadPdfjs(){
-  if(window.pdfjsLib && window.pdfjsWorker) return Promise.resolve(window.pdfjsLib);
-  if(pdfjsP) return pdfjsP;
-  pdfjsP=withTimeout((async()=>{
-    await pdfScript(PDFJS_BASE+'pdf.min.js');
-    await pdfScript(PDFJS_BASE+'pdf.worker.min.js');
-    return window.pdfjsLib;
-  })(), 25000, 'библиотека не загрузилась за 25 с');
-  return pdfjsP;
-}
-/* Заранее подтягиваем библиотеку, чтобы открытие было мгновенным.
-   Ошибку здесь глотаем: если сеть недоступна — сработает обычный путь. */
-function pdfPreload(){
-  if(window.pdfjsLib && window.pdfjsWorker) return;
-  loadPdfjs().catch(()=>{ pdfjsP=null; });
-}
-
-/* Рисует страницы PDF в canvas. wrap — уже существующая обёртка .vwrap,
-   чтобы разметка PDF и картинки была одинаковой. */
-async function renderPdf(wrap,url,onErr){
-  try{
-    const lib=await withTimeout(loadPdfjs(), 25000, 'библиотека не загрузилась');
-    const data=new Uint8Array(await withTimeout(
-      fetch(url).then(r=>r.arrayBuffer()), 30000, 'файл не скачался за 30 с'));
-    const doc=await withTimeout(
-      lib.getDocument({data:data}).promise, 20000, 'разбор файла занял больше 20 с');
-
-    wrap.innerHTML='';
-    const avail=Math.max(240, wrap.clientWidth-24);
-    const dpr=Math.min(window.devicePixelRatio||1, 2);
-
-    for(let n=1;n<=doc.numPages;n++){
-      const page=await doc.getPage(n);
-      const base=page.getViewport({scale:1});
-      const sc=Math.max(0.5, Math.min(avail/base.width, 3));
-      const vp=page.getViewport({scale:sc*dpr});
-      const cv=document.createElement('canvas');
-      cv.className='pcv';
-      cv.width=Math.round(vp.width);
-      cv.height=Math.round(vp.height);
-      cv.style.width=Math.round(vp.width/dpr)+'px';
-      cv.style.height=Math.round(vp.height/dpr)+'px';
-      const ctx=cv.getContext('2d');
-      ctx.fillStyle='#fff';
-      ctx.fillRect(0,0,cv.width,cv.height);
-      wrap.appendChild(cv);
-      await page.render({canvasContext:ctx, viewport:vp}).promise;
-    }
-    const h=document.querySelector('#viewer .vhint');
-    if(h) h.textContent='Страниц: '+doc.numPages+' · листай колесом или пальцем';
-  }catch(e){
-    onErr(e);
-  }
-}
+/* ---------- ПРОСМОТР PDF ----------
+   PDF открывается во встроенной рамке браузера. Это работает, потому что
+   файл лежит на ТОМ ЖЕ домене, что и доска, и отдаётся с типом
+   application/pdf. Своего просмотрщика нет намеренно: библиотека весит
+   больше мегабайта, тянется с чужого CDN и на деле только добавляла
+   точек отказа. */
 function closeViewer(){
   const v=document.getElementById('viewer');
   if(!v) return;
@@ -622,7 +539,6 @@ function closeViewer(){
   if(b){ b.innerHTML=''; b.classList.remove('scroll'); }
   const h=v.querySelector('.vhint');
   if(h) h.innerHTML='';
-  if(VPDFURL){ try{ URL.revokeObjectURL(VPDFURL); }catch(e){} VPDFURL=null; }
 }
 document.addEventListener('keydown',ev=>{
   if(ev.key==='Escape') closeViewer();
@@ -676,22 +592,15 @@ function openAtt(att){
     hint.textContent='Клик по фону, крестик или Esc — закрыть.';
 
   }else if(kind==='pdf'){
-    /* Свой просмотрщик: страницы рисуются в canvas через PDF.js.
-       Встроенная рамка браузера на компьютере оставляла пустую область. */
-    const l=document.createElement('div');
-    l.className='vload'; l.textContent='Открываю PDF…';
-    stage.appendChild(l);
+    /* Рамка браузера, файл с того же домена. Никаких наложений и плашек:
+       если браузер PDF не покажет, человек просто нажмёт «Открыть». */
+    const fr=document.createElement('iframe');
+    fr.className='vpdf';
+    fr.title=att.name||'PDF';
+    fr.src=url;
+    wrap.appendChild(fr);
     hint.innerHTML='Если страницы не видно — нажми '+
       '<a href="'+url+'" target="_blank" rel="noopener">«Открыть»</a> сверху справа.';
-
-    renderPdf(wrap,url,(e)=>{
-      /* PDF.js не сработал. Рамку браузера не ставим: на компьютере она
-         заведомо пустая. Показываем понятный выход, а не пустую область. */
-      wrap.innerHTML='<div class="vmsg">Показать внутри доски не удалось.<br>'+
-        '<span style="opacity:.65">'+(e&&e.message?e.message:'неизвестная причина')+'</span><br><br>'+
-        '<a class="vbig" href="'+url+'" target="_blank" rel="noopener">Открыть PDF</a></div>';
-      hint.textContent='Файл откроется в новой вкладке — там он виден всегда.';
-    });
 
   }else{
     fail('Этот формат браузер не показывает.');
@@ -3252,11 +3161,10 @@ async function uploadFile(path,f,silent){
     const res=await gh('PUT','/repos/'+SYNC.owner+'/'+SYNC.repo+'/contents/'+full.split('/').map(encodeURIComponent).join('/'),
       {message:'вложение '+safe, content:b64, branch:'main'});
     if(res.status===200||res.status===201){
-      /* Адрес для просмотра строим через jsDelivr: он отдаёт файл
-         с правильным типом, поэтому PDF открывается, а не скачивается. */
-      const cdn='https://cdn.jsdelivr.net/gh/'+SYNC.owner+'/'+SYNC.repo+'@main/'+
-                full.split('/').map(encodeURIComponent).join('/');
-      remSet(path,{att:{path:cdn, name:f.name, kind:fileKind(f.name,f.type), size:f.size}});
+      /* Путь храним относительный: файл лежит рядом с доской на том же
+         домене, поэтому и картинка, и PDF открываются без CORS и без
+         чужих CDN. */
+      remSet(path,{att:{path:full, name:f.name, kind:fileKind(f.name,f.type), size:f.size}});
       /* Локальную копию убираем ТОЛЬКО после того, как запись реально
          ушла в облако. Иначе при обновлении страницы в эту секунду
          файл исчезал бы и здесь, и там. */
@@ -3321,9 +3229,6 @@ try{
     };
     setTimeout(boot,300);
     setTimeout(boot,2500);            /* повтор, если сеть ещё не поднялась */
-    /* библиотеку для PDF тянем заранее, в фоне — чтобы открытие файла
-       было мгновенным, а не с ожиданием загрузки на глазах */
-    setTimeout(pdfPreload,4000);
     setInterval(()=>{ if(!syncBusy&&syncOn()) syncPull(true); },60000);
     document.addEventListener('visibilitychange',()=>{
       if(!document.hidden&&syncOn()) syncPull(true);
