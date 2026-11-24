@@ -170,8 +170,12 @@ canvas{display:block;position:fixed;inset:0;cursor:default;
 .vbody{flex:1;min-height:0;background:#0d131c;border:1px solid var(--line2);
   border-top:none;border-radius:0 0 12px 12px;overflow:hidden;
   display:flex;flex-direction:column}
-.vstage{flex:1;min-height:0;position:relative;overflow:auto;
-  display:flex;align-items:flex-start;justify-content:center}
+/* Два режима области: картинка — по центру без прокрутки,
+   PDF — прокрутка страниц. Смешивать нельзя: при overflow:auto
+   картинка перестаёт центрироваться и уезжает вверх. */
+.vstage{flex:1;min-height:0;position:relative;overflow:hidden;
+  display:flex;align-items:center;justify-content:center}
+.vstage.scroll{display:block;overflow:auto}
 /* страницы PDF рисуются в canvas — прокрутка идёт по области */
 .pwrap{display:flex;flex-direction:column;align-items:center;gap:14px;
   padding:14px;width:100%;box-sizing:border-box}
@@ -188,6 +192,9 @@ canvas{display:block;position:fixed;inset:0;cursor:default;
 .vhint a{color:var(--acc)}
 .vmsg{font-size:13px;color:var(--tx2);text-align:center;line-height:1.9;padding:24px}
 .vmsg a{color:var(--acc)}
+.vbig{display:inline-block;margin-top:4px;padding:9px 18px;border-radius:9px;
+  background:#2b6cb0;color:#fff;text-decoration:none;font-size:13px}
+.vbig:hover{background:#2f7dc9}
 @media(max-width:640px){
   #viewer{padding:8px}
   .vname{font-size:12px}
@@ -570,12 +577,15 @@ async function renderPdf(stage,url,onErr){
   try{
     const lib=await loadPdfjs();
     const data=new Uint8Array(await (await fetch(url)).arrayBuffer());
-    const doc=await lib.getDocument({data:data}).promise;
+    /* страховка от зависания: раньше разбор файла мог встать навсегда
+       и человек видел пустую область без всякого сообщения */
+    const doc=await Promise.race([
+      lib.getDocument({data:data}).promise,
+      new Promise((_,rj)=>setTimeout(()=>rj(new Error('разбор занял больше 20 с')),20000))
+    ]);
 
-    stage.innerHTML='';
     const wrap=document.createElement('div');
     wrap.className='pwrap';
-    stage.appendChild(wrap);
 
     const avail=Math.max(240, stage.clientWidth-32);
     const dpr=Math.min(window.devicePixelRatio||1, 2);
@@ -596,8 +606,17 @@ async function renderPdf(stage,url,onErr){
       ctx.fillStyle='#fff';
       ctx.fillRect(0,0,cv.width,cv.height);
       wrap.appendChild(cv);
+      /* первую страницу показываем сразу, не дожидаясь остальных */
+      if(n===1){
+        stage.innerHTML='';
+        stage.appendChild(wrap);
+        stage.scrollTop=0;
+      }
       await page.render({canvasContext:ctx, viewport:vp}).promise;
-      if(n===1) stage.scrollTop=0;
+    }
+    if(!stage.querySelector('.pwrap')){
+      stage.innerHTML='';
+      stage.appendChild(wrap);
     }
     /* подсказка о числе страниц */
     const h=document.querySelector('#viewer .vhint');
@@ -647,6 +666,8 @@ function openAtt(att){
 
   const kind=att.kind||'file';
   v.classList.add('show');
+  /* картинка — центрирование, PDF — прокрутка */
+  stage.classList.toggle('scroll', kind==='pdf');
 
   const fail=(txt)=>{
     stage.innerHTML='<div class="vmsg">'+txt+'<br>'+
@@ -677,15 +698,12 @@ function openAtt(att){
       '<a href="'+url+'" target="_blank" rel="noopener">«Открыть»</a> сверху справа.';
 
     renderPdf(stage,url,(e)=>{
-      /* PDF.js не сработал — последняя попытка через рамку браузера */
-      const fr=document.createElement('iframe');
-      fr.className='vpdf';
-      fr.title=att.name||'PDF';
-      stage.innerHTML='';
-      stage.appendChild(fr);
-      fr.src=url;
-      hint.innerHTML='Своими силами показать не удалось ('+e.message+'). Нажми '+
-        '<a href="'+url+'" target="_blank" rel="noopener">«Открыть»</a> сверху справа.';
+      /* PDF.js не сработал. Рамку браузера не ставим: на компьютере она
+         заведомо пустая. Показываем понятный выход, а не пустую область. */
+      stage.innerHTML='<div class="vmsg">Показать внутри доски не удалось.<br>'+
+        '<span style="opacity:.65">'+(e&&e.message?e.message:'неизвестная причина')+'</span><br><br>'+
+        '<a class="vbig" href="'+url+'" target="_blank" rel="noopener">Открыть PDF</a></div>';
+      hint.textContent='Файл откроется в новой вкладке — там он виден всегда.';
     });
 
   }else{
