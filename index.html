@@ -174,7 +174,7 @@ canvas{display:block;position:fixed;inset:0;cursor:default;
   display:flex;align-items:center;justify-content:center}
 .vimg{max-width:100%;max-height:100%;width:auto;height:auto;
   object-fit:contain;display:block}
-.vpdf{width:100%;height:100%;border:0;background:#fff;display:block}
+.vpdf{width:100%;height:100%;border:0;background:#2b2b2b;display:block}
 .vload{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
   font-size:13px;color:var(--tx3);background:#0d131c;pointer-events:none}
 .vhint{font-size:11.5px;color:var(--tx3);padding:7px 10px;text-align:center;
@@ -515,6 +515,18 @@ function viewerEl(){
   v.addEventListener('click',ev=>{ if(ev.target===v) closeViewer(); });
   return v;
 }
+let VPDFURL=null;
+/* Скачивает PDF и отдаёт локальный адрес. Своя копия нужна потому,
+   что Chrome не рисует чужой PDF внутри рамки — область остаётся белой. */
+async function pdfLocal(url){
+  if(VPDFURL){ try{ URL.revokeObjectURL(VPDFURL); }catch(e){} VPDFURL=null; }
+  const r=await fetch(url,{mode:'cors',credentials:'omit',cache:'force-cache'});
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  const b=await r.blob();
+  if(!b.size) throw new Error('пусто');
+  VPDFURL=URL.createObjectURL(new Blob([b],{type:'application/pdf'}));
+  return VPDFURL;
+}
 function closeViewer(){
   const v=document.getElementById('viewer');
   if(!v) return;
@@ -523,6 +535,7 @@ function closeViewer(){
   if(st) st.innerHTML='';
   const h=v.querySelector('.vhint');
   if(h) h.innerHTML='';
+  if(VPDFURL){ try{ URL.revokeObjectURL(VPDFURL); }catch(e){} VPDFURL=null; }
 }
 document.addEventListener('keydown',ev=>{
   if(ev.key==='Escape') closeViewer();
@@ -576,19 +589,32 @@ function openAtt(att){
     }
 
   }else if(kind==='pdf'){
-    const fr=document.createElement('iframe');
-    fr.className='vpdf';
-    fr.title=att.name||'PDF';
-    fr.src=url;
-    stage.appendChild(fr);
+    /* ВАЖНО. Встроенный просмотрщик Chrome не показывает PDF по чужой
+       ссылке внутри рамки — область остаётся белой. Поэтому сначала
+       скачиваем файл как данные и подставляем локальный адрес:
+       для своего источника просмотрщик срабатывает всегда. */
     const l=document.createElement('div');
-    l.className='vload'; l.textContent='Открываю PDF…';
+    l.className='vload'; l.textContent='Загружаю PDF…';
     stage.appendChild(l);
-    /* рамка грузится без события load для PDF, поэтому убираем плашку
-       по таймауту; если пусто — подсказка уже видна снизу */
-    setTimeout(()=>{ const x=stage.querySelector('.vload'); if(x) x.remove(); },2500);
     hint.innerHTML='Если страницы не видно — нажми '+
       '<a href="'+url+'" target="_blank" rel="noopener">«Открыть»</a> сверху справа.';
+
+    const show=(src)=>{
+      const fr=document.createElement('iframe');
+      fr.className='vpdf';
+      fr.title=att.name||'PDF';
+      fr.src=src;
+      stage.innerHTML='';
+      stage.appendChild(fr);
+    };
+
+    pdfLocal(url).then(show).catch(()=>{
+      /* не вышло скачать — пробуем прямую ссылку, это лучше, чем ничего */
+      stage.innerHTML='';
+      show(url);
+      hint.innerHTML='Файл не удалось загрузить целиком. Нажми '+
+        '<a href="'+url+'" target="_blank" rel="noopener">«Открыть»</a> сверху справа.';
+    });
 
   }else{
     fail('Этот формат браузер не показывает.');
