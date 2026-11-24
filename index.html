@@ -2552,18 +2552,19 @@ const SYNC_DEFAULT={
       const p=JSON.parse(raw);
       if(p&&typeof p==='object') saved=p;
     }
-    if(saved && saved.off){
-      /* пользователь отключил вручную — уважаем это */
-      SYNC.off=true;
-    }else if(saved && saved.tok){
+    /* Доступ всегда берём вшитый. Раньше здесь уважалась галочка «отключено»,
+       оставшаяся от старой панели, — и доска навсегда застревала без
+       синхронизации, а включить было нечем: панели больше нет.
+       Теперь застрявший флаг лечится сам. */
+    if(saved && saved.tok && !saved.off){
       SYNC.tok=saved.tok; SYNC.owner=saved.owner||SYNC_DEFAULT.owner;
       SYNC.repo=saved.repo||SYNC_DEFAULT.repo;
     }else{
-      /* первый запуск — берём встроенные настройки */
       SYNC.tok=SYNC_DEFAULT.tok;
       SYNC.owner=SYNC_DEFAULT.owner;
       SYNC.repo=SYNC_DEFAULT.repo;
     }
+    SYNC.off=false;
     const d=localStorage.getItem('board.del.v1');
     if(d){ const p=JSON.parse(d); if(p&&typeof p==='object') DEL=p; }
   }catch(e){}
@@ -2846,8 +2847,23 @@ function linkAtt(path){
 }
 
 /* Локальная копия: файл целиком лежит в браузере этого устройства.
-   Ограничение — квота localStorage (обычно 5 МБ), берём 1,5 МБ. */
+   Это только подстраховка — основное хранилище в облаке. Квота браузера
+   маленькая и легко забивается, поэтому при нехватке места вычищаем
+   старые копии, которые уже уехали в облако, и пробуем ещё раз. */
 const MAXLOCAL=1.5*1024*1024;
+
+/* выбрасываем локальные копии, которые уже есть в облаке — они не нужны */
+function lattPrune(){
+  let n=0;
+  Object.keys(LATT).forEach(k=>{
+    const cloud=REM[k]&&REM[k].att;
+    if(cloud && !cloud.local && !(LATT[k]&&LATT[k].local)){ delete LATT[k]; n++; }
+    else if(cloud && !cloud.local && LATT[k] && LATT[k].local &&
+            cloud.path && cloud.path===LATT[k].path){ delete LATT[k]; n++; }
+  });
+  if(n) lattSave();
+  return n;
+}
 
 function readAsDataURL(f){
   return new Promise((res,rej)=>{
@@ -2861,8 +2877,14 @@ function readAsDataURL(f){
 async function attachLocal(path,f){
   try{
     const url=await readAsDataURL(f);
-    const saved=lattSet(path,{path:url, name:f.name, kind:fileKind(f.name,f.type),
-                              size:f.size, local:true});
+    let saved=lattSet(path,{path:url, name:f.name, kind:fileKind(f.name,f.type),
+                            size:f.size, local:true});
+    if(!saved){
+      /* места нет — чистим то, что уже в облаке, и пробуем снова */
+      lattPrune();
+      saved=lattSet(path,{path:url, name:f.name, kind:fileKind(f.name,f.type),
+                          size:f.size, local:true});
+    }
     relayout(null); refitSoon();
     return saved;
   }catch(e){
@@ -2926,21 +2948,21 @@ async function uploadFile(path,f,silent){
   /* Крупные фото уменьшаем до отправки — и в хранилище влезет, и уйдёт быстро */
   try{ f=await shrinkImage(f); }catch(e){}
 
-  /* 1. Локальная копия — сразу и без сети. Даже если дальше всё упадёт,
-        файл уже на карточке и переживёт перезагрузку. */
+  /* Локальная копия — подстраховка, чтобы файл был виден сразу.
+     Если места в браузере нет, это не повод отказывать: грузим в облако. */
   let local=false;
   if(f.size<=MAXLOCAL){
     local=await attachLocal(path,f);
-    if(!silent && local) toast('Файл на месте. Отправляю в облако…');
   }
 
   if(!syncOn()){
+    /* сюда попадаем только если облако недоступно совсем */
     if(local){ if(!silent) toast('Прикреплено: '+f.name); return true; }
-    toast('Файл больше 1,5 МБ — нужна синхронизация');
+    toast('Не удалось ни сохранить, ни отправить. Проверь связь');
     return false;
   }
   if(f.size>MAXATT){
-    toast('Файл больше 25 МБ — не загрузится');
+    toast('Файл больше 25 МБ — используй ссылку на облако');
     return local;
   }
   if(!silent) toast('Отправляю '+(f.size/1024|0)+' КБ…');
