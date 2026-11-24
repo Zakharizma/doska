@@ -391,7 +391,12 @@ let LATT={};
   }catch(e){}
 })();
 function lattSave(){
-  try{ localStorage.setItem(LATT_KEY,JSON.stringify(LATT)); }catch(e){}
+  try{ localStorage.setItem(LATT_KEY,JSON.stringify(LATT)); return true; }
+  catch(e){
+    /* не влезло в квоту браузера — говорим прямо, а не теряем молча */
+    try{ toast('В браузере не хватает места для файла'); }catch(x){}
+    return false;
+  }
 }
 /* вложение карточки: облачное важнее локального */
 function attOf(path){
@@ -400,7 +405,7 @@ function attOf(path){
   if(r&&r.att) return r.att;
   return LATT[path]||null;
 }
-function lattSet(path,att){ LATT[path]=att; lattSave(); }
+function lattSet(path,att){ LATT[path]=att; return lattSave(); }
 function lattDel(path){ delete LATT[path]; lattSave(); }
 
 const IMGC={};
@@ -2775,20 +2780,30 @@ function syncDisconnect(){
 }
 
 /* ================= ЗАГРУЗКА ВЛОЖЕНИЙ =================
-   Файл кладём в репозиторий (папка files/), в карточке — только ссылка.
-   Так страница остаётся лёгкой, а картинки и PDF открываются с любого
-   устройства. Без подключённой синхронизации файл останется локальным. */
-const MAXATT=4*1024*1024;      /* 4 МБ — предел GitHub Contents API */
+   Порядок такой, чтобы файл не терялся никогда:
+   1) сначала сохраняем локально (мгновенно, без сети);
+   2) потом выгружаем в репозиторий;
+   3) после успеха облачная ссылка заменяет локальную копию.
+   Если сеть отвалилась или файл большой — локальная копия остаётся,
+   и при следующем запуске догрузится сама. */
+const MAXATT=25*1024*1024;     /* 25 МБ — предел GitHub на файл через API */
 
 function pickFile(path){
   const inp=document.createElement('input');
   inp.type='file';
   inp.accept='image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.md';
+  /* input обязательно в документе: без этого на телефоне выбор файла
+     иногда не срабатывает, а обработчик может быть собран сборщиком мусора */
+  inp.style.cssText='position:fixed;left:-9999px;top:0;width:1px;height:1px;opacity:0';
+  document.body.appendChild(inp);
   inp.addEventListener('change',()=>{
     const f=inp.files&&inp.files[0];
+    try{ inp.remove(); }catch(e){}
     if(f) uploadFile(path,f);
   });
   inp.click();
+  /* если пользователь передумал — убираем поле через минуту */
+  setTimeout(()=>{ try{ inp.remove(); }catch(e){} },60000);
 }
 
 function fileKind(name,mime){
@@ -2797,9 +2812,8 @@ function fileKind(name,mime){
   return 'file';
 }
 
-/* Локальное вложение: файл целиком лежит в localStorage этого устройства.
-   Работает сразу, без токена и без интернета. Ограничение — квота браузера
-   (обычно 5 МБ на всё), поэтому локально принимаем не больше 1,5 МБ. */
+/* Локальная копия: файл целиком лежит в браузере этого устройства.
+   Ограничение — квота localStorage (обычно 5 МБ), берём 1,5 МБ. */
 const MAXLOCAL=1.5*1024*1024;
 
 function readAsDataURL(f){
@@ -2812,19 +2826,13 @@ function readAsDataURL(f){
 }
 
 async function attachLocal(path,f){
-  if(f.size>MAXLOCAL){
-    toast('Без синхронизации — до 1,5 МБ. Подключи ⇅ для файлов до 4 МБ');
-    return false;
-  }
   try{
     const url=await readAsDataURL(f);
-    lattSet(path,{path:url, name:f.name, kind:fileKind(f.name,f.type),
-                  size:f.size, local:true});
+    const saved=lattSet(path,{path:url, name:f.name, kind:fileKind(f.name,f.type),
+                              size:f.size, local:true});
     relayout(null); refitSoon();
-    toast('Прикреплено на этом устройстве: '+f.name);
-    return true;
+    return saved;
   }catch(e){
-    toast('Не удалось прочитать файл');
     return false;
   }
 }
@@ -2846,15 +2854,61 @@ async function uploadPending(){
   return n;
 }
 
+/* Фото с телефона весит 4–8 МБ: в браузерное хранилище не влезает,
+   а грузится по мобильной сети целую вечность. Поэтому крупные картинки
+   уменьшаем до 1400 px по длинной стороне — на карточке разницы не видно,
+   а вес падает до 150–300 КБ. PDF и документы не трогаем. */
+function shrinkImage(f){
+  return new Promise(resolve=>{
+    if(!f.type || !f.type.startsWith('image/') || f.size < 600*1024) return resolve(f);
+    const url=URL.createObjectURL(f);
+    const img=new Image();
+    img.onload=()=>{
+      try{
+        const MAXPX=1400;
+        let w=img.naturalWidth, h=img.naturalHeight;
+        if(!w||!h){ URL.revokeObjectURL(url); return resolve(f); }
+        if(Math.max(w,h)>MAXPX){
+          const k=MAXPX/Math.max(w,h);
+          w=Math.round(w*k); h=Math.round(h*k);
+        }
+        const cv=document.createElement('canvas');
+        cv.width=w; cv.height=h;
+        cv.getContext('2d').drawImage(img,0,0,w,h);
+        cv.toBlob(b=>{
+          URL.revokeObjectURL(url);
+          if(!b || b.size>=f.size) return resolve(f);
+          resolve(new File([b], f.name, {type:'image/jpeg'}));
+        }, 'image/jpeg', 0.82);
+      }catch(e){ URL.revokeObjectURL(url); resolve(f); }
+    };
+    img.onerror=()=>{ URL.revokeObjectURL(url); resolve(f); };
+    img.src=url;
+  });
+}
+
 async function uploadFile(path,f,silent){
-  if(!syncOn()){
-    return await attachLocal(path,f);
+  /* Крупные фото уменьшаем до отправки — и в хранилище влезет, и уйдёт быстро */
+  try{ f=await shrinkImage(f); }catch(e){}
+
+  /* 1. Локальная копия — сразу и без сети. Даже если дальше всё упадёт,
+        файл уже на карточке и переживёт перезагрузку. */
+  let local=false;
+  if(f.size<=MAXLOCAL){
+    local=await attachLocal(path,f);
+    if(!silent && local) toast('Файл на месте. Отправляю в облако…');
   }
-  if(f.size>MAXATT){
-    toast('Файл больше 4 МБ — не загрузится');
+
+  if(!syncOn()){
+    if(local){ if(!silent) toast('Прикреплено: '+f.name); return true; }
+    toast('Файл больше 1,5 МБ — нужна синхронизация');
     return false;
   }
-  if(!silent) toast('Загружаю '+(f.size/1024|0)+' КБ…');
+  if(f.size>MAXATT){
+    toast('Файл больше 25 МБ — не загрузится');
+    return local;
+  }
+  if(!silent) toast('Отправляю '+(f.size/1024|0)+' КБ…');
   try{
     const buf=await f.arrayBuffer();
     const bytes=new Uint8Array(buf);
@@ -2872,15 +2926,17 @@ async function uploadFile(path,f,silent){
     if(res.status===200||res.status===201){
       const url=(res.json&&res.json.content&&res.json.content.download_url)||'';
       remSet(path,{att:{path:url||full, name:f.name, kind:fileKind(f.name,f.type), size:f.size}});
+      lattDel(path);                 /* локальная копия больше не нужна */
       relayout(null); refitSoon();
       if(!silent) toast('Прикреплено: '+f.name);
       return true;
     }
-    toast('Не удалось загрузить: HTTP '+res.status);
-    return false;
+    /* в облако не ушло — локальная копия осталась и догрузится позже */
+    toast('В облако не ушло (HTTP '+res.status+'). Файл сохранён здесь');
+    return local;
   }catch(e){
-    toast('Ошибка загрузки');
-    return false;
+    toast('В облако не ушло. Файл сохранён здесь');
+    return local;
   }
 }
 
@@ -2922,7 +2978,11 @@ try{
   syncStatus(syncOn()?'синхронизируюсь…':(SYNC.off?'выключено вручную':'не настроено'));
   if(syncOn()){
     const boot=()=>{
-      syncPull(true).then(ch=>{ if(!ch) syncPush(); });
+      syncPull(true).then(ch=>{
+        if(!ch) syncPush();
+        /* недогруженные вложения досылаем сами при каждом запуске */
+        if(syncOn() && Object.keys(LATT).length) uploadPending();
+      });
     };
     setTimeout(boot,300);
     setTimeout(boot,2500);            /* повтор, если сеть ещё не поднялась */
@@ -2939,6 +2999,7 @@ loop();
 </script>
 </body>
 </html>
+
 
 
 
