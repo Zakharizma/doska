@@ -170,10 +170,15 @@ canvas{display:block;position:fixed;inset:0;cursor:default;
 .vbody{flex:1;min-height:0;background:#0d131c;border:1px solid var(--line2);
   border-top:none;border-radius:0 0 12px 12px;overflow:hidden;
   display:flex;flex-direction:column}
-.vstage{flex:1;min-height:0;position:relative;overflow:hidden;
-  display:flex;align-items:center;justify-content:center}
+.vstage{flex:1;min-height:0;position:relative;overflow:auto;
+  display:flex;align-items:flex-start;justify-content:center}
+/* страницы PDF рисуются в canvas — прокрутка идёт по области */
+.pwrap{display:flex;flex-direction:column;align-items:center;gap:14px;
+  padding:14px;width:100%;box-sizing:border-box}
+.pcv{display:block;max-width:100%;background:#fff;
+  box-shadow:0 2px 14px rgba(0,0,0,.55);border-radius:2px}
 .vimg{max-width:100%;max-height:100%;width:auto;height:auto;
-  object-fit:contain;display:block}
+  object-fit:contain;display:block;margin:auto}
 .vpdf{width:100%;height:100%;border:0;background:#2b2b2b;display:block}
 .vload{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
   font-size:13px;color:var(--tx3);background:#0d131c;pointer-events:none}
@@ -527,6 +532,80 @@ async function pdfLocal(url){
   VPDFURL=URL.createObjectURL(new Blob([b],{type:'application/pdf'}));
   return VPDFURL;
 }
+
+/* ---------- СВОЙ ПРОСМОТРЩИК PDF ----------
+   Chrome на компьютере не показывает PDF внутри рамки: область остаётся
+   пустой. Поэтому рисуем страницы сами через PDF.js — это canvas, он
+   работает в любом браузере и не зависит от настроек PDF в системе.
+   Библиотека подгружается только при первом открытии PDF. */
+const PDFJS_VER='3.11.174';
+const PDFJS_BASE='https://cdn.jsdelivr.net/npm/pdfjs-dist@'+PDFJS_VER+'/build/';
+let pdfjsP=null;
+function pdfScript(src){
+  return new Promise((res,rej)=>{
+    const s=document.createElement('script');
+    s.src=src;
+    s.onload=()=>res();
+    s.onerror=()=>rej(new Error('не загрузилось: '+src.split('/').pop()));
+    document.head.appendChild(s);
+  });
+}
+/* Загружаем библиотеку И код воркера обычными скриптами.
+   Тогда PDF.js видит globalThis.pdfjsWorker и рисует в основном потоке —
+   без Worker, без blob-адресов, без ограничений безопасности.
+   Именно на воркере всё и зависало: браузер его не создавал. */
+function loadPdfjs(){
+  if(window.pdfjsLib && window.pdfjsWorker) return Promise.resolve(window.pdfjsLib);
+  if(pdfjsP) return pdfjsP;
+  pdfjsP=(async()=>{
+    await pdfScript(PDFJS_BASE+'pdf.min.js');
+    await pdfScript(PDFJS_BASE+'pdf.worker.min.js');
+    return window.pdfjsLib;
+  })();
+  return pdfjsP;
+}
+
+/* Рисует все страницы PDF в canvas внутри прокручиваемой области. */
+async function renderPdf(stage,url,onErr){
+  try{
+    const lib=await loadPdfjs();
+    const data=new Uint8Array(await (await fetch(url)).arrayBuffer());
+    const doc=await lib.getDocument({data:data}).promise;
+
+    stage.innerHTML='';
+    const wrap=document.createElement('div');
+    wrap.className='pwrap';
+    stage.appendChild(wrap);
+
+    const avail=Math.max(240, stage.clientWidth-32);
+    const dpr=Math.min(window.devicePixelRatio||1, 2);
+
+    for(let n=1;n<=doc.numPages;n++){
+      const page=await doc.getPage(n);
+      const base=page.getViewport({scale:1});
+      /* вписываем по ширине, но не мельче 0,6 — иначе не читается */
+      const sc=Math.max(0.6, Math.min(avail/base.width, 3));
+      const vp=page.getViewport({scale:sc*dpr});
+      const cv=document.createElement('canvas');
+      cv.className='pcv';
+      cv.width=Math.round(vp.width);
+      cv.height=Math.round(vp.height);
+      cv.style.width=Math.round(vp.width/dpr)+'px';
+      cv.style.height=Math.round(vp.height/dpr)+'px';
+      const ctx=cv.getContext('2d');
+      ctx.fillStyle='#fff';
+      ctx.fillRect(0,0,cv.width,cv.height);
+      wrap.appendChild(cv);
+      await page.render({canvasContext:ctx, viewport:vp}).promise;
+      if(n===1) stage.scrollTop=0;
+    }
+    /* подсказка о числе страниц */
+    const h=document.querySelector('#viewer .vhint');
+    if(h) h.textContent='Страниц: '+doc.numPages+' · листай колесом или пальцем';
+  }catch(e){
+    onErr(e);
+  }
+}
 function closeViewer(){
   const v=document.getElementById('viewer');
   if(!v) return;
@@ -589,30 +668,23 @@ function openAtt(att){
     }
 
   }else if(kind==='pdf'){
-    /* ВАЖНО. Встроенный просмотрщик Chrome не показывает PDF по чужой
-       ссылке внутри рамки — область остаётся белой. Поэтому сначала
-       скачиваем файл как данные и подставляем локальный адрес:
-       для своего источника просмотрщик срабатывает всегда. */
+    /* Свой просмотрщик: страницы рисуются в canvas через PDF.js.
+       Встроенная рамка браузера на компьютере оставляла пустую область. */
     const l=document.createElement('div');
-    l.className='vload'; l.textContent='Загружаю PDF…';
+    l.className='vload'; l.textContent='Открываю PDF…';
     stage.appendChild(l);
     hint.innerHTML='Если страницы не видно — нажми '+
       '<a href="'+url+'" target="_blank" rel="noopener">«Открыть»</a> сверху справа.';
 
-    const show=(src)=>{
+    renderPdf(stage,url,(e)=>{
+      /* PDF.js не сработал — последняя попытка через рамку браузера */
       const fr=document.createElement('iframe');
       fr.className='vpdf';
       fr.title=att.name||'PDF';
-      fr.src=src;
       stage.innerHTML='';
       stage.appendChild(fr);
-    };
-
-    pdfLocal(url).then(show).catch(()=>{
-      /* не вышло скачать — пробуем прямую ссылку, это лучше, чем ничего */
-      stage.innerHTML='';
-      show(url);
-      hint.innerHTML='Файл не удалось загрузить целиком. Нажми '+
+      fr.src=url;
+      hint.innerHTML='Своими силами показать не удалось ('+e.message+'). Нажми '+
         '<a href="'+url+'" target="_blank" rel="noopener">«Открыть»</a> сверху справа.';
     });
 
