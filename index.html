@@ -527,16 +527,25 @@ function remSet(path,val){
    Ключ — путь карточки, поэтому переименование текста не ломает
    напоминания и вложения: они привязаны к пути, а не к подписи. */
 const RTX_KEY='board.rtx.v1';
+const RTXU_KEY='board.rtxu.v1';
 let RTX={};
+let RTXU={};              /* путь → время правки, для слияния устройств */
 (function rtxLoad(){
   try{
     const raw=localStorage.getItem(RTX_KEY);
     if(raw){ const p=JSON.parse(raw); if(p&&typeof p==='object') RTX=p; }
+    const raw2=localStorage.getItem(RTXU_KEY);
+    if(raw2){ const p=JSON.parse(raw2); if(p&&typeof p==='object') RTXU=p; }
   }catch(e){}
 })();
 function rtxSaveLocal(){
-  try{ localStorage.setItem(RTX_KEY,JSON.stringify(RTX)); }catch(e){}
+  try{
+    localStorage.setItem(RTX_KEY,JSON.stringify(RTX));
+    localStorage.setItem(RTXU_KEY,JSON.stringify(RTXU));
+  }catch(e){}
 }
+/* пустая строка — надгробие: значит «вернуть исходный текст»,
+   и это тоже должно уехать на другое устройство */
 const rtxOf=p=>(p&&RTX[p])||null;
 
 /* цвета выделения — ровно те, что в панели редактора */
@@ -551,35 +560,85 @@ Object.keys(RTX_COL).forEach(k=>{ RTX_HEX[RTX_COL[k]]=k; });
    только то, что умеет рисоваться на холсте. */
 const RTX_OK=/^(b|strong|i|em|u|s|strike|del|br|div|p|span|ul|ol|li|h1|h2|h3|font)$/i;
 
+/* Chrome при styleWithCSS=true выдаёт жирный не тегом <b>, а
+   <span style="font-weight: bold">. Если такой span просто пропустить,
+   выделение теряется — именно поэтому «жирный не работал».
+   Поэтому стили переводим в теги: b, i, u, s. */
+function spanTags(attrs){
+  const out=[];
+  const st=/style\s*=\s*"([^"]*)"/i.exec(attrs) || /style\s*=\s*'([^']*)'/i.exec(attrs);
+  const css=st?st[1]:'';
+  const fw=/font-weight\s*:\s*([a-z0-9]+)/i.exec(css);
+  if(fw){
+    const v=fw[1].toLowerCase();
+    if(v==='bold'||v==='bolder'||(parseInt(v,10)>=600)) out.push('b');
+  }
+  if(/font-style\s*:\s*italic/i.test(css)) out.push('i');
+  const td=/text-decoration(?:-line)?\s*:\s*([^;"]+)/i.exec(css);
+  if(td){
+    const v=td[1].toLowerCase();
+    if(v.indexOf('underline')>=0) out.push('u');
+    if(v.indexOf('line-through')>=0) out.push('s');
+  }
+  /* теги, записанные прямо атрибутами */
+  if(/<b>|font-weight/i.test(attrs) && out.indexOf('b')<0 && /\bbold\b/i.test(attrs)) out.push('b');
+
+  /* цвет */
+  let hex=null;
+  const cl=/color\s*:\s*([^;"]+)/i.exec(css) || /color\s*=\s*["']?([^"'>]+)/i.exec(attrs);
+  if(cl){
+    const v=String(cl[1]).trim().toLowerCase();
+    if(/^#[0-9a-f]{6}$/.test(v)) hex=v;
+    else{
+      const rgb=/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i.exec(v);
+      if(rgb) hex='#'+[1,2,3].map(i=>('0'+parseInt(rgb[i],10).toString(16)).slice(-2)).join('');
+    }
+  }
+  const key=(hex&&RTX_HEX[hex]) || /data-c\s*=\s*["']([a-z]+)["']/i.exec(attrs);
+  const kk=typeof key==='string'?key:(key?key[1]:null);
+  if(kk && RTX_COL[kk]) out.push('c:'+kk);
+  return out;
+}
+
 function rtxClean(html){
   let s=String(html||'');
   s=s.replace(/<!--[\s\S]*?-->/g,'');
   /* содержимое script/style вырезаем вместе с тегами: иначе остаётся
      голый текст вроде «alert(1)» прямо в карточке */
   s=s.replace(/<(script|style|iframe|object|embed)\b[\s\S]*?<\/\1\s*>/gi,'');
+  /* стек открытых span: на закрытии снимаем ровно то, что открыли */
+  const sp=[];
   s=s.replace(/<\s*(\/?)\s*([a-zA-Z0-9]+)([^>]*?)(\/?)\s*>/g,(m,close,tag,attrs)=>{
     if(!RTX_OK.test(tag)) return '';
-    /* font — это цвет; на холсте он живёт в span data-c */
     const t=tag.toLowerCase()==='font' ? 'span' : tag.toLowerCase();
-    if(close) return '</'+t+'>';
-    if(t==='span'){
-      /* цвет переносим в data-c: привязка к имени цвета, а не к оттенку */
-      let hex=null;
-      const st=/color\s*:\s*([^;"]+)/i.exec(attrs) || /color\s*=\s*["']?([^"'>]+)/i.exec(attrs);
-      if(st){
-        const v=String(st[1]).trim().toLowerCase();
-        if(/^#[0-9a-f]{6}$/.test(v)) hex=v;
-        else{
-          const rgb=/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i.exec(v);
-          if(rgb) hex='#'+[1,2,3].map(i=>('0'+parseInt(rgb[i],10).toString(16)).slice(-2)).join('');
+    if(close){
+      if(t==='span'){
+        const open=sp.pop()||[];
+        let out='';
+        for(let i=open.length-1;i>=0;i--){
+          const o=open[i];
+          out+= o.indexOf('c:')===0 ? '</span>' : '</'+o+'>';
         }
+        return out;
       }
-      const key=(hex&&RTX_HEX[hex]) || /data-c\s*=\s*["']([a-z]+)["']/i.exec(attrs);
-      const kk=typeof key==='string'?key:(key?key[1]:null);
-      return kk && RTX_COL[kk] ? '<span data-c="'+kk+'">' : '<span>';
+      return '</'+t+'>';
+    }
+    if(t==='span'){
+      const tags=spanTags(attrs);
+      sp.push(tags);
+      return tags.map(o=>o.indexOf('c:')===0
+        ? '<span data-c="'+o.slice(2)+'">' : '<'+o+'>').join('');
     }
     return '<'+t+'>';
   });
+  /* незакрытые span в конце — закрываем, иначе разбор уедет */
+  while(sp.length){
+    const open=sp.pop()||[];
+    for(let i=open.length-1;i>=0;i--){
+      const o=open[i];
+      s+= o.indexOf('c:')===0 ? '</span>' : '</'+o+'>';
+    }
+  }
   return s;
 }
 const rtxPlain=h=>String(h||'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
@@ -587,16 +646,28 @@ const rtxPlain=h=>String(h||'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim
 function rtxSet(path,html){
   if(!path) return;
   const clean=rtxClean(html);
-  if(!rtxPlain(clean)) delete RTX[path];
-  else RTX[path]=clean;
+  RTX[path]=rtxPlain(clean)?clean:'';
+  RTXU[path]=Date.now();
   rtxSaveLocal();
+  try{ syncTouch(); }catch(e){}
   pushHist();                 /* правка текста попадает в Ctrl+Z */
   relayout(null); redraw();
 }
+/* то же, но без истории и перерисовки — для автосохранения */
+function rtxSetSilent(path,html){
+  if(!path) return;
+  const clean=rtxClean(html);
+  RTX[path]=rtxPlain(clean)?clean:'';
+  RTXU[path]=Date.now();
+  rtxSaveLocal();
+  try{ syncTouch(); }catch(e){}
+}
 function rtxClear(path){
   if(!path) return;
-  delete RTX[path];
+  RTX[path]='';             /* надгробие: вернуть исходный текст */
+  RTXU[path]=Date.now();
   rtxSaveLocal();
+  try{ syncTouch(); }catch(e){}
   pushHist();
   relayout(null); redraw();
 }
@@ -2950,6 +3021,10 @@ cv.addEventListener('dblclick',ev=>{
 /* ================= РЕДАКТОР ТЕКСТА ================= */
 let editing=null;
 function startEdit(it){
+  /* Карточки правим только в окне редактора. Старое поле на холсте
+     меняло рабочую копию items, а доска собирается из TREE — поэтому
+     такие правки пропадали после обновления страницы. */
+  if(it && it.type==='card'){ openEditor(it); return; }
   editing=it;
   const p=toScreen(it.x,it.y);
   const z=view.z;
@@ -3670,7 +3745,9 @@ function openEditor(it){
   cap.textContent=it.text||'без названия';
   const rich=rtxOf(it.path);
   area.innerHTML=rich || ('<div>'+escHtml(it.text||'')+'</div>');
-  try{ document.execCommand('styleWithCSS',false,true); }catch(e){}
+  /* styleWithCSS=false — Chrome ставит теги <b>/<i>/<u>, а не span со
+     стилями. Так разметка переживает сохранение без потерь. */
+  try{ document.execCommand('styleWithCSS',false,false); }catch(e){}
   el.classList.add('show');
   setTimeout(()=>{ area.focus(); },30);
 }
@@ -3678,6 +3755,13 @@ function closeEditor(){
   const el=document.getElementById('edt');
   if(el) el.classList.remove('show');
   edtItem=null;
+}
+/* сохранить без перерисовки — для автосохранения по ходу набора */
+function editorSaveNow(){
+  const el=document.getElementById('edt');
+  if(!el||!edtItem) return;
+  const area=el.querySelector('.area');
+  rtxSetSilent(edtItem.path, area.innerHTML);
 }
 function editorCommit(){
   const el=document.getElementById('edt');
@@ -3726,6 +3810,8 @@ function editorCommit(){
       try{
         document.execCommand('styleWithCSS',false,true);
         document.execCommand('foreColor',false,RTX_COL[key]||'#e6eef7');
+        /* обратно на теги: дальше bold должен ставить <b>, а не стиль */
+        document.execCommand('styleWithCSS',false,false);
       }catch(err){}
     });
   });
@@ -3739,12 +3825,27 @@ function editorCommit(){
     if(p) rtxClear(p);
     toast('Форматирование сброшено');
   });
-  el.addEventListener('click',ev=>{ if(ev.target===el) closeEditor(); });
+  /* клик мимо окна — это «готово», а не «потерять всё» */
+  el.addEventListener('click',ev=>{ if(ev.target===el) editorCommit(); });
+
+  /* автосохранение: текст не теряется, даже если закрыть окно
+     крестиком, Esc или просто обновить страницу */
+  let edtTimer=null;
+  area.addEventListener('input',()=>{
+    if(edtTimer) clearTimeout(edtTimer);
+    edtTimer=setTimeout(()=>{
+      editorSaveNow();
+      try{ redraw(); }catch(e){}
+    },500);
+  });
+  window.addEventListener('beforeunload',()=>{
+    if(edtItem){ try{ editorSaveNow(); }catch(e){} }
+  });
 
   /* Esc и Ctrl+Enter внутри окна */
   area.addEventListener('keydown',ev=>{
     ev.stopPropagation();
-    if(ev.key==='Escape'){ ev.preventDefault(); closeEditor(); }
+    if(ev.key==='Escape'){ ev.preventDefault(); editorCommit(); }
     if(ev.key==='Enter'&&(ev.ctrlKey||ev.metaKey)){ ev.preventDefault(); editorCommit(); }
   });
 })();
@@ -4106,6 +4207,18 @@ async function syncPull(quiet){
       const loc=REM[p];
       if(!loc || (rrem[p].u||0)>(loc.u||0)){ REM[p]=rrem[p]; changed++; }
     });
+    /* форматирование текста карточек: побеждает более поздняя правка */
+    const rrtx=doc.rtx||{}, rrtu=doc.rtxu||{};
+    let tch=0;
+    Object.keys(rrtu).forEach(p=>{
+      const rt=rrtu[p]||0;
+      if(rt>(RTXU[p]||0)){
+        RTX[p]=rrtx[p]||'';
+        RTXU[p]=rt;
+        tch++;
+      }
+    });
+    if(tch){ rtxSaveLocal(); changed+=tch; }
     if(changed){
       remLevels(); remSave();
       try{ relayout(null); }catch(e){}
@@ -4137,7 +4250,7 @@ async function syncPush(){
       syncBusy=false;
       await syncPull(true);
       syncBusy=true;
-      const doc2={rem:REM, del:DEL, done:DONE, v:1, at:Date.now()};
+      const doc2={rem:REM, del:DEL, done:DONE, rtx:RTX, rtxu:RTXU, v:1, at:Date.now()};
       const b2={message:'напоминания '+new Date().toISOString().slice(0,16),
                 content:b64enc(JSON.stringify(doc2)), branch:'main'};
       if(SYNC.sha) b2.sha=SYNC.sha;
