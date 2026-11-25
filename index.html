@@ -190,7 +190,7 @@ canvas{display:block;position:fixed;inset:0;cursor:default;
    Раньше здесь стоял prompt(), но в Electron его нет вообще: вызов
    молча возвращает null, и выглядит это как «кнопка не работает».
    Поэтому поле ввода своё, обычное DOM-окно. */
-#ask{position:fixed;inset:0;z-index:210;display:none;
+#ask{position:fixed;inset:0;z-index:240;display:none;
   background:rgba(4,8,14,.62);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
   align-items:center;justify-content:center;padding:18px}
 #ask.show{display:flex}
@@ -650,7 +650,7 @@ const RTXU_KEY='board.rtxu.v1';
 /* Версия сборки. Видна в панели «Напоминания» мелким шрифтом.
    Нужна ровно для одного: отличить старую страницу из кеша GitHub Pages
    от настоящей ошибки. Если версия старая — правки и не должны сохраняться. */
-const BOARD_VER='2026-11-25 16:20';
+const BOARD_VER='2026-11-25 16:38';
 /* сколько карточек с сохранённым текстом — видно рядом с версией */
 function showVer(){
   const v=document.getElementById('verState');
@@ -1505,14 +1505,31 @@ function buildCalItem(targetW){
     });
   }
 
+  /* Кнопки шапки календаря — справа сверху, одним рядом.
+     Собираем справа налево, поэтому порядок слева-направо получается
+     обратным порядку добавления. Новая функция к календарю — это одна
+     строка addBtn(...) здесь; больше нигде править не нужно. */
+  const btns=[];
+  let bx=W-CALPAD;
+  const addBtn=(id,label,big)=>{
+    ctx.font='600 '+(big?17:11)+'px '+FONT_UI;
+    /* ширину считаем по самой надписи: иначе «сегодня» вылезает за край */
+    const w=big ? 30 : Math.round(ctx.measureText(label).width)+22;
+    bx-=w;
+    btns.push({id:id, label:label, x:bx, y:20, w:w, h:30, big:!!big});
+    bx-=7;
+  };
+  addBtn('next','›',true);
+  addBtn('today','сегодня');
+  addBtn('prev','‹',true);
+  addBtn('tpl','ШАБЛОНЫ');
+
   return {
     id:uid(), type:'cal', x:0, y:0, w:W, h:H,
     path:'Календарь', lvl:0, zone:'cal',
     title:MONTHS[m]+' '+y, cells:cells, rows:rows,
     cellW:CW, gridX:CALPAD, gridY:CALHEAD,
-    prev:{x:W-CALPAD-120, y:20, w:30, h:30},
-    next:{x:W-CALPAD-30,  y:20, w:30, h:30},
-    todayBtn:{x:W-CALPAD-84, y:20, w:48, h:30}
+    btns:btns
   };
 }
 
@@ -2190,7 +2207,7 @@ function frameZones(){
         : base;
     const zo={x:minX-PAD, y:minY-PAD, w:(maxX-minX)+PAD*2, h:(maxY-minY)+PAD*2,
       kind:z, title:meta.title, accent:meta.accent};
-    /* кнопки в правом верхнем углу зоны задач — как в Trello */
+    /* кнопка «АРХИВ» в правом верхнем углу зоны задач — как в Trello */
     if(z==='day'){
       const label=ARCH_VIEW?'К СПИСКУ':'АРХИВ';
       const n=(ARCH_VIEW?0:tasksArch(SELDAY).length);
@@ -2199,14 +2216,6 @@ function frameZones(){
       const bw=ctx.measureText(txt).width+22;
       zo.btn={x:zo.x+zo.w-16-bw, y:zo.y-13, w:bw, h:26};
       zo.btnLabel=txt;
-
-      /* шаблоны дня — левее архива, в архиве не нужны */
-      if(!ARCH_VIEW){
-        const t2='ШАБЛОНЫ';
-        const bw2=ctx.measureText(t2).width+22;
-        zo.btn2={x:zo.btn.x-8-bw2, y:zo.y-13, w:bw2, h:26};
-        zo.btn2Label=t2;
-      }
     }
     res.push(zo);
   });
@@ -2293,18 +2302,20 @@ function drawCal(it,lw){
   ctx.fillStyle='#f2e6d8';
   ctx.fillText(it.title, X+CALPAD, Y+35);
 
-  /* кнопки листания */
-  const btn=(r,label,small)=>{
-    roundRect(ctx,X+r.x,Y+r.y,r.w,r.h,r.h/2);
-    ctx.fillStyle='rgba(255,255,255,.07)'; ctx.fill();
-    ctx.strokeStyle='rgba(255,255,255,.15)'; ctx.lineWidth=lw; ctx.stroke();
-    ctx.fillStyle='#dbe4ee';
-    ctx.font='600 '+(small?11:17)+'px '+ff;
+  /* кнопки шапки: листание, «сегодня», шаблоны */
+  (it.btns||[]).forEach(b=>{
+    const isBig=(b.id==='prev'||b.id==='next');
+    roundRect(ctx,X+b.x,Y+b.y,b.w,b.h,b.h/2);
+    ctx.fillStyle=(b.id==='tpl')?'rgba(224,138,60,.18)':'rgba(255,255,255,.07)';
+    ctx.fill();
+    ctx.strokeStyle=(b.id==='tpl')?'rgba(224,138,60,.75)':'rgba(255,255,255,.15)';
+    ctx.lineWidth=lw; ctx.stroke();
+    ctx.fillStyle=(b.id==='tpl')?'#f0c79a':'#dbe4ee';
+    ctx.font='600 '+(isBig?17:11)+'px '+ff;
     ctx.textAlign='center';
-    ctx.fillText(label, X+r.x+r.w/2, Y+r.y+r.h/2+0.5);
+    ctx.fillText(b.label, X+b.x+b.w/2, Y+b.y+b.h/2+0.5);
     ctx.textAlign='left';
-  };
-  btn(it.prev,'‹',false); btn(it.next,'›',false); btn(it.todayBtn,'сегодня',true);
+  });
 
   /* дни недели */
   ctx.font='700 11px '+ff;
@@ -2964,9 +2975,10 @@ function calHit(w){
     const lx=w.x-it.x, ly=w.y-it.y;
     if(lx<0||ly<0||lx>it.w||ly>it.h) continue;
     const inR=r=>lx>=r.x&&lx<=r.x+r.w&&ly>=r.y&&ly<=r.y+r.h;
-    if(inR(it.prev))     return {kind:'prev'};
-    if(inR(it.next))     return {kind:'next'};
-    if(inR(it.todayBtn)) return {kind:'today'};
+    const bs=it.btns||[];
+    for(let k=0;k<bs.length;k++){
+      if(inR(bs[k])) return {kind:bs[k].id};
+    }
     for(let k=0;k<it.cells.length;k++){
       const c=it.cells[k];
       if(lx>=c.x&&lx<=c.x+c.w&&ly>=c.y&&ly<=c.y+c.h)
@@ -2991,6 +3003,9 @@ function calAction(r){
     CALM={y:d.getFullYear(), m:d.getMonth()};
     SELDAY=dayKey(d);
     relayout(null); redraw(); return true;
+  }
+  if(r.kind==='tpl'){
+    openTpl(SELDAY); return true;
   }
   if(r.kind==='day'){
     SELDAY=r.key;
@@ -3027,20 +3042,17 @@ function attAt(w){
   return null;
 }
 
-/* кнопки на рамке зоны задач: архив и шаблоны */
+/* кнопка «АРХИВ» на рамке зоны задач */
 function zoneBtnAt(w){
   for(let i=0;i<zones.length;i++){
     const z=zones[i];
     if(z.btn && w.x>=z.btn.x && w.x<=z.btn.x+z.btn.w &&
        w.y>=z.btn.y && w.y<=z.btn.y+z.btn.h) return {z:z, which:'btn'};
-    if(z.btn2 && w.x>=z.btn2.x && w.x<=z.btn2.x+z.btn2.w &&
-       w.y>=z.btn2.y && w.y<=z.btn2.y+z.btn2.h) return {z:z, which:'btn2'};
   }
   return null;
 }
 function zoneBtnPress(hit){
   if(!hit) return false;
-  if(hit.which==='btn2'){ openTpl(SELDAY); return true; }
   archToggle();
   return true;
 }
