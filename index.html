@@ -242,7 +242,8 @@ const PAL={
   blue  :{bg:'#cfe3ff',bd:'#87b9f2',tx:'#0d2a52'},
   pink  :{bg:'#ffd2df',bd:'#ef9cb8',tx:'#4a1128'},
   purple:{bg:'#e0d3ff',bd:'#b09df0',tx:'#26124d'},
-  gray  :{bg:'#e4e9ef',bd:'#b7c1cd',tx:'#1c2530'}
+  gray  :{bg:'#e4e9ef',bd:'#b7c1cd',tx:'#1c2530'},
+  orange:{bg:'#ffdcb8',bd:'#f0b070',tx:'#4a2a08'}
 };
 const ORDER=['yellow','green','blue','pink','purple','gray'];
 
@@ -280,8 +281,14 @@ bgImg.src=BG_DATA;
 
 /* ================= ДЕРЕВО: корень → сферы в ряд → ветки ================= */
 
-/* ==== 6 блоков, порядок задан вручную ==== */
+/* ==== блоки, порядок задан вручную ==== */
 const TREE=[
+  /* Отдельная зона НАД схемой. Отметки живут один день: утром список
+     снова чистый (см. isDone). Задачи меняются здесь, в этом списке. */
+  {t:'Задачи на день', c:'orange', zone:'day', kids:[
+    'План на день','Фокус-сессия 2 ч','Прогулка 30 мин',
+    'Заявки и почта','Звонки и встречи','Итоги дня'
+  ]},
   {t:'Карьера', c:'blue', kids:[
     {t:'Дело', kids:['Проекты','Заказчики','Ставка']},
     {t:'Навыки', kids:['Tekla','Смета','Расчёт','КМД']},
@@ -355,6 +362,8 @@ function allPaths(){
 let COLLAPSED=allPaths();
 /* блок целей раскрыт по умолчанию — проценты видны сразу */
 COLLAPSED.delete('Цели 2027');
+/* задачи на день тоже сразу видны: это первое, что нужно утром */
+COLLAPSED.delete('Задачи на день');
 
 function pathOf(p,n){ return p? p+'/'+n : n; }
 
@@ -410,6 +419,8 @@ function remSet(path,val){
    Отметка «сделано» для конечных карточек (подпунктов).
    Прогресс цели считается сам: сколько отмечено из скольких. */
 const DONE_KEY='board.done.v1';
+/* корень зоны «Задачи на день»: отметки внутри неё живут один день */
+const DAY_ROOT='Задачи на день';
 let DONE={};
 (function doneLoad(){
   try{
@@ -424,7 +435,22 @@ function doneSave(){
   doneSaveLocal();
   try{ syncTouch(); }catch(e){}
 }
-function isDone(path){ return !!DONE[path]; }
+/* Отметка «сделано». У задач на день она одноразовая: если галочка
+   поставлена вчера, сегодня задача снова невыполнена. Иначе список
+   копился бы отмеченным и перестал быть планом на день. */
+function isDone(path){
+  const v=DONE[path];
+  if(!v) return false;
+  if(path && path.indexOf(DAY_ROOT+'/')===0){
+    const a=new Date(v), b=new Date();
+    if(a.getFullYear()!==b.getFullYear() ||
+       a.getMonth()!==b.getMonth() ||
+       a.getDate()!==b.getDate()) return false;
+  }
+  return true;
+}
+/* годится ли карточка под галочку чек-листа */
+const isChk=it=>!!(it && it.type==='card' && (it.checkable || (it.lvl===2 && !it.hasKids)));
 function setDone(path,v){
   if(v) DONE[path]=Date.now(); else delete DONE[path];
   doneSave();
@@ -633,6 +659,7 @@ function rowY(d){
 const ZONEGAP=120;    // просвет между зонами по X
 const ZONEGAPV=26;    // просвет между целями по Y
 const VIND=26;        // отступ вложенности в вертикальной зоне
+const DAYGAP=120;     // просвет между «Задачами на день» и схемой
 
 /* собирает ВИДИМЫЕ узлы; свёрнутые дети не создаются вовсе */
 function buildTree(){
@@ -657,12 +684,13 @@ function buildTree(){
     return Math.max(own,s);
   }
 
-  function place(it,d,left){
+  function place(it,d,left,zone){
     const s=lvsz(d);
     const W=subW(it,d);
     const ch=kidsOf(it);
     const hasReal=(it.node.kids||[]).length>0;
-    const canToggle=(d<2);
+    /* сворачивать можно только то, у чего есть дети */
+    const canToggle=(d<2) && hasReal;
     const open=!COLLAPSED.has(it.path);
     const id=uid();
     let cx=left+W/2;
@@ -676,7 +704,7 @@ function buildTree(){
       const centers=[];
       ch.forEach(c=>{
         const kw=subW(c,d+1);
-        const r=place(c,d+1,cur);
+        const r=place(c,d+1,cur,zone);
         centers.push(r.cx);
         outE.push({id:uid(),from:id,to:r.id});
         cur+=kw+hgap(d);
@@ -687,11 +715,20 @@ function buildTree(){
       cx=(centers[0]+centers[centers.length-1])/2;
     }
 
+    /* прогресс блока «Задачи на день» — по всем задачам, даже свёрнутым */
+    let pct=it.node.pct;
+    if(zone==='day' && d===0){
+      const ks=(it.node.kids||[]).map(k=>typeof k==='string'?{t:k}:k);
+      const dn=ks.filter(k=>isDone(pathOf(it.path,k.t))).length;
+      pct=ks.length ? Math.round(dn/ks.length*100) : 0;
+    }
+
     out.push({id:id,type:'card',
       x:cx-s.w/2, y:rowY(d), w:s.w, h:s.h,
       text:it.node.t, color:it.color, fs:s.fs,
       hasKids:hasReal, canToggle:canToggle,
-      open:open, pct:it.node.pct,
+      checkable:(zone==='day' && d===1 && !hasReal),
+      open:open, pct:pct,
       path:it.path, lvl:d});
 
     return {cx:cx, id:id};
@@ -718,7 +755,7 @@ function buildTree(){
     list.forEach(sp=>{
       const it={node:sp, path:pathOf('',sp.t), color:sp.c};
       const w=subW(it,0);
-      place(it,0,cur);
+      place(it,0,cur,z);
       cur+=w+hgap(0);
     });
     const seg=out.slice(startIdx);
@@ -861,33 +898,43 @@ function buildTree(){
 
   const mainZ  = placeZoneH('main');
   const goalsZ = placeZoneV('goals');
+  const dayZ   = placeZoneH('day');
 
+  /* ── 1. схема и цели: цели вплотную справа от схемы, зазор ZONEGAP ── */
   if(mainZ && goalsZ){
-    if(portrait){
-      /* цели — под схемой, по центру */
-      const mc=(mainZ.box.minX+mainZ.box.maxX)/2;
-      const gc=(goalsZ.box.minX+goalsZ.box.maxX)/2;
-      const dy=mainZ.box.maxY + 60 - goalsZ.box.minY;
-      goalsZ.seg.forEach(i=>{ i.x+=mc-gc; i.y+=dy; });
-      const ax=out.map(i=>i.x), ax2=out.map(i=>i.x+i.w);
-      const gmid=(Math.min.apply(null,ax)+Math.max.apply(null,ax2))/2;
-      out.forEach(i=>{ i.x-=gmid; });
-    }else{
-      /* цели — вплотную справа от схемы, зазор всегда ZONEGAP */
-      const dx=mainZ.box.maxX + ZONEGAP - goalsZ.box.minX;
-      goalsZ.seg.forEach(i=>{ i.x+=dx; });
-      const allX=out.map(i=>i.x), allX2=out.map(i=>i.x+i.w);
-      const gmid=(Math.min.apply(null,allX)+Math.max.apply(null,allX2))/2;
-      out.forEach(i=>{ i.x-=gmid; });
-    }
-  } else {
-    const z=mainZ||goalsZ;
-    if(z) z.seg.forEach(i=>{ i.y-=z.box.minY; });
+    const dx=mainZ.box.maxX + ZONEGAP - goalsZ.box.minX;
+    goalsZ.seg.forEach(i=>{ i.x+=dx; });
   }
+
+  /* ── 2. «Задачи на день» — полосой НАД схемой, по её центру ── */
+  if(dayZ){
+    /* ширины блока дня и схемы почти совпадают, поэтому выравниваем
+       по схеме: две рамки встают друг над другом ровно */
+    const ref=(mainZ && mainZ.seg.length)? mainZ.seg
+             : out.filter(i=>dayZ.seg.indexOf(i)<0);
+    if(ref.length){
+      const rx=ref.map(i=>i.x), rx2=ref.map(i=>i.x+i.w), ry=ref.map(i=>i.y);
+      const cx=(Math.min.apply(null,rx)+Math.max.apply(null,rx2))/2;
+      const dayCx=(dayZ.box.minX+dayZ.box.maxX)/2;
+      const topY=Math.min.apply(null,ry) - DAYGAP - dayZ.box.h;
+      dayZ.seg.forEach(i=>{ i.x+=cx-dayCx; i.y+=topY-dayZ.box.minY; });
+    }
+  }
+
+  /* ── 3. всё содержимое центрируем по X, верх подтягиваем к нулю ── */
+  const allX=out.map(i=>i.x), allX2=out.map(i=>i.x+i.w), allY=out.map(i=>i.y);
+  const gmid=(Math.min.apply(null,allX)+Math.max.apply(null,allX2))/2;
+  const gtop=Math.min.apply(null,allY);
+  out.forEach(i=>{ i.x-=gmid; i.y-=gtop; });
 
   /* рамки считаем ПОСЛЕ расстановки — по фактическим карточкам */
   const PAD=34;
   const zones=[];
+  if(dayZ){
+    const b=boxOf(dayZ.seg);
+    zones.push({x:b.minX-PAD, y:b.minY-PAD, w:b.w+PAD*2, h:b.h+PAD*2,
+      title:'ЗАДАЧИ НА ДЕНЬ', accent:'#e08a3c'});
+  }
   if(mainZ){
     const b=boxOf(mainZ.seg);
     zones.push({x:b.minX-PAD, y:b.minY-PAD, w:b.w+PAD*2, h:b.h+PAD*2,
@@ -1267,7 +1314,7 @@ function drawItem(it,lw){
     }
 
     /* Текст — обычный, как на компьютере */
-    const chk=(it.lvl===2 && !it.hasKids);
+    const chk=isChk(it);
     const don=chk && isDone(it.path);
     ctx.fillStyle=pal.tx;
     const fs=it.fs||15;
@@ -1528,7 +1575,7 @@ function chkAt(w,r){
   const rad=(r||13)/view.z;
   for(let i=items.length-1;i>=0;i--){
     const it=items[i];
-    if(it.type!=='card'||it.lvl!==2||it.hasKids) continue;
+    if(it.type!=='card'||!isChk(it)) continue;
     const bx=it.x+it.w-13, by=it.y+13;
     if(Math.hypot(w.x-bx,w.y-by)<rad) return it;
   }
@@ -2323,12 +2370,12 @@ function openCtxAt(cx,cy,it){
       const nd=nextDue(Object.assign({},rem,{done:false}));
       if(nd) remSet(it.path,{due:nd,done:false});
     }
-    if(now && it.lvl===2 && !it.hasKids) setDone(it.path,true);
+    if(now && isChk(it)) setDone(it.path,true);
     relayout(null); redraw(); ctxClose();
   }));
 
   /* чек-лист — для конечных карточек */
-  if(it.lvl===2 && !it.hasKids){
+  if(isChk(it)){
     const dn=isDone(it.path);
     ctxEl.appendChild(mkRow('<span class="ic">'+(dn?'☑':'☐')+'</span>'+
       (dn?'Снять галочку':'Поставить галочку'),'',()=>{
