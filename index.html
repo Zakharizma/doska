@@ -39,14 +39,14 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%;cursor:defaul
    и обновление. Когда вышла новая версия, значок сам подсвечивается. */
 #vchip{position:fixed;right:calc(16px + var(--sar));top:calc(16px + var(--sat));
   z-index:25;background:rgba(21,28,38,.94);border:1px solid var(--line2);
-  border-radius:11px;padding:9px 12px;
+  border-radius:11px;padding:9px 11px;
   font:700 11.5px ui-monospace,SFMono-Regular,Menlo,monospace;
-  letter-spacing:.03em;color:var(--tx3);cursor:pointer;
+  letter-spacing:.03em;color:var(--tx3);cursor:default;
   box-shadow:0 8px 24px rgba(0,0,0,.5);transition:.13s;user-select:none;
   white-space:nowrap}
-#vchip:hover{color:var(--tx);border-color:var(--acc)}
 #vchip.new{background:var(--acc);border-color:var(--acc);color:#0b0f14;
-  animation:pulse 1.6s ease-in-out infinite}
+  cursor:pointer;animation:pulse 1.6s ease-in-out infinite}
+#vchip.new:hover{filter:brightness(1.08)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.62}}
 
 /* ---------- безопасные зоны iPhone ----------
@@ -880,7 +880,7 @@ const RTXU_KEY='board.rtxu.v1';
 /* Версия сборки. Видна в панели «Напоминания» мелким шрифтом.
    Нужна ровно для одного: отличить старую страницу из кеша GitHub Pages
    от настоящей ошибки. Если версия старая — правки и не должны сохраняться. */
-const BOARD_VER='2026-11-26 01:05';
+const BOARD_VER='2026-11-26 01:20';
 /* сколько карточек с сохранённым текстом — видно рядом с версией */
 function showVer(){
   const v=document.getElementById('verState');
@@ -5828,7 +5828,7 @@ function chipSet(state,text){
 }
 
 function chipIdle(){
-  chipSet('idle','v'+BOARD_VER.slice(11)+' · проверить');
+  chipSet('idle','v'+BOARD_VER.slice(11));
 }
 
 function reloadNow(){
@@ -5895,26 +5895,26 @@ setInterval(()=>{ if(!document.hidden) checkUpdate(false); },120000);
 document.addEventListener('visibilitychange',()=>{ if(!document.hidden) checkUpdate(false); });
 window.addEventListener('pageshow',()=>{ checkUpdate(false); });
 
-/* нажатие на значок версии */
+/* нажатие на значок версии.
+   В обычном виде значок только показывает версию — обновление идёт само.
+   Когда вышла новая, значок загорается и становится кнопкой. */
 (function wireChip(){
   const c=chipEl();
   if(!c) return;
   chipIdle();
+  c.title='Версия доски. Обновляется сама.';
   c.addEventListener('click',ev=>{
     ev.stopPropagation();
     if(c.classList.contains('new')) reloadNow();
-    else checkUpdate(true);
   });
 })();
 
-/* версия в панели напоминаний — тоже кликабельна */
+/* версия в панели напоминаний — просто показывает номер */
 (function wireVer(){
   const v=document.getElementById('verState');
   if(!v) return;
-  v.style.cursor='pointer';
   v.textContent='v'+BOARD_VER.slice(11);
-  v.title='Версия от '+BOARD_VER;
-  v.addEventListener('click',ev=>{ ev.stopPropagation(); checkUpdate(true); });
+  v.title='Версия от '+BOARD_VER+'. Обновляется сама.';
 })();
 
 })();
