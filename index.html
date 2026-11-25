@@ -161,6 +161,81 @@ canvas{display:block;position:fixed;inset:0;cursor:default;
   margin-top:8px;padding:8px 4px 2px;border-top:1px solid var(--line);
   font-size:11px;color:var(--tx3)}
 
+/* ---------- калькулятор линейного раскроя ----------
+   Слева сверху: там было пусто. Считает, сколько хлыстов нужно
+   и как разложить детали с наименьшим отходом. */
+#cbtn{position:fixed;left:16px;top:16px;z-index:25;
+  background:rgba(21,28,38,.94);border:1px solid var(--line2);border-radius:11px;
+  padding:9px 13px;font:700 12px ui-monospace,SFMono-Regular,Menlo,monospace;
+  letter-spacing:.04em;color:var(--tx2);cursor:pointer;
+  box-shadow:0 8px 24px rgba(0,0,0,.5);transition:.13s;user-select:none}
+#cbtn:hover{color:var(--tx);border-color:var(--acc)}
+#cbtn.on{color:#0b0f14;background:var(--acc);border-color:var(--acc)}
+#cpanel{position:fixed;left:16px;top:60px;z-index:26;
+  width:min(326px,calc(100vw - 32px));
+  max-height:calc(100vh - 84px);overflow:auto;display:none;
+  background:rgba(18,24,33,.985);border:1px solid var(--line2);border-radius:14px;
+  padding:10px;box-shadow:0 20px 52px rgba(0,0,0,.66);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+#cpanel.show{display:block}
+#cpanel .chead{display:flex;align-items:center;justify-content:space-between;
+  padding:2px 4px 9px;font-size:10.5px;letter-spacing:.08em;font-weight:700;
+  color:var(--tx3);border-bottom:1px solid var(--line);margin-bottom:9px}
+#cclose{cursor:pointer;color:var(--tx2);font-size:13px;padding:0 3px}
+#cclose:hover{color:var(--tx)}
+#cpanel .crow{display:flex;align-items:center;gap:7px;margin-bottom:7px}
+#cpanel .crow label{font-size:11.5px;color:var(--tx3);flex:0 0 auto;width:96px}
+#cpanel .crow input{flex:1;min-width:0;background:#0f1620;border:1px solid var(--line2);
+  border-radius:8px;color:var(--tx);padding:7px 9px;outline:none;color-scheme:dark;
+  font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace}
+#cpanel .crow input:focus{border-color:var(--acc)}
+#cpanel .cunit{font-size:10.5px;color:var(--tx3);flex:0 0 auto}
+#cpanel .presets{display:flex;gap:5px;margin:0 0 9px 103px;flex-wrap:wrap}
+#cpanel .presets button{background:#1b2431;border:1px solid var(--line2);color:var(--tx2);
+  border-radius:7px;padding:4px 8px;font:11px ui-monospace,monospace;cursor:pointer}
+#cpanel .presets button:hover{background:#26344a;color:var(--tx);border-color:var(--acc)}
+#cpanel .clabel{font-size:10.5px;color:var(--tx3);margin:0 0 5px 2px;line-height:1.5}
+#cpanel .clabel b{color:var(--tx2);font-weight:600}
+#cpanel textarea{width:100%;box-sizing:border-box;min-height:92px;
+  background:#0f1620;border:1px solid var(--line2);border-radius:9px;
+  color:var(--tx);padding:8px 10px;outline:none;resize:vertical;line-height:1.6;
+  font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace}
+#cpanel textarea:focus{border-color:var(--acc)}
+#cpanel .cgo{display:flex;gap:6px;margin-top:8px}
+#cpanel .cgo button{flex:1;border:1px solid var(--line2);background:#1a2434;color:var(--tx);
+  border-radius:9px;padding:8px 6px;font-size:12.5px;cursor:pointer;font-family:inherit}
+#cpanel .cgo button.ok{background:var(--acc);border-color:var(--acc);color:#0b0f14;font-weight:700}
+#cpanel .cgo button:hover{filter:brightness(1.1)}
+#cpanel .res{margin-top:10px;border-top:1px solid var(--line);padding-top:9px}
+#cpanel .rtop{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:9px}
+#cpanel .chip{background:#121a25;border:1px solid var(--line);border-radius:9px;
+  padding:6px 9px;font-size:11px;color:var(--tx3);white-space:nowrap}
+#cpanel .chip b{color:var(--tx);font-size:12.5px;font-variant-numeric:tabular-nums}
+#cpanel .chip.warn{border-color:#7a4a12}
+#cpanel .chip.warn b{color:#e0a35c}
+#cpanel .chip.good{border-color:#2f6b45}
+#cpanel .chip.good b{color:#5fce8c}
+#cpanel .bar2{margin-bottom:7px}
+#cpanel .bar2 .hd{display:flex;justify-content:space-between;font-size:10.5px;
+  color:var(--tx3);margin-bottom:3px;font-variant-numeric:tabular-nums}
+#cpanel .track{height:17px;background:#0f1620;border:1px solid var(--line);
+  border-radius:5px;overflow:hidden;display:flex}
+#cpanel .seg{height:100%;background:var(--acc);border-right:1px solid #0b0f14;
+  font:9.5px ui-monospace,monospace;color:#0b0f14;display:flex;align-items:center;
+  justify-content:center;overflow:hidden;flex:0 0 auto}
+#cpanel .seg.alt{background:#7fbcff}
+#cpanel .waste{height:100%;flex:0 0 auto;
+  background:repeating-linear-gradient(45deg,#2a3648,#2a3648 4px,#212b3a 4px,#212b3a 8px)}
+#cpanel .cempty{font-size:11.5px;color:var(--tx3);line-height:1.6;padding:6px 2px}
+#cpanel .cwarn{margin-top:8px;font-size:11px;color:#e0a35c;line-height:1.5;
+  background:#241a10;border:1px solid #7a4a12;border-radius:8px;padding:7px 9px}
+#cpanel .csum{margin-top:9px;font-size:11px;color:var(--tx3);line-height:1.6;
+  border-top:1px solid var(--line);padding-top:8px;font-variant-numeric:tabular-nums}
+#cpanel .ccopy{width:100%;margin-top:8px;border:1px solid var(--line2);background:#1a2434;
+  color:var(--tx2);border-radius:9px;padding:7px 6px;font-size:11.5px;cursor:pointer;
+  font-family:inherit}
+#cpanel .ccopy:hover{background:#26344a;color:var(--tx);border-color:var(--acc)}
+
 /* ---------- редактор карточки ----------
    Полноценное окно: панель инструментов, поле ввода, сохранение.
    Раньше правка шла прямо на холсте одним textarea — без разметки. */
@@ -451,6 +526,39 @@ canvas{display:block;position:fixed;inset:0;cursor:default;
 </div></div>
 
 <!-- кнопка и панель напоминаний -->
+<!-- калькулятор линейного раскроя -->
+<div id="cbtn" title="Калькулятор линейного раскроя">✂ РАСКРОЙ</div>
+<div id="cpanel">
+  <div class="chead"><span>ЛИНЕЙНЫЙ РАСКРОЙ</span><span id="cclose">✕</span></div>
+
+  <div class="crow">
+    <label>Длина хлыста</label>
+    <input id="cStock" type="number" min="1" step="1" inputmode="numeric" value="6000">
+    <span class="cunit">мм</span>
+  </div>
+  <div class="presets">
+    <button type="button" data-stock="6000">6000</button>
+    <button type="button" data-stock="11700">11700</button>
+    <button type="button" data-stock="12000">12000</button>
+  </div>
+
+  <div class="crow">
+    <label>Пропил</label>
+    <input id="cKerf" type="number" min="0" step="0.5" inputmode="decimal" value="0">
+    <span class="cunit">мм</span>
+  </div>
+
+  <div class="clabel">Детали — по одной в строке: <b>длина × количество</b></div>
+  <textarea id="cParts" spellcheck="false" placeholder="1200 x 4&#10;800 x 6&#10;450 x 2"></textarea>
+
+  <div class="cgo">
+    <button type="button" id="cGo" class="ok">Рассчитать</button>
+    <button type="button" id="cClear">Очистить</button>
+  </div>
+
+  <div id="cOut" class="res"></div>
+</div>
+
 <div id="rbtn" title="Напоминания">⏰ 0</div>
 <div id="rpanel">
   <div class="rhead"><span>НАПОМИНАНИЯ</span><span id="rclose">✕</span></div>
@@ -666,7 +774,7 @@ const RTXU_KEY='board.rtxu.v1';
 /* Версия сборки. Видна в панели «Напоминания» мелким шрифтом.
    Нужна ровно для одного: отличить старую страницу из кеша GitHub Pages
    от настоящей ошибки. Если версия старая — правки и не должны сохраняться. */
-const BOARD_VER='2026-11-25 17:50';
+const BOARD_VER='2026-11-25 22:50';
 /* сколько карточек с сохранённым текстом — видно рядом с версией */
 function showVer(){
   const v=document.getElementById('verState');
@@ -5590,6 +5698,280 @@ loop();
       })
       .catch(()=>{});
   }catch(e){}
+})();
+
+})();
+</script>
+<script>
+/* ================= КАЛЬКУЛЯТОР ЛИНЕЙНОГО РАСКРОЯ =================
+   Отдельным блоком, чтобы панель работала даже если основной скрипт
+   споткнётся: это инструмент, а не часть доски.
+
+   Считает раскладку деталей по хлыстам с наименьшим отходом.
+   Метод — «лучший подходящий» (best fit decreasing): детали идут от
+   длинной к короткой, каждая кладётся в тот хлыст, где после неё
+   останется меньше всего свободного места. Для раскроя это даёт
+   результат не хуже ручного, а на реальных наборах обычно лучше.
+
+   Пропил учитывается честно: между деталями на одном хлысте нужен
+   рез. На хлысте из k деталей — (k−1) рез. */
+(function(){
+'use strict';
+
+const btn=document.getElementById('cbtn');
+const pan=document.getElementById('cpanel');
+if(!btn||!pan) return;
+
+const elStock=document.getElementById('cStock');
+const elKerf =document.getElementById('cKerf');
+const elParts=document.getElementById('cParts');
+const elOut  =document.getElementById('cOut');
+const KEY='board.cut.v1';
+
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+/* числа показываем по-русски: запятая, не больше одного знака после */
+function fmt(n){
+  const v=Math.round(n*10)/10;
+  return String(v).replace('.',',');
+}
+
+function loadCfg(){
+  try{ return JSON.parse(localStorage.getItem(KEY)||'{}')||{}; }catch(e){ return {}; }
+}
+function saveCfg(){
+  try{
+    localStorage.setItem(KEY,JSON.stringify({
+      stock:elStock.value, kerf:elKerf.value, parts:elParts.value
+    }));
+  }catch(e){}
+}
+
+/* разбор списка деталей: "1200 x 4", "1200х4", "1200*4", "1200, 4", "1200" */
+function parseParts(txt){
+  const out=[], bad=[];
+  String(txt||'').split(/\r?\n/).forEach((line,i)=>{
+    const s=line.trim();
+    if(!s || s.charAt(0)==='#') return;
+    const toks=s.split(/[xхXХ*×;:\s]+/).filter(Boolean);
+    if(!toks.length){ bad.push(i+1); return; }
+    const len=parseFloat(String(toks[0]).replace(',','.'));
+    let qty=toks.length>1?parseInt(toks[1],10):1;
+    if(!isFinite(len)||len<=0||!isFinite(qty)||qty<=0){ bad.push(i+1); return; }
+    if(qty>5000) qty=5000;                 /* защита от случайного нуля */
+    out.push({len:len, qty:qty});
+  });
+  return {parts:out, bad:bad};
+}
+
+/* сколько места на хлысте уже занято, с учётом резов */
+function usedOf(b, kerf){
+  return b.sum + (b.pieces.length>1 ? kerf*(b.pieces.length-1) : 0);
+}
+
+/* сама раскладка */
+function planCut(stock, kerf, parts){
+  const pieces=[], tooLong=[];
+  parts.forEach(p=>{
+    for(let i=0;i<p.qty;i++){
+      if(p.len>stock) tooLong.push(p.len);
+      else pieces.push(p.len);
+    }
+  });
+  pieces.sort((a,b)=>b-a);            /* от длинной к короткой */
+
+  const bars=[];
+  pieces.forEach(len=>{
+    let best=-1, bestFree=Infinity;
+    for(let i=0;i<bars.length;i++){
+      const b=bars[i];
+      /* после укладки на хлысте станет на одну деталь и на один рез больше */
+      const after=b.sum+len+kerf*b.pieces.length;
+      if(after<=stock+1e-9){
+        const free=stock-after;
+        if(free<bestFree){ bestFree=free; best=i; }
+      }
+    }
+    if(best>=0){ bars[best].pieces.push(len); bars[best].sum+=len; }
+    else bars.push({pieces:[len], sum:len});
+  });
+  return {bars:bars, tooLong:tooLong, pieces:pieces};
+}
+
+let lastPlan=null;   /* для копирования в буфер */
+
+function render(){
+  const stock=parseFloat(elStock.value);
+  const kerf=parseFloat(elKerf.value)||0;
+
+  if(!isFinite(stock)||stock<=0){
+    elOut.innerHTML='<div class="cempty">Укажи длину хлыста в миллиметрах.</div>';
+    return;
+  }
+  if(kerf<0){
+    elOut.innerHTML='<div class="cempty">Пропил не может быть отрицательным.</div>';
+    return;
+  }
+  if(kerf>=stock){
+    elOut.innerHTML='<div class="cempty">Пропил не может быть больше хлыста.</div>';
+    return;
+  }
+
+  const r=parseParts(elParts.value);
+  if(!r.parts.length){
+    elOut.innerHTML='<div class="cempty">Впиши детали: например «1200 × 4» — '+
+      'четыре детали по 1200 мм.</div>';
+    return;
+  }
+
+  const res=planCut(stock,kerf,r.parts);
+  const bars=res.bars, pieces=res.pieces;
+
+  const totalStock=bars.length*stock;
+  const net=pieces.reduce((a,b)=>a+b,0);
+  const waste=bars.reduce((a,b)=>a+(stock-usedOf(b,kerf)),0);
+  const pct=totalStock>0 ? waste/totalStock*100 : 0;
+
+  let h='<div class="rtop">';
+  h+='<div class="chip">хлыстов <b>'+bars.length+'</b></div>';
+  h+='<div class="chip">деталей <b>'+pieces.length+'</b></div>';
+  h+='<div class="chip '+(pct>15?'warn':'good')+'">отход <b>'+fmt(waste)+
+     '</b> мм · '+fmt(pct)+'%</div>';
+  h+='</div>';
+
+  bars.forEach((b,idx)=>{
+    const u=usedOf(b,kerf);
+    const free=stock-u;
+    h+='<div class="bar2">';
+    h+='<div class="hd"><span>хлыст '+(idx+1)+'</span><span>остаток '+
+       fmt(free)+' мм</span></div>';
+    h+='<div class="track">';
+    b.pieces.forEach((p,i)=>{
+      const w=p/stock*100;
+      h+='<div class="seg'+(i%2?' alt':'')+'" style="width:'+w.toFixed(3)+'%"'+
+         ' title="'+fmt(p)+' мм">'+(w>12?fmt(p):'')+'</div>';
+    });
+    if(free>0){
+      h+='<div class="waste" style="width:'+(free/stock*100).toFixed(3)+'%"'+
+         ' title="отход '+fmt(free)+' мм"></div>';
+    }
+    h+='</div></div>';
+  });
+
+  if(res.tooLong.length){
+    const uniq=[];
+    res.tooLong.forEach(x=>{ if(uniq.indexOf(x)<0) uniq.push(x); });
+    h+='<div class="cwarn">Не влезает в хлыст: '+uniq.map(fmt).join(', ')+
+       ' мм. Такие детали в расчёт не вошли.</div>';
+  }
+  if(r.bad.length){
+    h+='<div class="cwarn">Не разобрал строки: '+r.bad.join(', ')+
+       '. Пиши так: «1200 × 4».</div>';
+  }
+
+  h+='<div class="csum">чистая длина деталей '+fmt(net)+' мм · '+
+     'всего материала '+fmt(totalStock)+' мм'+
+     (kerf>0?' · пропил '+fmt(kerf)+' мм':'')+'</div>';
+
+  h+='<button type="button" class="ccopy" id="cCopy">Скопировать раскладку</button>';
+
+  elOut.innerHTML=h;
+
+  lastPlan={stock:stock, kerf:kerf, bars:bars, waste:waste, pct:pct, net:net,
+            tooLong:res.tooLong};
+
+  const cp=document.getElementById('cCopy');
+  if(cp) cp.addEventListener('click',copyPlan);
+}
+
+function planText(){
+  if(!lastPlan) return '';
+  const p=lastPlan;
+  const lines=[];
+  lines.push('РАСКРОЙ · хлыст '+fmt(p.stock)+' мм'+(p.kerf>0?', пропил '+fmt(p.kerf)+' мм':''));
+  lines.push('Хлыстов: '+p.bars.length+' · отход '+fmt(p.waste)+' мм ('+fmt(p.pct)+'%)');
+  lines.push('');
+  p.bars.forEach((b,i)=>{
+    const free=p.stock-usedOf(b,p.kerf);
+    lines.push((i+1)+') '+b.pieces.map(fmt).join(' + ')+'  →  остаток '+fmt(free));
+  });
+  if(p.tooLong.length) lines.push('');
+  if(p.tooLong.length) lines.push('Не влезает: '+p.tooLong.map(fmt).join(', '));
+  return lines.join('\n');
+}
+
+function copyPlan(){
+  const txt=planText();
+  if(!txt) return;
+  const done=()=>{ const b=document.getElementById('cCopy');
+    if(b){ b.textContent='Скопировано'; setTimeout(()=>{ b.textContent='Скопировать раскладку'; },1500); } };
+  try{
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(done).catch(()=>{});
+    }else{
+      const ta=document.createElement('textarea');
+      ta.value=txt; ta.style.position='fixed'; ta.style.left='-9999px';
+      document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); ta.remove(); done();
+    }
+  }catch(e){}
+}
+
+/* ── показ и скрытие панели ── */
+function openPan(){
+  pan.classList.add('show');
+  btn.classList.add('on');
+  render();
+}
+function closePan(){
+  pan.classList.remove('show');
+  btn.classList.remove('on');
+}
+btn.addEventListener('click',()=>{
+  if(pan.classList.contains('show')) closePan(); else openPan();
+});
+document.getElementById('cclose').addEventListener('click',closePan);
+
+/* ── кнопки ── */
+document.getElementById('cGo').addEventListener('click',()=>{ saveCfg(); render(); });
+document.getElementById('cClear').addEventListener('click',()=>{
+  elParts.value='';
+  elOut.innerHTML='';
+  lastPlan=null;
+  saveCfg();
+  elParts.focus();
+});
+
+/* быстрые длины хлыста */
+pan.querySelectorAll('.presets button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    elStock.value=b.getAttribute('data-stock');
+    saveCfg(); render();
+  });
+});
+
+/* Enter в полях и Ctrl+Enter в списке — пересчёт без мышки */
+[elStock,elKerf].forEach(inp=>{
+  inp.addEventListener('input',saveCfg);
+  inp.addEventListener('keydown',ev=>{
+    if(ev.key==='Enter'){ ev.preventDefault(); saveCfg(); render(); }
+  });
+});
+elParts.addEventListener('input',saveCfg);
+elParts.addEventListener('keydown',ev=>{
+  if(ev.key==='Enter'&&(ev.ctrlKey||ev.metaKey)){
+    ev.preventDefault(); saveCfg(); render();
+  }
+});
+
+/* ── восстановление прошлого расчёта ── */
+(function restore(){
+  const c=loadCfg();
+  if(c.stock) elStock.value=c.stock;
+  if(c.kerf!==undefined&&c.kerf!=='') elKerf.value=c.kerf;
+  if(c.parts) elParts.value=c.parts;
+  /* панель при загрузке не раскрываем: доска должна быть видна сразу,
+     но если в списке уже есть детали — считаем и держим результат готовым */
+  if(c.parts&&String(c.parts).trim()) render();
 })();
 
 })();
