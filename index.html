@@ -938,7 +938,7 @@ function buildTree(){
   if(mainZ){
     const b=boxOf(mainZ.seg);
     zones.push({x:b.minX-PAD, y:b.minY-PAD, w:b.w+PAD*2, h:b.h+PAD*2,
-      title:'СХЕМА ЖИЗНИ', accent:'#6f8fb8'});
+      title:'life', accent:'#6f8fb8'});
   }
   if(goalsZ){
     const b=boxOf(goalsZ.seg);
@@ -1223,7 +1223,7 @@ function roundRect(c,x,y,w,h,r){
 /* рамки зон считаем из фактических карточек — всегда, при любом
    состоянии доски (в т.ч. после загрузки из localStorage) */
 const ZONE_META={
-  main:  {title:'СХЕМА ЖИЗНИ', accent:'#6f8fb8'},
+  main:  {title:'life', accent:'#6f8fb8'},
   goals: {title:'ЦЕЛИ 2027',   accent:'#c9a24a'}
 };
 function frameZones(){
