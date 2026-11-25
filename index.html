@@ -21,21 +21,27 @@
   --acc:#4ea1ff;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;overflow:hidden;background:var(--bg);
+/* фон страницы задаётся из скрипта: картину нужно ставить на html,
+   чтобы iOS растянул её на весь экран вместе с нижней зоной */
+html,body{height:100%;height:100dvh;overflow:hidden;background:transparent;
   overscroll-behavior:none;-webkit-text-size-adjust:100%}
 body{font:14px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--tx);
   -webkit-font-smoothing:antialiased;user-select:none;
   -webkit-user-select:none;-webkit-touch-callout:none;
   -webkit-tap-highlight-color:transparent}
 
-/* Пробник безопасных зон.
-   env(safe-area-inset-*) в JavaScript напрямую не читается, поэтому
-   вешаем его на невидимый элемент и снимаем вычисленное значение.
-   Нужен ровно для одного: узнать высоту нижней зоны (полоска «Домой»),
-   чтобы фон ушёл под неё, а не обрывался над ней. */
+/* Пробники.
+   env(safe-area-inset-*) и 100dvh из JavaScript напрямую не читаются,
+   поэтому вешаем их на невидимые элементы и снимаем вычисленные значения.
+   Нужны ровно для одного: узнать настоящую высоту экрана вместе с зоной
+   под индикатором «Домой», чтобы фон ушёл под неё, а не обрывался над ней. */
 #saprobe{position:fixed;left:-9999px;top:0;width:1px;height:1px;
   pointer-events:none;visibility:hidden;
   padding-bottom:env(safe-area-inset-bottom,0px)}
+/* 100dvh — динамическая высота видимой области: включает нижнюю зону.
+   Там, где единица не поддерживается, height остаётся 0 и в расчёт не идёт. */
+#dvhprobe{position:fixed;left:-9999px;top:0;width:1px;height:100dvh;
+  pointer-events:none;visibility:hidden}
 /* Холст закрывает ВЕСЬ экран, включая зону «брови» и нижнюю полосу:
    иначе по краям оставались тёмные полосы. Кнопки при этом отодвинуты
    от опасных зон через env(safe-area-inset-*). */
@@ -628,6 +634,8 @@ canvas{display:block;position:fixed;top:0;left:0;cursor:default;
 <div id="bgfill"></div>
 <!-- пробник безопасных зон: нужен, чтобы фон ушёл под полоску «Домой» -->
 <div id="saprobe"></div>
+<!-- пробник динамической высоты: 100dvh включает нижнюю зону экрана -->
+<div id="dvhprobe"></div>
 
 <!-- контекстное меню карточки -->
 <div id="ctx"></div>
@@ -922,15 +930,29 @@ bgImg.src=BG_DATA;
 function bgFill(on){
   try{
     const d=document.getElementById('bgfill');
-    /* Фон страницы — цвет нижней кромки картины. Он нужен только как
-       самый последний резерв: холст и подложка уже покрывают экран
-       целиком, поэтому видно его не будет. */
+    /* ГЛАВНЫЙ ПРИЁМ.
+       Содержимое страницы iOS обрезает по видимой области, поэтому холст
+       и подложка до нижней зоны не достают — там оставалась полоса.
+       А вот фон КОРНЕВОГО элемента (html) браузер растягивает на весь
+       экран, включая зону под индикатором «Домой». Поэтому картина
+       ставится именно туда: тогда снизу видно продолжение пейзажа,
+       а не ровная заливка. */
     const EDGE='#162414', OFF='#0b0f14';
-    const col=on?EDGE:OFF;
-    document.documentElement.style.backgroundColor=col;
-    document.body.style.backgroundColor=col;
+    const st=document.documentElement.style;
+    if(on && BG_DATA){
+      st.backgroundColor=EDGE;
+      st.backgroundImage='url("'+BG_DATA+'")';
+      st.backgroundSize='cover';
+      st.backgroundPosition='center center';
+      st.backgroundRepeat='no-repeat';
+      st.backgroundAttachment='scroll';
+    }else{
+      st.backgroundColor=OFF;
+      st.backgroundImage='none';
+    }
+    document.body.style.backgroundColor='transparent';
     if(!d) return;
-    d.style.backgroundColor=col;
+    d.style.backgroundColor='transparent';
     if(CH>0){ d.style.width=W+'px'; d.style.height=CH+'px'; }
     if(on && BG_DATA){
       d.style.backgroundImage='url("'+BG_DATA+'")';
@@ -1085,7 +1107,7 @@ const RTXU_KEY='board.rtxu.v1';
 /* Версия сборки. Видна в панели «Напоминания» мелким шрифтом.
    Нужна ровно для одного: отличить старую страницу из кеша GitHub Pages
    от настоящей ошибки. Если версия старая — правки и не должны сохраняться. */
-const BOARD_VER='2026-11-26 04:30';
+const BOARD_VER='2026-11-26 05:00';
 /* сколько карточек с сохранённым текстом — видно рядом с версией */
 function showVer(){
   const v=document.getElementById('verState');
@@ -2446,6 +2468,19 @@ function safeBottom(){
   }catch(e){ return 0; }
 }
 
+/* Настоящая высота экрана по 100dvh.
+   В отличие от innerHeight эта величина включает зону под индикатором
+   «Домой» — то есть ровно то, до чего должен дотягиваться фон.
+   Если браузер единицу не понимает, вернётся 0 и значение не повлияет. */
+function dvhHeight(){
+  try{
+    const p=document.getElementById('dvhprobe');
+    if(!p) return 0;
+    const h=p.getBoundingClientRect().height;
+    return isFinite(h)&&h>0 ? h : 0;
+  }catch(e){ return 0; }
+}
+
 function resize(){
   DPR=window.devicePixelRatio||1;
   const pw=W, ph=H;
@@ -2459,16 +2494,16 @@ function resize(){
   const vv=window.visualViewport;
   W=Math.round(Math.max(de.clientWidth||0, window.innerWidth||0, vv?vv.width:0));
   H=Math.round(Math.max(de.clientHeight||0, window.innerHeight||0, vv?vv.height:0));
-  if(!W||!H){ W=window.innerWidth||360; H=window.innerHeight||640; }
-
-  /* ГЛАВНОЕ ДЛЯ iPhone: окно не включает нижнюю зону под индикатором
-     «Домой» — её высота приходит только через env(safe-area-inset-bottom).
-     Фон обязан уйти ПОД эту зону, иначе внизу остаётся полоса.
-     Поэтому полная высота = высота окна + нижняя безопасная зона.
-     В обычном браузере и на компьютере эта добавка равна нулю, там
-     раскладка не меняется. */
+  /* ГЛАВНОЕ ДЛЯ iPhone: высота берётся по наибольшему из трёх значений.
+     1) окно (innerHeight / visualViewport);
+     2) 100dvh — динамическая высота, включает зону под индикатором «Домой»;
+     3) окно плюс env(safe-area-inset-bottom).
+     Все три на компьютере совпадают, на iPhone наибольшим оказывается
+     настоящее значение экрана — фон уходит под полоску, а не обрывается. */
+  const dvh=dvhHeight();
   const sab=safeBottom();
-  if(sab>0) H=Math.round(H+sab);
+  H=Math.round(Math.max(H, dvh, H+sab));
+  if(!W||!H){ W=window.innerWidth||360; H=window.innerHeight||640; }
 
   CH=H+CPAD;
   cv.width=Math.floor(W*DPR); cv.height=Math.floor(CH*DPR);
