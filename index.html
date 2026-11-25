@@ -41,9 +41,15 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%;cursor:defaul
    намеренно выходит за нижний край экрана (bottom:-45vh): что бы ни
    оказалось ниже холста, там будет пейзаж, а не чернота.
    Верх прижат к top:0, чтобы картинка совпадала с той, что на холсте. */
-#bgfill{position:fixed;left:0;top:0;right:0;bottom:-100vh;z-index:0;
-  pointer-events:none;display:none;background-color:#0b0f14;
-  background-position:center top;background-size:cover;background-repeat:no-repeat}
+/* Подложка с пейзажем.
+   Лежит ПОД холстом и повторяет его размеры один в один (ширину и высоту
+   задаёт resize). Картинка на ней масштабируется так же, как на холсте,
+   поэтому стыка не видно. Нужна как страховка: если iOS отдаст высоту
+   меньше реального экрана, снизу всё равно будет продолжение пейзажа,
+   а не ровная заливка. */
+#bgfill{position:fixed;left:0;top:0;z-index:0;
+  pointer-events:none;display:none;background-color:#162414;
+  background-position:center center;background-size:cover;background-repeat:no-repeat}
 #bgfill.on{display:block}
 
 /* ---------- версия и обновление: значок в правом верхнем углу ----------
@@ -874,7 +880,7 @@ let W=0,H=0,DPR=1;
    экрана — вреда нет, а полосы не будет ни при каком раскладе.
    Для центрирования содержимого по-прежнему служит H. */
 let CH=0;
-const CPAD=160;
+const CPAD=240;
 let view={x:0,y:0,z:1};
 let items=[], edges=[], zones=[];
 let sel=new Set();
@@ -907,16 +913,16 @@ bgImg.src=BG_DATA;
 function bgFill(on){
   try{
     const d=document.getElementById('bgfill');
-    /* цвет нижней кромки картины после затемнения — тот же, что залит
-       под видимым низом холста (см. drawBackdrop). Пока он стоит на
-       странице и на подложке, полосы внизу не видно даже если iOS
-       не отдал высоту вместе с нижней зоной. */
+    /* Фон страницы — цвет нижней кромки картины. Он нужен только как
+       самый последний резерв: холст и подложка уже покрывают экран
+       целиком, поэтому видно его не будет. */
     const EDGE='#162414', OFF='#0b0f14';
     const col=on?EDGE:OFF;
     document.documentElement.style.backgroundColor=col;
     document.body.style.backgroundColor=col;
     if(!d) return;
     d.style.backgroundColor=col;
+    if(CH>0){ d.style.width=W+'px'; d.style.height=CH+'px'; }
     if(on && BG_DATA){
       d.style.backgroundImage='url("'+BG_DATA+'")';
       d.classList.add('on');
@@ -1070,7 +1076,7 @@ const RTXU_KEY='board.rtxu.v1';
 /* Версия сборки. Видна в панели «Напоминания» мелким шрифтом.
    Нужна ровно для одного: отличить старую страницу из кеша GitHub Pages
    от настоящей ошибки. Если версия старая — правки и не должны сохраняться. */
-const BOARD_VER='2026-11-26 03:40';
+const BOARD_VER='2026-11-26 04:00';
 /* сколько карточек с сохранённым текстом — видно рядом с версией */
 function showVer(){
   const v=document.getElementById('verState');
@@ -2431,13 +2437,33 @@ function resize(){
   W=Math.round(Math.max(de.clientWidth||0, window.innerWidth||0, vv?vv.width:0));
   H=Math.round(Math.max(de.clientHeight||0, window.innerHeight||0, vv?vv.height:0));
   if(!W||!H){ W=window.innerWidth||360; H=window.innerHeight||640; }
-  /* Размер берём ТОЛЬКО из окна. window.screen использовать нельзя:
-     если доска открыта в узкой панели (например, встроенный браузер
-     справа в DSH), screen отдаёт размер всего монитора — доска
-     считала бы себя выше панели, и низ уезжал за видимую область. */
+  /* Размер берём из окна. window.screen в обычном браузере брать нельзя:
+     если доска открыта в узкой панели (встроенный браузер справа в DSH),
+     screen отдаёт размер всего монитора — доска считала бы себя выше
+     панели, и низ уезжал бы за видимую область.
+
+     НО в установленном приложении на iPhone (standalone) всё наоборот:
+     окно не сообщает высоту вместе с нижней зоной, поэтому внизу
+     оставалась полоса. Там берём высоту экрана — это ровно то, что нужно,
+     чтобы картинка растянулась до самого низа телефона. */
+  let standalone=false;
+  try{
+    standalone = (navigator.standalone===true) ||
+      (!!(window.matchMedia && window.matchMedia('(display-mode: standalone)').matches));
+  }catch(e){}
+  if(standalone && window.screen && window.screen.height){
+    W=Math.round(Math.max(W, window.screen.width||0));
+    H=Math.round(Math.max(H, window.screen.height||0));
+  }
   CH=H+CPAD;
   cv.width=Math.floor(W*DPR); cv.height=Math.floor(CH*DPR);
   cv.style.width=W+'px'; cv.style.height=CH+'px';
+  /* подложка под холстом — ровно те же размеры, чтобы картинка на ней
+     совпадала с картинкой на холсте пиксель в пиксель */
+  try{
+    const bl=document.getElementById('bgfill');
+    if(bl){ bl.style.width=W+'px'; bl.style.height=CH+'px'; }
+  }catch(e){}
   bgBuf=null; /* буфер фона пересоберём под новый размер */
   const changed=Math.abs(W-pw)>4||Math.abs(H-ph)>4;
   const land=W>=H;
@@ -2567,17 +2593,6 @@ function drawBackdrop(){
   g.addColorStop(1,'rgba(6,9,14,.50)');
   ctx.fillStyle=g;
   ctx.fillRect(0,0,W,CH);
-
-  /* НИЗ ХОЛСТА — ровная заливка цветом нижней кромки картины.
-     На iPhone высота видимой области иногда не включает нижнюю зону,
-     и под холстом проступала полоса фона страницы (тёмно-синяя #0b0f14),
-     которая на фоне зелёной степи выглядела чёрной. Теперь под видимым
-     низом холст залит ровно тем же цветом (#162414), что и подложка
-     страницы, поэтому стык не виден ни при каком раскладе. */
-  if(CH>H){
-    ctx.fillStyle='#162414';
-    ctx.fillRect(0,H,W,CH-H);
-  }
 }
 
 function drawGrid(){
