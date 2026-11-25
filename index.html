@@ -23,7 +23,9 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden;background:var(--bg);
   overscroll-behavior:none;-webkit-text-size-adjust:100%}
-body{font:14px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--tx);
+/* body прибит к экрану: тогда ни прокрутка, ни адресная строка не
+   сдвигают содержимое, и низ не «отклеивается» */
+body{position:fixed;inset:0;font:14px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--tx);
   -webkit-font-smoothing:antialiased;user-select:none;
   -webkit-user-select:none;-webkit-touch-callout:none;
   -webkit-tap-highlight-color:transparent}
@@ -39,8 +41,8 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%;cursor:defaul
    намеренно выходит за нижний край экрана (bottom:-45vh): что бы ни
    оказалось ниже холста, там будет пейзаж, а не чернота.
    Верх прижат к top:0, чтобы картинка совпадала с той, что на холсте. */
-#bgfill{position:fixed;left:0;top:0;right:0;bottom:-45vh;z-index:0;
-  pointer-events:none;display:none;
+#bgfill{position:fixed;left:0;top:0;right:0;bottom:-100vh;z-index:0;
+  pointer-events:none;display:none;background-color:#0b0f14;
   background-position:center top;background-size:cover;background-repeat:no-repeat}
 #bgfill.on{display:block}
 
@@ -337,6 +339,64 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%;cursor:defaul
 #upanel .uhint{font-size:10.5px;color:var(--tx3);line-height:1.55;
   margin-top:8px;border-top:1px solid var(--line);padding-top:7px}
 #upanel .uerr{font-size:11.5px;color:#e0a35c;line-height:1.5;
+  background:#241a10;border:1px solid #7a4a12;border-radius:8px;padding:7px 9px}
+
+/* ---------- теплотехнический расчёт (СП 50.13330.2024) ---------- */
+#tpanel{position:fixed;left:calc(16px + var(--sal));top:calc(60px + var(--sat));z-index:26;
+  width:min(392px,calc(100vw - 32px));
+  max-height:calc(100vh - 84px);overflow:auto;display:none;
+  background:rgba(18,24,33,.985);border:1px solid var(--line2);border-radius:14px;
+  padding:10px;box-shadow:0 20px 52px rgba(0,0,0,.66);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+#tpanel.show{display:block}
+#tpanel .chead{display:flex;align-items:center;justify-content:space-between;
+  padding:2px 4px 9px;font-size:10.5px;letter-spacing:.08em;font-weight:700;
+  color:var(--tx3);border-bottom:1px solid var(--line);margin-bottom:9px}
+#tclose{cursor:pointer;color:var(--tx2);font-size:13px;padding:0 3px}
+#tclose:hover{color:var(--tx)}
+#tpanel .frow{display:flex;align-items:center;gap:7px;margin-bottom:6px}
+#tpanel .frow label{font-size:11.5px;color:var(--tx3);flex:0 0 auto;width:118px;line-height:1.3}
+#tpanel .frow input,#tpanel .frow select{flex:1;min-width:0;background:#0f1620;
+  border:1px solid var(--line2);border-radius:8px;color:var(--tx);padding:6px 8px;
+  outline:none;color-scheme:dark;font:12px ui-monospace,SFMono-Regular,Menlo,monospace}
+#tpanel .frow input:focus,#tpanel .frow select:focus{border-color:var(--acc)}
+#tpanel .frow .u{font-size:10px;color:var(--tx3);flex:0 0 auto;width:52px}
+#tpanel .sect{font-size:10px;letter-spacing:.06em;color:var(--tx3);font-weight:700;
+  margin:11px 0 6px;padding-top:8px;border-top:1px solid var(--line)}
+#tpanel .lay{display:flex;align-items:center;gap:5px;margin-bottom:5px}
+#tpanel .lay select{flex:1;min-width:0;background:#0f1620;border:1px solid var(--line2);
+  border-radius:7px;color:var(--tx);padding:6px 6px;outline:none;
+  font:11.5px -apple-system,sans-serif}
+#tpanel .lay input{width:62px;flex:0 0 auto;background:#0f1620;border:1px solid var(--line2);
+  border-radius:7px;color:var(--tx);padding:6px 6px;outline:none;color-scheme:dark;
+  font:11.5px ui-monospace,monospace;text-align:right}
+#tpanel .lay .ins{flex:0 0 auto;font-size:10px;color:var(--tx3);cursor:pointer;
+  padding:5px 6px;border:1px solid var(--line2);border-radius:6px;user-select:none}
+#tpanel .lay .ins.on{background:#1f4d33;border-color:#2f9e57;color:#7fe0a3}
+#tpanel .lay .del{flex:0 0 auto;color:#e5484d;cursor:pointer;font-size:13px;
+  padding:0 3px;line-height:1}
+#tpanel .lgo{display:flex;gap:6px;margin-top:7px}
+#tpanel .lgo button{flex:1;border:1px solid var(--line2);background:#1a2434;color:var(--tx2);
+  border-radius:8px;padding:6px;font-size:11.5px;cursor:pointer;font-family:inherit}
+#tpanel .lgo button:hover{background:#26344a;color:var(--tx);border-color:var(--acc)}
+#tpanel .go{display:flex;gap:6px;margin-top:10px}
+#tpanel .go button{flex:1;border:1px solid var(--line2);background:#1a2434;color:var(--tx);
+  border-radius:9px;padding:9px 6px;font-size:12.5px;cursor:pointer;font-family:inherit}
+#tpanel .go button.ok{background:var(--acc);border-color:var(--acc);color:#0b0f14;font-weight:700}
+#tpanel .go button:hover{filter:brightness(1.1)}
+#tpanel .res{margin-top:10px;border-top:1px solid var(--line);padding-top:9px}
+#tpanel .chip{display:inline-block;background:#121a25;border:1px solid var(--line);
+  border-radius:8px;padding:5px 8px;font-size:11px;color:var(--tx3);margin:0 4px 5px 0}
+#tpanel .chip b{color:var(--tx);font-variant-numeric:tabular-nums}
+#tpanel .verdict{border-radius:9px;padding:9px 11px;font-size:12.5px;line-height:1.45;
+  margin:9px 0;font-weight:600}
+#tpanel .verdict.ok{background:#12291c;border:1px solid #2f9e57;color:#7fe0a3}
+#tpanel .verdict.bad{background:#2a1416;border:1px solid #a13b3f;color:#ff9a9d}
+#tpanel .kv{display:flex;justify-content:space-between;gap:8px;font-size:11.5px;
+  color:var(--tx3);padding:3px 2px;border-bottom:1px dashed #1e2938}
+#tpanel .kv b{color:var(--tx);font-variant-numeric:tabular-nums;font-weight:600}
+#tpanel .note{font-size:10.5px;color:var(--tx3);line-height:1.55;margin-top:8px}
+#tpanel .warn{margin-top:8px;font-size:11px;color:#e0a35c;line-height:1.5;
   background:#241a10;border:1px solid #7a4a12;border-radius:8px;padding:7px 9px}
 
 /* ---------- редактор карточки ----------
@@ -637,6 +697,7 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%;cursor:defaul
   <div id="tmenu">
     <div class="tmi" data-tool="cut"><span class="tmi-ic">✂</span>Линейный раскрой</div>
     <div class="tmi" data-tool="units"><span class="tmi-ic">⇄</span>Единицы измерения</div>
+    <div class="tmi" data-tool="heat"><span class="tmi-ic">🌡</span>Теплотехнический расчёт</div>
   </div>
 </div>
 <div id="vchip" title="Версия доски. Обновляется сама.">v—</div>
@@ -681,6 +742,80 @@ canvas{display:block;position:fixed;inset:0;width:100%;height:100%;cursor:defaul
   </div>
   <div class="ulist" id="uList"></div>
   <div class="uhint" id="uHint">Нажми на строку — значение скопируется.</div>
+</div>
+
+<!-- теплотехнический расчёт -->
+<div id="tpanel">
+  <div class="chead"><span>ТЕПЛОТЕХНИЧЕСКИЙ РАСЧЁТ</span><span id="tclose">✕</span></div>
+
+  <div class="frow">
+    <label>Категория здания</label>
+    <select id="hCat">
+      <option value="1.1">1.1 Жилые, гостиницы</option>
+      <option value="1.2">1.2 Детские, школы, мед.</option>
+      <option value="2">2 Общественные, административные</option>
+      <option value="3">3 Производственные</option>
+    </select>
+  </div>
+  <div class="frow">
+    <label>Конструкция</label>
+    <select id="hKind">
+      <option value="wall">Стена, включая стены в грунте</option>
+      <option value="roof">Покрытие, перекрытие над проездами</option>
+      <option value="floor">Чердачное, над подвалом, пол по грунту</option>
+      <option value="win">Окна, светопрозрачный фасад</option>
+      <option value="lantern">Фонари</option>
+    </select>
+  </div>
+
+  <div class="sect">КЛИМАТ И ТЕМПЕРАТУРЫ</div>
+  <div class="frow">
+    <label>t внутреннего воздуха</label>
+    <input id="hTv" type="number" step="0.1" value="20"><span class="u">°C</span>
+  </div>
+  <div class="frow">
+    <label>t отопительного периода</label>
+    <input id="hTot" type="number" step="0.1" value="-3.1"><span class="u">°C</span>
+  </div>
+  <div class="frow">
+    <label>Длительность периода</label>
+    <input id="hZot" type="number" step="1" value="214"><span class="u">сут</span>
+  </div>
+  <div class="frow">
+    <label>t coldest пятидневки</label>
+    <input id="hTn" type="number" step="0.1" value="-25"><span class="u">°C</span>
+  </div>
+  <div class="frow">
+    <label>Влажность в помещении</label>
+    <input id="hPhi" type="number" step="1" value="50"><span class="u">%</span>
+  </div>
+  <div class="frow">
+    <label>Условия эксплуатации</label>
+    <select id="hCond">
+      <option value="A">А (сухие)</option>
+      <option value="B">Б (влажные)</option>
+    </select>
+  </div>
+  <div class="frow">
+    <label>Коэффициент m<sub>р</sub></label>
+    <input id="hMr" type="number" step="0.01" value="1"><span class="u"></span>
+  </div>
+
+  <div class="sect">СЛОИ КОНСТРУКЦИИ — от внутренней поверхности к наружной</div>
+  <div id="hLays"></div>
+  <div class="lgo">
+    <button type="button" id="hAdd">+ слой</button>
+    <button type="button" id="hClear">Очистить</button>
+  </div>
+
+  <div class="go">
+    <button type="button" id="hGo" class="ok">Рассчитать</button>
+  </div>
+
+  <div id="hOut" class="res"></div>
+  <div class="note">СП 50.13330.2024 «Тепловая защита зданий», утв. приказом Минстроя
+    России от 15.05.2024 № 327/пр, введён с 16.06.2024 (заменил СП 50.13330.2012).
+    Формулы (5.1)–(5.4), таблицы 3–6, приложение М.1.</div>
 </div>
 
 <div id="rbtn" title="Напоминания">⏰ 0</div>
@@ -926,7 +1061,7 @@ const RTXU_KEY='board.rtxu.v1';
 /* Версия сборки. Видна в панели «Напоминания» мелким шрифтом.
    Нужна ровно для одного: отличить старую страницу из кеша GitHub Pages
    от настоящей ошибки. Если версия старая — правки и не должны сохраняться. */
-const BOARD_VER='2026-11-26 02:25';
+const BOARD_VER='2026-11-26 03:10';
 /* сколько карточек с сохранённым текстом — видно рядом с версией */
 function showVer(){
   const v=document.getElementById('verState');
@@ -6545,6 +6680,381 @@ document.addEventListener('pointerdown',ev=>{
 window.addEventListener('keydown',ev=>{
   if(ev.key==='Escape'){ closeMenu(); }
 });
+
+})();
+</script>
+<script>
+/* ================= ТЕПЛОТЕХНИЧЕСКИЙ РАСЧЁТ =================
+   СП 50.13330.2024 «Тепловая защита зданий»
+   (утв. приказом Минстроя России от 15.05.2024 № 327/пр,
+    введён в действие 16.06.2024; заменил СП 50.13330.2012)
+
+   Что считается:
+     ф.(5.2)   ГСОП = (t_в − t_от)·z_от
+     табл. 3   R_о^тр по ГСОП: a·ГСОП + b либо интерполяция узлов
+     ф.(5.1)   R_о^норм = R_о^тр · m_р
+     п.5.4     R_о = 1/α_в + Σ(δ/λ) + 1/α_н
+     табл.4,6  α_в и α_н
+     п.5.1 в)  τ_в = t_в − (t_в − t_н)/(R_о·α_в) ≥ t_росы
+   Материалы и λ по условиям А/Б — приложение М, табл. М.1.
+   Проверено 25.11.2026 по полному тексту СП. */
+(function(){
+'use strict';
+
+const pan=document.getElementById('tpanel');
+if(!pan) return;
+window.TOOLS=window.TOOLS||{};
+window.TOOLS.heat={panel:pan, name:'Теплотехнический расчёт'};
+
+/* табл. 3: коэффициенты a и b линейных участков.
+   null — линейной зависимости нет, берутся узлы с интерполяцией. */
+const AB={
+  '1.1':{wall:[0.00035,1.4], roof:[0.0005,2.2], floor:[0.00045,1.9], win:null, lantern:[0.000025,0.25]},
+  '1.2':{wall:[0.00035,1.4], roof:[0.0005,2.2], floor:[0.00045,1.9], win:null, lantern:[0.000025,0.25]},
+  '2'  :{wall:[0.0003,1.2],  roof:null,        floor:null,        win:null, lantern:[0.000025,0.25]},
+  '3'  :{wall:[0.0002,1.0],  roof:null,        floor:null,        win:[0.000025,0.2], lantern:[0.000025,0.15]}
+};
+
+const GSOPS=[1000,2000,4000,6000,8000,10000,12000];
+const NODES={
+  '1.1':{win:[0.49,0.49,0.63,0.73,0.75,0.77,0.8]},
+  '1.2':{win:[0.3,0.3,0.45,0.6,0.7,0.75,0.8]},
+  '2':{roof:[1.5,2.0,2.8,3.4,3.9,4.4,4.8],
+       floor:[1.2,1.6,2.2,2.7,3.1,3.5,3.8],
+       win:[0.49,0.49,0.63,0.73,0.75,0.77,0.8]},
+  '3':{roof:[1.5,2.0,2.8,3.4,3.9,4.4,4.8],
+       floor:[1.2,1.6,2.2,2.7,3.1,3.5,3.8],
+       win:[0.23,0.25,0.3,0.35,0.4,0.45,0.5]}
+};
+
+/* табл. 4 и 6 */
+const ALPHA_IN={wall:8.7, roof:8.7, floor:8.7, win:8.0, lantern:9.9};
+const ALPHA_OUT={wall:23, roof:23, floor:6, win:23, lantern:23};
+/* табл. 5 */
+const DT={'1.1':{wall:4.0,roof:3.0,floor:2.0},
+          '1.2':{wall:4.0,roof:3.0,floor:2.0},
+          '2'  :{wall:4.5,roof:4.0,floor:2.5},
+          '3'  :{wall:7.0,roof:6.0,floor:2.5}};
+
+/* приложение М, табл. М.1: [поз., название, λ_А, λ_Б, μ] */
+const MAT=[
+  [1,'Пенополистирол 25–35 кг/м³',0.040,0.049,0.05],
+  [6,'Пенополистирол фасадный 16–18,5',0.039,0.048,0.05],
+  [7,'Экструзионный пенополистирол до 35',0.034,0.035,0.005],
+  [12,'Пенополиизоцианурат 30–45',0.029,0.031,0.03],
+  [23,'Минвата каменная 160–180',0.042,0.047,0.30],
+  [24,'Минвата каменная 125–160',0.041,0.046,0.31],
+  [25,'Минвата каменная 80–125',0.040,0.044,0.32],
+  [26,'Минвата каменная 60–80',0.039,0.043,0.34],
+  [27,'Минвата каменная 40–60',0.040,0.044,0.35],
+  [28,'Минвата каменная 25–40',0.041,0.046,0.37],
+  [29,'Минвата стеклянная 75–85',0.045,0.050,0.30],
+  [30,'Минвата стеклянная 60–75',0.042,0.047,0.35],
+  [31,'Минвата стеклянная 35–60',0.041,0.046,0.40],
+  [32,'Минвата стеклянная 25–35',0.040,0.044,0.45],
+  [250,'Пеностекло 80–100',0.042,0.042,0.006],
+  [53,'Гипсокартонный лист 1050',0.34,0.36,0.075],
+  [51,'Пазогребневая плита 1350',0.50,0.56,0.10],
+  [52,'Пазогребневая плита 1100',0.35,0.41,0.11],
+  [189,'Ячеистый бетон автоклавный 800',0.225,0.241,0.08],
+  [178,'Газо- и пенобетон цементный 1000',0.38,0.43,0.11],
+  [182,'Газо- и пенобетон известковый 1000',0.48,0.55,0.13],
+  [165,'Полистиролбетон 600',0.175,0.20,0.068],
+  [173,'Полистиролбетон модифицированный 500',0.13,0.14,0.075],
+  [64,'Гравий керамзитовый 600',0.17,0.19,0.23],
+  [67,'Гравий керамзитовый 400',0.13,0.145,0.24],
+  [197,'Кирпич глиняный на ЦПР 1800',0.7,0.81,0.11],
+  [200,'Кирпич силикатный на ЦПР 1800',0.76,0.87,0.11],
+  [204,'Кирпич керамический пустотный 1400',0.58,0.64,0.14],
+  [205,'Кирпич керамический пустотный 1300',0.52,0.58,0.16],
+  [206,'Кирпич керамический пустотный 1000',0.47,0.52,0.17],
+  [207,'Кирпич силикатный 11-пустотный 1500',0.7,0.81,0.13],
+  [208,'Кирпич силикатный 14-пустотный 1400',0.64,0.76,0.14],
+  [209,'Сосна, ель поперёк волокон 500',0.14,0.18,0.06],
+  [210,'Сосна, ель вдоль волокон 500',0.29,0.35,0.32],
+  [213,'Фанера клееная 600',0.15,0.18,0.02],
+  [38,'ДВП, ДСП 1000',0.23,0.29,0.12],
+  [39,'ДВП, ДСП 800',0.19,0.23,0.12],
+  [40,'ДВП, ДСП 600',0.13,0.16,0.13],
+  [216,'Железобетон 2500',1.92,2.04,0.03],
+  [217,'Бетон на гравии, щебне 2400',1.74,1.86,0.03],
+  [218,'Раствор цементно-песчаный 1800',0.76,0.93,0.09],
+  [219,'Раствор сложный 1700',0.7,0.87,0.098],
+  [220,'Раствор известково-песчаный 1600',0.7,0.81,0.12],
+  [221,'Гранит, гнейс, базальт 2800',3.49,3.49,0.008],
+  [99,'Песок для строительных работ 1600',0.47,0.58,0.17],
+  [235,'Битумы нефтяные 1400',0.27,0.27,0.008],
+  [238,'Асфальтобетон 2100',1.05,1.05,0.008]
+];
+
+const KEY='board.heat.v1';
+let lays=[];
+
+const elCat=document.getElementById('hCat');
+const elKind=document.getElementById('hKind');
+const elTv=document.getElementById('hTv');
+const elTot=document.getElementById('hTot');
+const elZot=document.getElementById('hZot');
+const elTn=document.getElementById('hTn');
+const elPhi=document.getElementById('hPhi');
+const elCond=document.getElementById('hCond');
+const elMr=document.getElementById('hMr');
+const elLays=document.getElementById('hLays');
+const elOut=document.getElementById('hOut');
+
+function fmt(v,n){
+  if(!isFinite(v)) return '—';
+  const p=(n===undefined?2:n);
+  let s=v.toFixed(p);
+  if(p>0) s=s.replace(/0+$/,'').replace(/\.$/,'');
+  return s.replace('.',',');
+}
+
+function rBase(cat,kind,g){
+  const ab=(AB[cat]||{})[kind];
+  if(ab) return ab[0]*g+ab[1];
+  const nd=(NODES[cat]||{})[kind];
+  if(!nd) return null;
+  if(g<=GSOPS[0]) return nd[0];
+  if(g>=GSOPS[GSOPS.length-1]) return nd[nd.length-1];
+  for(let i=1;i<GSOPS.length;i++){
+    if(g<=GSOPS[i]){
+      const k=(g-GSOPS[i-1])/(GSOPS[i]-GSOPS[i-1]);
+      return nd[i-1]+(nd[i]-nd[i-1])*k;
+    }
+  }
+  return nd[nd.length-1];
+}
+
+/* точка росы, формула Магнуса */
+function dewPoint(t,phi){
+  const a=17.27, b=237.7;
+  const rh=Math.max(1,Math.min(100,phi))/100;
+  const g=(a*t)/(b+t)+Math.log(rh);
+  return (b*g)/(a-g);
+}
+
+function renderLays(){
+  elLays.innerHTML='';
+  if(!lays.length){
+    const d=document.createElement('div');
+    d.className='warn';
+    d.textContent='Добавь слои кнопкой «+ слой». Первый слой — внутренний.';
+    elLays.appendChild(d);
+    return;
+  }
+  lays.forEach((L,i)=>{
+    const row=document.createElement('div');
+    row.className='lay';
+
+    const sel=document.createElement('select');
+    MAT.forEach((m,j)=>{
+      const o=document.createElement('option');
+      o.value=String(j);
+      o.textContent=m[0]+'. '+m[1];
+      if(j===L.m) o.selected=true;
+      sel.appendChild(o);
+    });
+    sel.addEventListener('change',()=>{ L.m=parseInt(sel.value,10)||0; save(); });
+
+    const inp=document.createElement('input');
+    inp.type='number'; inp.step='1'; inp.min='0';
+    inp.value=String(L.d);
+    inp.title='Толщина, мм';
+    inp.addEventListener('input',()=>{ L.d=parseFloat(inp.value)||0; save(); });
+
+    const ins=document.createElement('span');
+    ins.className='ins'+(L.ins?' on':'');
+    ins.textContent='ут';
+    ins.title='Этот слой — утеплитель: по нему подберётся толщина';
+    ins.addEventListener('click',()=>{
+      L.ins=!L.ins;
+      ins.classList.toggle('on',L.ins);
+      save();
+    });
+
+    const del=document.createElement('span');
+    del.className='del';
+    del.textContent='✕';
+    del.title='Удалить слой';
+    del.addEventListener('click',()=>{ lays.splice(i,1); renderLays(); save(); });
+
+    row.appendChild(sel); row.appendChild(inp); row.appendChild(ins); row.appendChild(del);
+    elLays.appendChild(row);
+  });
+}
+
+function save(){
+  try{
+    localStorage.setItem(KEY,JSON.stringify({
+      cat:elCat.value, kind:elKind.value,
+      tv:elTv.value, tot:elTot.value, zot:elZot.value, tn:elTn.value,
+      phi:elPhi.value, cond:elCond.value, mr:elMr.value, lays:lays
+    }));
+  }catch(e){}
+}
+
+function calc(){
+  const cat=elCat.value, kind=elKind.value;
+  const tv=parseFloat(elTv.value), tot=parseFloat(elTot.value);
+  const zot=parseFloat(elZot.value), tn=parseFloat(elTn.value);
+  const phi=parseFloat(elPhi.value), mr=parseFloat(elMr.value);
+  const lamCol=elCond.value==='B'?3:2;
+
+  if(![tv,tot,zot,tn,phi,mr].every(v=>isFinite(v))){
+    elOut.innerHTML='<div class="warn">Заполни климат: t внутреннего воздуха, t отопительного периода, длительность, t холодной пятидневки и влажность.</div>';
+    return;
+  }
+  if(!lays.length){
+    elOut.innerHTML='<div class="warn">Добавь хотя бы один слой конструкции.</div>';
+    return;
+  }
+  if(!(zot>0)){
+    elOut.innerHTML='<div class="warn">Длительность отопительного периода должна быть больше нуля.</div>';
+    return;
+  }
+
+  const g=(tv-tot)*zot;
+  const rTr=rBase(cat,kind,g);
+  if(rTr===null||!isFinite(rTr)){
+    elOut.innerHTML='<div class="warn">Для этой пары «категория здания — конструкция» в таблице 3 нет данных.</div>';
+    return;
+  }
+  const rNorm=rTr*mr;
+  const aIn=ALPHA_IN[kind], aOut=ALPHA_OUT[kind];
+
+  let rk=0;
+  lays.forEach(L=>{
+    const m=MAT[L.m];
+    if(!m) return;
+    const lam=lamCol===2?m[2]:m[3];
+    rk+=(L.d/1000)/lam;
+  });
+  const r0=1/aIn+rk+1/aOut;
+
+  const tauIn=tv-(tv-tn)/(r0*aIn);
+  const dew=dewPoint(tv,phi);
+  const dtNorm=(DT[cat]||{})[kind];
+  const dtFact=tv-tauIn;
+
+  const okR=r0>=rNorm-1e-9;
+  const okTau=tauIn>=dew-1e-9;
+  const okDt=dtNorm===undefined ? true : dtFact<=dtNorm+1e-9;
+
+  /* подбор толщины утеплителя */
+  const insIdx=lays.map((L,i)=>L.ins?i:-1).filter(i=>i>=0);
+  let need=null;
+  if(insIdx.length){
+    const i=insIdx[0];
+    const m=MAT[lays[i].m];
+    if(m){
+      const lam=lamCol===2?m[2]:m[3];
+      let rkOther=0;
+      lays.forEach((L,j)=>{
+        if(j===i) return;
+        const mm=MAT[L.m];
+        if(!mm) return;
+        const l2=lamCol===2?mm[2]:mm[3];
+        rkOther+=(L.d/1000)/l2;
+      });
+      const needR=rNorm-(1/aIn+rkOther+1/aOut);
+      const needD=needR>0 ? needR*lam*1000 : 0;
+      need={mm:Math.ceil(needD/10)*10, lam:lam, name:m[1], now:lays[i].d};
+    }
+  }
+
+  let h='';
+  h+='<div class="chip">ГСОП <b>'+fmt(g,0)+'</b> °C·сут</div>';
+  h+='<div class="chip">R<sub>тр</sub> <b>'+fmt(rTr)+'</b></div>';
+  h+='<div class="chip">R<sub>норм</sub> <b>'+fmt(rNorm)+'</b></div>';
+  h+='<div class="chip">R<sub>о</sub> <b>'+fmt(r0)+'</b></div>';
+
+  h+='<div class="verdict '+(okR?'ok':'bad')+'">'+
+     (okR ? 'Теплопередача в норме: '+fmt(r0)+' ≥ '+fmt(rNorm)+' (м²·°C)/Вт'
+          : 'НЕ ПРОХОДИТ: '+fmt(r0)+' < '+fmt(rNorm)+' (м²·°C)/Вт, не хватает '+fmt(rNorm-r0))+
+     '</div>';
+
+  h+='<div class="kv"><span>Сопротивление слоёв R<sub>к</sub></span><b>'+fmt(rk)+'</b></div>';
+  h+='<div class="kv"><span>α<sub>в</sub> / α<sub>н</sub></span><b>'+fmt(aIn)+' / '+fmt(aOut)+'</b></div>';
+  h+='<div class="kv"><span>Температура внутренней поверхности τ<sub>в</sub></span><b>'+fmt(tauIn)+' °C</b></div>';
+  h+='<div class="kv"><span>Точка росы при '+fmt(phi,0)+' %</span><b>'+fmt(dew)+' °C</b></div>';
+  h+='<div class="kv"><span>Перепад t<sub>в</sub> − τ<sub>в</sub></span><b>'+fmt(dtFact)+
+     (dtNorm!==undefined?' / норма '+fmt(dtNorm):'')+' °C</b></div>';
+  h+='<div class="kv"><span>Удельные потери теплоты q</span><b>'+fmt((tv-tn)/r0)+' Вт/м²</b></div>';
+
+  if(!okTau){
+    h+='<div class="warn">Конденсат: температура внутренней поверхности '+fmt(tauIn)+
+       ' °C ниже точки росы '+fmt(dew)+' °C. Нужно утепление или вентиляция.</div>';
+  }else if(!okDt && dtNorm!==undefined){
+    h+='<div class="warn">Санитарно-гигиеническое требование не выполнено: перепад '+
+       fmt(dtFact)+' °C больше нормы '+fmt(dtNorm)+' °C (таблица 5).</div>';
+  }
+
+  if(need){
+    if(need.mm<=0){
+      h+='<div class="verdict ok">Утеплитель не нужен: конструкция проходит по норме и без него.</div>';
+    }else if(need.mm<=need.now){
+      h+='<div class="verdict ok">Утеплителя достаточно: нужно <b>'+need.mm+
+         ' мм</b>, стоит '+need.now+' мм — '+need.name+
+         ' (λ = '+fmt(need.lam,3)+' Вт/(м·°C))</div>';
+    }else{
+      h+='<div class="verdict bad">Нужно <b>'+need.mm+' мм</b> утеплителя, стоит '+
+         need.now+' мм — добавить '+Math.ceil((need.mm-need.now)/10)*10+' мм. '+
+         need.name+' (λ = '+fmt(need.lam,3)+' Вт/(м·°C))</div>';
+    }
+  }else if(!okR){
+    h+='<div class="warn">Отметь слой утеплителя кнопкой «ут» — тогда посчитаю нужную толщину.</div>';
+  }
+
+  elOut.innerHTML=h;
+}
+
+document.getElementById('hAdd').addEventListener('click',()=>{
+  const hasIns=lays.some(L=>L.ins);
+  /* по умолчанию — минвата каменная 80–125 (индекс 6 в MAT) */
+  lays.push({m:6, d:100, ins:!hasIns});
+  renderLays(); save();
+});
+document.getElementById('hClear').addEventListener('click',()=>{
+  lays=[]; renderLays(); elOut.innerHTML=''; save();
+});
+document.getElementById('hGo').addEventListener('click',()=>{ save(); calc(); });
+
+[elCat,elKind,elCond].forEach(e=>e.addEventListener('change',()=>{ save(); calc(); }));
+[elTv,elTot,elZot,elTn,elPhi,elMr].forEach(e=>{
+  e.addEventListener('input',save);
+  e.addEventListener('keydown',ev=>{
+    if(ev.key==='Enter'){ ev.preventDefault(); save(); calc(); }
+  });
+});
+
+function openPan(){ pan.classList.add('show'); renderLays(); calc(); }
+function closePan(){ pan.classList.remove('show'); }
+window.TOOLS.heat.open=openPan;
+window.TOOLS.heat.close=closePan;
+document.getElementById('tclose').addEventListener('click',closePan);
+
+(function restore(){
+  let c=null;
+  try{ c=JSON.parse(localStorage.getItem(KEY)||'null'); }catch(e){}
+  if(c){
+    if(c.cat) elCat.value=c.cat;
+    if(c.kind) elKind.value=c.kind;
+    if(c.tv!==undefined) elTv.value=c.tv;
+    if(c.tot!==undefined) elTot.value=c.tot;
+    if(c.zot!==undefined) elZot.value=c.zot;
+    if(c.tn!==undefined) elTn.value=c.tn;
+    if(c.phi!==undefined) elPhi.value=c.phi;
+    if(c.cond) elCond.value=c.cond;
+    if(c.mr!==undefined) elMr.value=c.mr;
+    if(Array.isArray(c.lays)) lays=c.lays.map(x=>({m:x.m|0,d:x.d||0,ins:!!x.ins}));
+  }else{
+    /* первый запуск: минвата 100 плюс кирпич 380 — типовая стена.
+       Индексы в MAT: 6 — минвата каменная 80–125, 25 — кирпич глиняный */
+    lays=[{m:6,d:100,ins:true},{m:25,d:380,ins:false}];
+  }
+  renderLays();
+})();
 
 })();
 </script>
