@@ -532,7 +532,7 @@ const RTXU_KEY='board.rtxu.v1';
 /* Версия сборки. Видна в панели «Напоминания» мелким шрифтом.
    Нужна ровно для одного: отличить старую страницу из кеша GitHub Pages
    от настоящей ошибки. Если версия старая — правки и не должны сохраняться. */
-const BOARD_VER='2026-11-25 15:46';
+const BOARD_VER='2026-11-25 15:58';
 /* сколько карточек с сохранённым текстом — видно рядом с версией */
 function showVer(){
   const v=document.getElementById('verState');
@@ -4045,24 +4045,11 @@ document.getElementById('rclose').addEventListener('click',()=>{
 document.getElementById('ricex').addEventListener('click',()=>{ exportICS(); });
 document.getElementById('rdone').addEventListener('click',()=>{ SHOWDONE=!SHOWDONE; renderPanel(); });
 
-/* ---- тикающая перерисовка + уведомление о наступлении срока ---- */
-/* Об отметке «уже сообщил» помним и после перезагрузки: иначе просроченное
-   напоминание всплывало заново при каждом обновлении страницы. Ключ включает
-   сам срок — если перенести дату, напоминание сработает по-новому. */
-const NOTIF_KEY='board.notified.v1';
-let notified={};
-try{
-  const raw=localStorage.getItem(NOTIF_KEY);
-  if(raw){ const p=JSON.parse(raw); if(p&&typeof p==='object') notified=p; }
-}catch(e){}
-function notifSave(){
-  try{
-    const ks=Object.keys(notified);
-    /* журнал не растёт бесконечно: держим последние 300 отметок */
-    if(ks.length>300){ ks.slice(0,ks.length-300).forEach(k=>{ delete notified[k]; }); }
-    localStorage.setItem(NOTIF_KEY,JSON.stringify(notified));
-  }catch(e){}
-}
+/* ---- тикающая перерисовка ----
+/* ---- тикающая перерисовка ----
+   Всплывающих сообщений о наступившем сроке нет: они мешали и появлялись
+   повторно при каждой правке и перезагрузке. Срок виден на самой карточке
+   (плашка с отсчётом) и в панели справа — этого достаточно. */
 let lastTick=0;
 function remTick(){
   const now=Date.now();
@@ -4073,30 +4060,13 @@ function remTick(){
     const r=REM[p];
     if(!r||!r.due||r.done) return;
     active=true;
-    const nk=p+'|'+r.due;
-    if(r.due<=now && !notified[nk]){
-      notified[nk]=1;
-      notifSave();
-      toast('Срок: '+p.split('/').pop());
-      try{
-        if(window.Notification&&Notification.permission==='granted'){
-          new Notification('Срок исполнения',{body:p.split('/').pop()});
-        }
-      }catch(e){}
-    }
   });
   if(active) redraw();
 }
 function refitSoon(){ setTimeout(()=>{ if(!userTouched&&items.length) fitAll(); },30); }
 
-/* разрешение на системные уведомления — спрашиваем один раз, по действию */
-function askNotify(){
-  try{
-    if(window.Notification && Notification.permission==='default'){
-      Notification.requestPermission();
-    }
-  }catch(e){}
-}
+/* системные уведомления не запрашиваем: всплывающих окон не будет вовсе */
+function askNotify(){}
 
 /* ================= СИНХРОНИЗАЦИЯ МЕЖДУ УСТРОЙСТВАМИ =================
    Хранилище — файл rem.json в твоём же репозитории на GitHub.
