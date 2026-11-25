@@ -332,6 +332,7 @@ canvas{display:block;position:fixed;inset:0;cursor:default;
   </div>
   <div class="rfoot">
     <span id="syncState">подключаюсь…</span>
+    <span id="verState" style="opacity:.5;font-size:10px"></span>
   </div>
 </div>
 
@@ -528,6 +529,10 @@ function remSet(path,val){
    напоминания и вложения: они привязаны к пути, а не к подписи. */
 const RTX_KEY='board.rtx.v1';
 const RTXU_KEY='board.rtxu.v1';
+/* Версия сборки. Видна в панели «Напоминания» мелким шрифтом.
+   Нужна ровно для одного: отличить старую страницу из кеша GitHub Pages
+   от настоящей ошибки. Если версия старая — правки и не должны сохраняться. */
+const BOARD_VER='2026-11-25 15:26';
 let RTX={};
 let RTXU={};              /* путь → время правки, для слияния устройств */
 (function rtxLoad(){
@@ -4133,6 +4138,8 @@ function syncStatus(txt,err){
     el.textContent=txt||'';
     el.style.color=err?'#e5484d':'#5d7085';
   }
+  const v=document.getElementById('verState');
+  if(v) v.textContent='v'+BOARD_VER.slice(11);
 }
 
 async function gh(method,path,body){
@@ -4598,6 +4605,26 @@ try{
   }
 }catch(e){}
 loop();
+
+/* ── самопроверка версии ──
+   GitHub Pages отдаёт index.html из кеша до 10 минут. Из-за этого
+   исправленная страница не появляется, и правки «не сохраняются»:
+   работает-то старая сборка. Здесь страница сверяет свою версию
+   с файлом ver.txt и один раз перезагружается в обход кеша. */
+(function autoUpdate(){
+  try{
+    fetch('ver.txt?t='+Date.now(),{cache:'no-store'})
+      .then(r=>r.ok?r.text():'')
+      .then(t=>{
+        t=(t||'').trim();
+        if(!t||t===BOARD_VER) return;
+        if(sessionStorage.getItem('board.tryver')===t) return;  /* уже пробовали */
+        sessionStorage.setItem('board.tryver',t);
+        location.replace(location.pathname+'?v='+Date.now());
+      })
+      .catch(()=>{});
+  }catch(e){}
+})();
 
 })();
 </script>
