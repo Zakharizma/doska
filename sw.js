@@ -1,22 +1,29 @@
-/* Служебный скрипт для установки доски как приложения.
-   Главное правило: страница всегда берётся из сети, кеш — только запасной
-   вариант на случай, когда интернета нет. Иначе снова начнётся «старая
-   версия из кеша», из-за которой правки будто бы не сохраняются. */
-const CACHE = 'doska-v1';
-const SHELL = ['./', 'icon-192.png', 'icon-512.png', 'manifest.json'];
+/* Служебный скрипт — нужен только для установки доски как приложения.
+   Chrome на Android даёт «Установить приложение» лишь тогда, когда у сайта
+   есть манифест и служебный скрипт с обработчиком fetch. Больше он ни для
+   чего не нужен.
+
+   ГЛАВНОЕ ПРАВИЛО: страницу он НЕ трогает.
+   Никакого кеширования и подмены index.html — ни при первом заходе, ни при
+   обновлении. Именно из-за кеша страницы в прошлый раз получился чёрный
+   экран. Здесь запросы навигации уходят в сеть напрямую, наш обработчик к
+   ним не прикасается. Кешируются только иконки и манифест — они не меняются
+   и весят мало. */
+const CACHE = 'doska-assets-v1';
+const ASSETS = ['icon-192.png', 'icon-512.png', 'apple-touch-icon.png', 'manifest.json'];
 
 self.addEventListener('install', e => {
   self.skipWaiting();
   e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(SHELL).catch(() => {}))
+    caches.open(CACHE).then(c => c.addAll(ASSETS).catch(() => {}))
   );
 });
 
 self.addEventListener('activate', e => {
   e.waitUntil(
-    caches.keys().then(ks => Promise.all(
-      ks.filter(k => k !== CACHE).map(k => caches.delete(k))
-    )).then(() => self.clients.claim())
+    caches.keys()
+      .then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      .then(() => self.clients.claim())
   );
 });
 
@@ -25,20 +32,26 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;
 
   const url = new URL(req.url);
-  /* чужие домены (GitHub API, файлы) не трогаем */
   if (url.origin !== location.origin) return;
 
-  /* данные синхронизации и проверка версии — строго из сети */
-  if (url.pathname.endsWith('rem.json') || url.pathname.endsWith('ver.txt')) return;
+  /* Страница, версия и данные синхронизации — только сеть, без нашего
+     участия. Обработчик при этом существует, поэтому установка доступна. */
+  if (req.mode === 'navigate' ||
+      url.pathname.endsWith('index.html') ||
+      url.pathname.endsWith('/') ||
+      url.pathname.endsWith('ver.txt') ||
+      url.pathname.endsWith('rem.json')) {
+    return;
+  }
 
-  /* страница и её разметка: сначала сеть, кеш — только если сети нет */
+  /* Иконки и манифест: из кеша, если он есть, иначе из сети. */
   e.respondWith(
-    fetch(req).then(res => {
+    caches.match(req).then(hit => hit || fetch(req).then(res => {
       if (res && res.status === 200) {
         const copy = res.clone();
         caches.open(CACHE).then(c => c.put(req, copy)).catch(() => {});
       }
       return res;
-    }).catch(() => caches.match(req).then(hit => hit || caches.match('./')))
+    }))
   );
 });
