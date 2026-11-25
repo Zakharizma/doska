@@ -666,7 +666,7 @@ const RTXU_KEY='board.rtxu.v1';
 /* Версия сборки. Видна в панели «Напоминания» мелким шрифтом.
    Нужна ровно для одного: отличить старую страницу из кеша GitHub Pages
    от настоящей ошибки. Если версия старая — правки и не должны сохраняться. */
-const BOARD_VER='2026-11-25 17:05';
+const BOARD_VER='2026-11-25 17:50';
 /* сколько карточек с сохранённым текстом — видно рядом с версией */
 function showVer(){
   const v=document.getElementById('verState');
@@ -5553,15 +5553,22 @@ try{ if(catchUpRepeats()){ relayout(null); } }catch(e){}
 loop();
 
 /* ── установка на телефон как приложение ──
-   Манифест и служебный скрипт лежат рядом со страницей. Без них
-   «Добавить на главный экран» даёт закладку с адресной строкой,
-   а с ними — полноэкранное приложение с иконкой. */
+   Манифест и иконки лежат рядом со страницей: с ними «Добавить на главный
+   экран» даёт полноэкранное приложение с иконкой.
+   Служебный скрипт (service worker) НЕ регистрируем: он встаёт между
+   страницей и сетью и при обновлении начинает отдавать старую или битую
+   сборку — из-за этого был чёрный экран. Кеш браузера и так отключён
+   мета-тегами, а версию страница проверяет сама через ver.txt.
+   Если старый service worker успел установиться — снимаем его. */
 (function pwa(){
   try{
     if(!('serviceWorker' in navigator)) return;
-    /* регистрируем только когда страница отдана по http(s) */
-    if(location.protocol!=='https:' && location.hostname!=='localhost') return;
-    navigator.serviceWorker.register('sw.js').catch(()=>{});
+    navigator.serviceWorker.getRegistrations().then(rs=>{
+      rs.forEach(r=>{ try{ r.unregister(); }catch(e){} });
+    }).catch(()=>{});
+    if(window.caches && caches.keys){
+      caches.keys().then(ks=>ks.forEach(k=>{ try{ caches.delete(k); }catch(e){} })).catch(()=>{});
+    }
   }catch(e){}
 })();
 
