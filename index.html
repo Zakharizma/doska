@@ -85,6 +85,9 @@ canvas{display:block;position:fixed;inset:0;cursor:default;
 #ctx{position:fixed;display:none;z-index:60;min-width:238px;max-width:290px;
   background:rgba(18,24,33,.985);border:1px solid var(--line2);border-radius:13px;
   box-shadow:0 20px 52px rgba(0,0,0,.68);padding:6px;
+  /* меню никогда не вылезает за экран: при нехватке места прокручивается */
+  max-height:calc(100vh - 20px);overflow-y:auto;overflow-x:hidden;
+  overscroll-behavior:contain;
   backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
 #ctx.show{display:block}
 #ctx .ctxHead{padding:8px 10px 9px;font-size:12.5px;font-weight:700;color:var(--tx);
@@ -92,6 +95,19 @@ canvas{display:block;position:fixed;inset:0;cursor:default;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #ctx .lbl{padding:7px 10px 4px;font-size:10px;text-transform:uppercase;
   letter-spacing:.07em;color:var(--tx3);font-weight:700}
+
+/* раскрывающиеся разделы: «повторять», «работает на цель».
+   Свёрнутые — одна строка, поэтому меню остаётся коротким. */
+#ctx .secHead{cursor:pointer}
+#ctx .secHead .secTitle{flex:1;overflow:hidden;text-overflow:ellipsis}
+#ctx .secHead .secVal{color:var(--tx3);font-size:11.5px;max-width:112px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:none}
+#ctx .secHead .chv{color:var(--tx3);font-size:9px;flex:none;
+  transition:transform .15s ease;display:inline-block}
+#ctx .ctxSec.open .secHead .chv{transform:rotate(180deg)}
+#ctx .ctxSec.open .secHead{background:#1e2a39}
+#ctx .secBody{display:none}
+#ctx .ctxSec.open .secBody{display:block}
 .ci{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;
   font-size:13px;color:var(--tx);cursor:pointer;white-space:nowrap}
 .ci:hover{background:#243044}
@@ -650,7 +666,7 @@ const RTXU_KEY='board.rtxu.v1';
 /* Версия сборки. Видна в панели «Напоминания» мелким шрифтом.
    Нужна ровно для одного: отличить старую страницу из кеша GitHub Pages
    от настоящей ошибки. Если версия старая — правки и не должны сохраняться. */
-const BOARD_VER='2026-11-25 16:45';
+const BOARD_VER='2026-11-25 17:05';
 /* сколько карточек с сохранённым текстом — видно рядом с версией */
 function showVer(){
   const v=document.getElementById('verState');
@@ -3852,7 +3868,11 @@ function drawRemBadge(it,rem,shr){
 const ctxEl=document.getElementById('ctx');
 let ctxPath=null, ctxItemId=null;
 
-function ctxClose(){ if(ctxEl) ctxEl.classList.remove('show'); ctxPath=null; }
+function ctxClose(){
+  if(ctxEl) ctxEl.classList.remove('show');
+  ctxPath=null;
+  ctxAnchor=null;
+}
 
 function mkRow(html,cls,fn){
   const d=document.createElement('div');
@@ -3959,79 +3979,108 @@ function openCtxAt(cx,cy,it){
     ctxEl.appendChild(sn);
   }
 
-  /* повтор */
-  const rl=document.createElement('div');
-  rl.className='lbl'; rl.textContent='повторять';
-  ctxEl.appendChild(rl);
-  const rq=document.createElement('div');
-  rq.className='quick';
-  [['нет',null],['каждый день',1],['по будням','weekdays'],
-   ['каждую нед.',7],['каждый мес.','month']].forEach(([t,v])=>{
-    const b=document.createElement('button');
-    b.textContent=t;
-    if((rem.every||null)===v) b.style.borderColor='#4ea1ff';
-    b.addEventListener('click',ev=>{
+  /* ── раскрывающиеся разделы ──
+     Свёрнутый раздел занимает одну строку и показывает текущее значение.
+     Открыт одновременно только один — иначе меню снова станет длинным. */
+  const secs=[];
+  const ctxSection=(icon,title,valueText,fill)=>{
+    const sec=document.createElement('div');
+    sec.className='ctxSec';
+    const hd=document.createElement('div');
+    hd.className='ci secHead';
+    const ic=document.createElement('span'); ic.className='ic'; ic.textContent=icon;
+    const ti=document.createElement('span'); ti.className='secTitle'; ti.textContent=title;
+    const va=document.createElement('span'); va.className='secVal'; va.textContent=valueText||'';
+    const ch=document.createElement('span'); ch.className='chv'; ch.textContent='▼';
+    hd.appendChild(ic); hd.appendChild(ti); hd.appendChild(va); hd.appendChild(ch);
+    const body=document.createElement('div');
+    body.className='secBody';
+    fill(body);
+    hd.addEventListener('click',ev=>{
       ev.stopPropagation();
-      remSet(it.path,{every:v});
-      relayout(null); redraw(); ctxClose();
+      const was=sec.classList.contains('open');
+      secs.forEach(s=>s.classList.remove('open'));
+      if(!was) sec.classList.add('open');
+      ctxFit();          /* после раскрытия меню могло вылезти за экран */
     });
-    rq.appendChild(b);
-  });
-  ctxEl.appendChild(rq);
+    sec.appendChild(hd); sec.appendChild(body);
+    ctxEl.appendChild(sec);
+    secs.push(sec);
+    return sec;
+  };
 
-  /* по каким дням недели — точная настройка повтора */
-  const wq=document.createElement('div');
-  wq.className='quick';
-  const curWd=everyWeekdays(rem.every);
-  [1,2,3,4,5,6,0].forEach(wd=>{
-    const b=document.createElement('button');
-    b.textContent=WD_SHORT[wd];
-    const on=curWd && curWd.indexOf(wd)>=0;
-    if(on) b.style.borderColor='#4ea1ff';
-    b.addEventListener('click',ev=>{
-      ev.stopPropagation();
-      let set=(curWd?curWd.slice():[]);
-      if(set.indexOf(wd)>=0) set=set.filter(x=>x!==wd);
-      else set.push(wd);
-      if(!set.length) remSet(it.path,{every:null});
-      else if(set.length===5 && [1,2,3,4,5].every(d=>set.indexOf(d)>=0))
-        remSet(it.path,{every:'weekdays'});
-      else remSet(it.path,{every:{wd:set}});
-      relayout(null); redraw(); ctxClose();
+  /* повтор: свёрнуто — одна строка, внутри — пресеты и точные дни недели */
+  ctxSection('⟳','Повторять',rem.every?everyLabel(rem.every):'нет',body=>{
+    const rq=document.createElement('div');
+    rq.className='quick';
+    [['нет',null],['каждый день',1],['по будням','weekdays'],
+     ['каждую нед.',7],['каждый мес.','month']].forEach(([t,v])=>{
+      const b=document.createElement('button');
+      b.textContent=t;
+      if((rem.every||null)===v) b.style.borderColor='#4ea1ff';
+      b.addEventListener('click',ev=>{
+        ev.stopPropagation();
+        remSet(it.path,{every:v});
+        relayout(null); redraw(); ctxClose();
+      });
+      rq.appendChild(b);
     });
-    wq.appendChild(b);
+    body.appendChild(rq);
+
+    /* по каким именно дням недели */
+    const wl=document.createElement('div');
+    wl.className='lbl'; wl.textContent='дни недели';
+    body.appendChild(wl);
+    const wq=document.createElement('div');
+    wq.className='quick';
+    const curWd=everyWeekdays(rem.every);
+    [1,2,3,4,5,6,0].forEach(wd=>{
+      const b=document.createElement('button');
+      b.textContent=WD_SHORT[wd];
+      const on=curWd && curWd.indexOf(wd)>=0;
+      if(on) b.style.borderColor='#4ea1ff';
+      b.addEventListener('click',ev=>{
+        ev.stopPropagation();
+        let set=(curWd?curWd.slice():[]);
+        if(set.indexOf(wd)>=0) set=set.filter(x=>x!==wd);
+        else set.push(wd);
+        if(!set.length) remSet(it.path,{every:null});
+        else if(set.length===5 && [1,2,3,4,5].every(d=>set.indexOf(d)>=0))
+          remSet(it.path,{every:'weekdays'});
+        else remSet(it.path,{every:{wd:set}});
+        relayout(null); redraw(); ctxClose();
+      });
+      wq.appendChild(b);
+    });
+    body.appendChild(wq);
   });
-  ctxEl.appendChild(wq);
-  if(rem.every){
-    const hint=document.createElement('div');
-    hint.className='lbl';
-    hint.style.opacity='.75';
-    hint.textContent='сейчас: '+everyLabel(rem.every);
-    ctxEl.appendChild(hint);
-  }
 
   /* цель, на которую работает задача */
   const goals=goalPaths();
   if(goals.length){
-    const gl=document.createElement('div');
-    gl.className='lbl'; gl.textContent='работает на цель';
-    ctxEl.appendChild(gl);
-    const gq=document.createElement('div');
-    gq.className='quick';
-    const mkGoalBtn=(t,v)=>{
-      const b=document.createElement('button');
-      b.textContent=t;
-      if((rem.goal||null)===v) b.style.borderColor='#4ea1ff';
-      b.addEventListener('click',ev=>{
-        ev.stopPropagation();
-        remSet(it.path,{goal:v});
-        relayout(null); redraw(); ctxClose();
-      });
-      gq.appendChild(b);
-    };
-    mkGoalBtn('нет',null);
-    goals.forEach(g=>mkGoalBtn(g.text, g.path));
-    ctxEl.appendChild(gq);
+    const curGoal=goals.filter(g=>g.path===rem.goal)[0];
+    ctxSection('◎','Работает на цель',curGoal?curGoal.text:'нет',body=>{
+      const gq=document.createElement('div');
+      gq.className='quick';
+      gq.style.flexDirection='column';
+      gq.style.alignItems='stretch';
+      gq.style.gap='4px';
+      const mkGoalBtn=(t,v)=>{
+        const b=document.createElement('button');
+        b.textContent=t;
+        b.style.textAlign='left';
+        if((rem.goal||null)===v) b.style.borderColor='#4ea1ff';
+        b.addEventListener('click',ev=>{
+          ev.stopPropagation();
+          remSet(it.path,{goal:v});
+          relayout(null); redraw(); ctxClose();
+        });
+        gq.appendChild(b);
+      };
+      mkGoalBtn('нет',null);
+      goals.forEach(g=>mkGoalBtn(g.text, g.path));
+      body.appendChild(gq);
+    });
   }
 
   /* вложение */
@@ -4141,12 +4190,28 @@ function openCtxAt(cx,cy,it){
 
   /* показать и уложить в экран */
   ctxEl.classList.add('show');
+  ctxAnchor={x:cx, y:cy};
+  ctxFit(true);
+}
+
+/* уложить меню в экран: сначала у правого края, потом у нижнего.
+   Вызывается и после раскрытия раздела — меню растёт вниз, и без
+   пересчёта нижние пункты уезжали за границу экрана. */
+let ctxAnchor=null;
+function ctxFit(resetScroll){
+  if(!ctxEl||!ctxEl.classList.contains('show')) return;
   const r=ctxEl.getBoundingClientRect();
-  let x=cx, y=cy;
+  const c=ctxAnchor||{x:8,y:8};
+  let x=c.x, y=c.y;
   if(x+r.width>W-8) x=Math.max(8,W-r.width-8);
   if(y+r.height>H-8) y=Math.max(8,H-r.height-8);
+  if(x<8) x=8;
+  if(y<8) y=8;
   ctxEl.style.left=Math.round(x)+'px';
   ctxEl.style.top=Math.round(y)+'px';
+  /* меню выше экрана — при открытии показываем его с начала.
+     При раскрытии раздела прокрутку не трогаем: иначе меню прыгало бы. */
+  if(resetScroll && r.height>=H-20) ctxEl.scrollTop=0;
 }
 
 /* правый клик по карточке */
