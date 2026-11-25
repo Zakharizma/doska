@@ -404,7 +404,7 @@ function remSet(path,val){
     REM[path]=Object.assign(cur,val);
     REM[path].u=Date.now();          /* метка времени — для слияния устройств */
     const e=REM[path];
-    if(!e.due && !e.done && !e.label && !e.note && !e.att && !e.every) delete REM[path];
+    if(!e.due && !e.done && !e.label && !e.note && !e.att && !e.every && !e.text) delete REM[path];
   }
   remLevels(); remSave();
   try{ renderPanel(); }catch(e){}
@@ -537,19 +537,74 @@ function calTasksMap(){
   Object.keys(REM).forEach(p=>{
     const r=REM[p];
     if(!r||!r.due) return;
-    const meta=idx[p];
+    /* задача, добавленная вручную в списке дня, живёт прямо в записи
+       напоминания — карточки в дереве у неё нет, текст берём оттуда */
+    const meta=idx[p] || (r.text ? {text:r.text, color:r.color||'orange'} : null);
     if(!meta) return;                    /* карточки больше нет в дереве */
     const k=dayKey(new Date(r.due));
     (map[k]=map[k]||[]).push({
       path:p, text:meta.text, color:meta.color,
-      done:!!r.done, due:r.due
+      done:!!r.done, due:r.due, own:!idx[p]
     });
   });
   Object.keys(map).forEach(k=>{
-    map[k].sort((a,b)=>
-      (a.done-b.done) || (a.due-b.due) || a.text.localeCompare(b.text,'ru'));
+    /* порядок: невыполненные выше выполненных; внутри — по времени,
+       а задачи, добавленные вручную, держат порядок добавления */
+    map[k].sort((a,b)=>{
+      if(a.done!==b.done) return a.done?1:-1;
+      if(a.own!==b.own) return a.own?-1:1;
+      if(a.own&&b.own){
+        const na=+String(a.path).split('/').pop()||0;
+        const nb=+String(b.path).split('/').pop()||0;
+        return na-nb;
+      }
+      return (a.due-b.due) || a.text.localeCompare(b.text,'ru');
+    });
   });
   return map;
+}
+
+/* ── задачи, добавленные вручную ──
+   Путь вида @day/2026-11-25/3. Живут в REM вместе с остальными, поэтому
+   синхронизируются, получают метки, заметки, вложения и повтор — как
+   обычные карточки. В дереве их нет, и это единственное отличие. */
+const DAYP='@day/';
+const isOwnTask=p=>String(p||'').indexOf(DAYP)===0;
+const ADDKEY=k=>DAYP+k+'/add';
+
+function addDayTask(k,text){
+  const s=String(text||'').trim();
+  if(!s) return null;
+  const d=parseKey(k); d.setHours(9,0,0,0);
+  let n=1;
+  while(REM[DAYP+k+'/'+n]) n++;
+  const p=DAYP+k+'/'+n;
+  REM[p]={due:d.getTime(), done:false, text:s, color:'orange', u:Date.now()};
+  remLevels(); remSave();
+  relayout(null); refitSoon(); redraw();
+  return p;
+}
+function delDayTask(p){
+  if(!isOwnTask(p)) return;
+  delete REM[p];
+  lattDel(p);
+  remLevels(); remSave();
+  relayout(null); redraw();
+}
+
+/* Ввод задач списком. Понимает и маркеры, и нумерацию — вставлять
+   можно прямо готовый список из заметок, чистить вручную не надо. */
+function askDayTask(k){
+  const v=prompt('Задачи на '+longDay(k)+':\n\n'+
+    'Каждую — с новой строки. Маркеры «—», «•», «1.» можно оставить, '+
+    'они уберутся сами.','');
+  if(v===null) return;
+  const lines=v.split('\n')
+    .map(s=>s.replace(/^\s*[-–—•*·]\s*/,'').replace(/^\s*\d+[.)]\s*/,'').trim())
+    .filter(Boolean);
+  if(!lines.length) return;
+  lines.forEach(s=>addDayTask(k,s));
+  toast('Добавлено задач: '+lines.length);
 }
 const tasksOn=k=>calTasksMap()[k]||[];
 const remDone=p=>{ const r=remOf(p); return !!(r&&r.done); };
@@ -780,15 +835,25 @@ const CALGX=8,  CALGY=12;      // просветы внутри недели и 
 const CALPAD=16, CALHEAD=92;   // поля и высота шапки
 
 /* один предмет на всю сетку месяца: в потоке раскладки это просто
-   прямоугольник, а клетки считаются внутри него */
-function buildCalItem(){
+   прямоугольник, а клетки считаются внутри него.
+   targetW — ширина, которую надо занять. Её задаёт блок life, чтобы
+   календарь и схема стояли друг под другом с одинаковыми краями. */
+function buildCalItem(targetW){
   const y=CALM.y, m=CALM.m;
   const first=new Date(y,m,1);
   const dow=(first.getDay()+6)%7;          // Пн = 0
   const dim=new Date(y,m+1,0).getDate();   // сколько дней в месяце
   const rows=Math.ceil((dow+dim)/7);
 
-  const W=CALPAD*2 + 7*CALW + 6*CALGX;
+  /* ширина клетки выводится из общей ширины: 7 клеток + 6 просветов
+     + поля. Держим её в разумных пределах, чтобы при очень узкой или
+     очень широкой схеме клетки не превращались в щели или в простыни. */
+  let CW=CALW;
+  if(targetW){
+    CW=(targetW - CALPAD*2 - 6*CALGX)/7;
+    CW=Math.max(96, Math.min(360, CW));
+  }
+  const W=CALPAD*2 + 7*CW + 6*CALGX;
   const H=CALHEAD + rows*CALH + (rows-1)*CALGY;
 
   const todayK=dayKey(new Date());
@@ -802,9 +867,9 @@ function buildCalItem(){
       key:k, day:dd.getDate(), inMonth:dd.getMonth()===m,
       isToday:k===todayK, isSel:k===SELDAY,
       holiday:di.holiday, dayOff:di.dayOff, working:di.working,
-      x:CALPAD + c*(CALW+CALGX),
+      x:CALPAD + c*(CW+CALGX),
       y:CALHEAD + r*(CALH+CALGY),
-      w:CALW, h:CALH
+      w:CW, h:CALH
     });
   }
 
@@ -812,7 +877,7 @@ function buildCalItem(){
     id:uid(), type:'cal', x:0, y:0, w:W, h:H,
     path:'Календарь', lvl:0, zone:'cal',
     title:MONTHS[m]+' '+y, cells:cells, rows:rows,
-    gridX:CALPAD, gridY:CALHEAD,
+    cellW:CW, gridX:CALPAD, gridY:CALHEAD,
     prev:{x:W-CALPAD-120, y:20, w:30, h:30},
     next:{x:W-CALPAD-30,  y:20, w:30, h:30},
     todayBtn:{x:W-CALPAD-84, y:20, w:48, h:30}
@@ -943,6 +1008,7 @@ function buildTree(){
     const s=lvsz(1);
     const GAP=8;
     let y=0;
+    let count=0;
     list.forEach(sp=>{
       const path=pathOf('',sp.t);
       const kids=(sp.kids||[]).map(k=>typeof k==='string'?{t:k}:k);
@@ -954,14 +1020,23 @@ function buildTree(){
           checkable:!!k.rp, remPath:k.rp||null,
           open:false, path:k.p||pathOf(path,k.t), lvl:1, zone:'day'});
         y+=s.h+GAP;
+        count++;
       });
     });
-    if(out.length===startIdx){
+    if(!count){
       out.push({id:uid(),type:'card',x:0,y:0,w:s.w,h:s.h,
         text:'на этот день задач нет',color:'gray',fs:s.fs,
         hasKids:false,canToggle:false,checkable:false,remPath:null,
         open:false,path:'Задачи/пусто',lvl:1,zone:'day'});
+      y=s.h+GAP;
     }
+    /* карточка добавления — всегда последняя в столбике */
+    out.push({id:uid(),type:'card',
+      x:0, y:y, w:s.w, h:Math.round(s.h*0.82),
+      text:'+ задача', color:'gray', fs:s.fs,
+      hasKids:false, canToggle:false, checkable:false, remPath:null,
+      isAdd:true, open:false, path:ADDKEY(SELDAY), lvl:1, zone:'day'});
+
     const seg=out.slice(startIdx);
     const bb=boxOf(seg);
     seg.forEach(i=>{ i.x-=bb.minX; i.y-=bb.minY; });
@@ -1098,11 +1173,13 @@ function buildTree(){
      Портретной перестройки нет. Читаемость даёт постоянный кегль
      текста на экране (см. drawItem), а не зум. */
 
-  const calIt  = buildCalItem();
+  /* Схему считаем ПЕРВОЙ: её ширина задаёт ширину календаря.
+     Так обе рамки встают друг под другом с одинаковыми краями. */
+  const mainZ  = placeZoneH('main');
+  const calIt  = buildCalItem(mainZ ? mainZ.box.w : 0);
   out.push(calIt);
 
   const dayZ   = placeZoneDay('day');
-  const mainZ  = placeZoneH('main');
   const goalsZ = placeZoneV('goals');
 
   /* две колонки:
@@ -1532,7 +1609,7 @@ function drawCal(it,lw){
   ctx.fillStyle='rgba(224,138,60,.9)';
   ctx.textAlign='center';
   for(let c=0;c<7;c++){
-    ctx.fillText(WDAYS[c], X+it.gridX+c*(CALW+CALGX)+CALW/2, Y+CALHEAD-24);
+    ctx.fillText(WDAYS[c], X+it.gridX+c*(it.cellW+CALGX)+it.cellW/2, Y+CALHEAD-24);
   }
   ctx.textAlign='left';
 
@@ -2085,9 +2162,11 @@ cv.addEventListener('pointerdown',ev=>{
     /* вложение — открыть в новой вкладке */
     const at=attAt(w);
     if(at){ openAtt(at.att); return; }
+    /* карточка «+ задача» */
+    const addIt=hitItem(w.x,w.y);
+    if(addIt && addIt.isAdd){ askDayTask(SELDAY); return; }
     /* карточка из списка задач — показать её блок на схеме */
-    const srcIt=hitItem(w.x,w.y);
-    if(srcIt && srcIt.remPath){ gotoSource(srcIt.remPath); return; }
+    if(addIt && addIt.remPath && !isOwnTask(addIt.remPath)){ gotoSource(addIt.remPath); return; }
   }
 
   if(tool==='eraser'){
@@ -2332,7 +2411,8 @@ cv.addEventListener('touchend',ev=>{
     const at=attAt(w);
     if(at){ openAtt(at.att); T.mode=null; return; }
     const it=hitItem(w.x,w.y);
-    if(it && it.remPath){ gotoSource(it.remPath); T.mode=null; return; }
+    if(it && it.isAdd){ askDayTask(SELDAY); T.mode=null; return; }
+    if(it && it.remPath && !isOwnTask(it.remPath)){ gotoSource(it.remPath); T.mode=null; return; }
     if(it && it.canToggle){ toggleNode(it.id); T.mode=null; return; }
     if(it){ sel.clear(); sel.add(it.id); redraw(); T.mode=null; return; }
     sel.clear(); redraw(); T.mode=null; return;
@@ -2949,6 +3029,13 @@ function openCtxAt(cx,cy,it){
     }));
   }
 
+  /* задача, добавленная вручную, — её можно убрать совсем */
+  if(isOwnTask(it.path)){
+    ctxEl.appendChild(mkRow('<span class="ic">✕</span>Удалить задачу','',()=>{
+      ctxClose(); delDayTask(it.path);
+    }));
+  }
+
   ctxEl.appendChild(mkRow('<span class="ic">⧉</span>Скопировать название','',()=>{
     ctxClose();
     try{ navigator.clipboard.writeText(it.text||''); toast('Скопировано: '+(it.text||'')); }catch(e){}
@@ -2969,7 +3056,7 @@ cv.addEventListener('contextmenu',ev=>{
   ev.preventDefault();
   const w=toWorld(ev.clientX,ev.clientY);
   const it=hitItem(w.x,w.y);
-  if(it&&it.type==='card'){ openCtxAt(ev.clientX,ev.clientY,it); }
+  if(it&&it.type==='card'&&!it.isAdd){ openCtxAt(ev.clientX,ev.clientY,it); }
   else ctxClose();
 });
 
