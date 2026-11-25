@@ -9,7 +9,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#0b0f14">
+<meta name="theme-color" content="#162414">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -907,7 +907,16 @@ bgImg.src=BG_DATA;
 function bgFill(on){
   try{
     const d=document.getElementById('bgfill');
+    /* цвет нижней кромки картины после затемнения — тот же, что залит
+       под видимым низом холста (см. drawBackdrop). Пока он стоит на
+       странице и на подложке, полосы внизу не видно даже если iOS
+       не отдал высоту вместе с нижней зоной. */
+    const EDGE='#162414', OFF='#0b0f14';
+    const col=on?EDGE:OFF;
+    document.documentElement.style.backgroundColor=col;
+    document.body.style.backgroundColor=col;
     if(!d) return;
+    d.style.backgroundColor=col;
     if(on && BG_DATA){
       d.style.backgroundImage='url("'+BG_DATA+'")';
       d.classList.add('on');
@@ -1061,7 +1070,7 @@ const RTXU_KEY='board.rtxu.v1';
 /* Версия сборки. Видна в панели «Напоминания» мелким шрифтом.
    Нужна ровно для одного: отличить старую страницу из кеша GitHub Pages
    от настоящей ошибки. Если версия старая — правки и не должны сохраняться. */
-const BOARD_VER='2026-11-26 03:10';
+const BOARD_VER='2026-11-26 03:40';
 /* сколько карточек с сохранённым текстом — видно рядом с версией */
 function showVer(){
   const v=document.getElementById('verState');
@@ -2558,6 +2567,17 @@ function drawBackdrop(){
   g.addColorStop(1,'rgba(6,9,14,.50)');
   ctx.fillStyle=g;
   ctx.fillRect(0,0,W,CH);
+
+  /* НИЗ ХОЛСТА — ровная заливка цветом нижней кромки картины.
+     На iPhone высота видимой области иногда не включает нижнюю зону,
+     и под холстом проступала полоса фона страницы (тёмно-синяя #0b0f14),
+     которая на фоне зелёной степи выглядела чёрной. Теперь под видимым
+     низом холст залит ровно тем же цветом (#162414), что и подложка
+     страницы, поэтому стык не виден ни при каком раскладе. */
+  if(CH>H){
+    ctx.fillStyle='#162414';
+    ctx.fillRect(0,H,W,CH-H);
+  }
 }
 
 function drawGrid(){
