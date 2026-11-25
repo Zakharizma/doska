@@ -532,7 +532,15 @@ const RTXU_KEY='board.rtxu.v1';
 /* Версия сборки. Видна в панели «Напоминания» мелким шрифтом.
    Нужна ровно для одного: отличить старую страницу из кеша GitHub Pages
    от настоящей ошибки. Если версия старая — правки и не должны сохраняться. */
-const BOARD_VER='2026-11-25 15:26';
+const BOARD_VER='2026-11-25 15:35';
+/* сколько карточек с сохранённым текстом — видно рядом с версией */
+function showVer(){
+  const v=document.getElementById('verState');
+  if(!v) return;
+  let n=0;
+  try{ n=Object.keys(RTX).filter(k=>RTX[k]).length; }catch(e){}
+  v.textContent='v'+BOARD_VER.slice(11)+(n?' · текст '+n:'');
+}
 let RTX={};
 let RTXU={};              /* путь → время правки, для слияния устройств */
 (function rtxLoad(){
@@ -547,11 +555,19 @@ function rtxSaveLocal(){
   try{
     localStorage.setItem(RTX_KEY,JSON.stringify(RTX));
     localStorage.setItem(RTXU_KEY,JSON.stringify(RTXU));
-  }catch(e){}
+    showVer();
+    return true;
+  }catch(e){
+    /* молча терять текст нельзя: переполненное хранилище — частая причина
+       «всё сбрасывается после обновления» */
+    try{ toast('Текст не сохранился: хранилище браузера переполнено'); }catch(_){}
+    return false;
+  }
 }
 /* пустая строка — надгробие: значит «вернуть исходный текст»,
    и это тоже должно уехать на другое устройство */
 const rtxOf=p=>(p&&RTX[p])||null;
+try{ showVer(); }catch(e){}
 
 /* цвета выделения — ровно те, что в панели редактора */
 const RTX_COL={
@@ -4139,7 +4155,7 @@ function syncStatus(txt,err){
     el.style.color=err?'#e5484d':'#5d7085';
   }
   const v=document.getElementById('verState');
-  if(v) v.textContent='v'+BOARD_VER.slice(11);
+  if(v) showVer();
 }
 
 async function gh(method,path,body){
@@ -4247,7 +4263,7 @@ async function syncPush(){
   syncBusy=true;
   try{
     syncStatus('сохраняю…');
-    const doc={rem:REM, del:DEL, done:DONE, v:1, at:Date.now()};
+    const doc={rem:REM, del:DEL, done:DONE, rtx:RTX, rtxu:RTXU, v:1, at:Date.now()};
     const body={message:'напоминания '+new Date().toISOString().slice(0,16),
                 content:b64enc(JSON.stringify(doc)), branch:'main'};
     if(SYNC.sha) body.sha=SYNC.sha;
@@ -4610,16 +4626,16 @@ loop();
    GitHub Pages отдаёт index.html из кеша до 10 минут. Из-за этого
    исправленная страница не появляется, и правки «не сохраняются»:
    работает-то старая сборка. Здесь страница сверяет свою версию
-   с файлом ver.txt и один раз перезагружается в обход кеша. */
+   с файлом ver.txt и один раз перезагружается в обход кеша.
+   Повторной перезагрузки не будет: метка остаётся в адресе (?v=). */
 (function autoUpdate(){
   try{
+    if(/[?&]v=\d+/.test(location.search||'')) return;   /* уже обновлялись */
     fetch('ver.txt?t='+Date.now(),{cache:'no-store'})
       .then(r=>r.ok?r.text():'')
       .then(t=>{
-        t=(t||'').trim();
+        t=(t||'').replace(/^\uFEFF/,'').trim();
         if(!t||t===BOARD_VER) return;
-        if(sessionStorage.getItem('board.tryver')===t) return;  /* уже пробовали */
-        sessionStorage.setItem('board.tryver',t);
         location.replace(location.pathname+'?v='+Date.now());
       })
       .catch(()=>{});
