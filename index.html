@@ -855,7 +855,7 @@ const RTXU_KEY='board.rtxu.v1';
 /* Версия сборки. Видна в панели «Напоминания» мелким шрифтом.
    Нужна ровно для одного: отличить старую страницу из кеша GitHub Pages
    от настоящей ошибки. Если версия старая — правки и не должны сохраняться. */
-const BOARD_VER='2026-11-26 00:10';
+const BOARD_VER='2026-11-26 00:35';
 /* сколько карточек с сохранённым текстом — видно рядом с версией */
 function showVer(){
   const v=document.getElementById('verState');
@@ -1858,12 +1858,16 @@ function buildTree(){
   }
 
   /* «Задачи» — вертикальный список: карточек может быть сколько угодно,
-     и в столбик они читаются, а в ряд уехали бы за экран. */
-  function placeZoneDay(z){
+     и в столбик они читаются, а в ряд уехали бы за экран.
+     Ширина задаётся снаружи: столбец задач должен быть ровно такой же
+     ширины, как столбец целей, иначе две колонки справа выглядят
+     рвано. Если ширину не передали — берём обычную для этого уровня. */
+  function placeZoneDay(z, forceW){
     const list=zoneList(z);
     if(!list.length) return null;
     const startIdx=out.length;
     const s=lvsz(1);
+    const wCard=forceW||s.w;
     const GAP=8;
     let y=0;
     let count=0;
@@ -1872,7 +1876,7 @@ function buildTree(){
       const kids=(sp.kids||[]).map(k=>typeof k==='string'?{t:k}:k);
       kids.forEach(k=>{
         out.push({id:uid(),type:'card',
-          x:0, y:y, w:s.w, h:s.h,
+          x:0, y:y, w:wCard, h:s.h,
           text:k.t, color:k.c||sp.c, fs:s.fs,
           hasKids:false, canToggle:false,
           checkable:!!k.rp, remPath:k.rp||null,
@@ -1884,7 +1888,7 @@ function buildTree(){
       });
     });
     if(!count){
-      out.push({id:uid(),type:'card',x:0,y:0,w:s.w,h:s.h,
+      out.push({id:uid(),type:'card',x:0,y:0,w:wCard,h:s.h,
         text: ARCH_VIEW?'архив пуст':'на этот день задач нет',color:'gray',fs:s.fs,
         hasKids:false,canToggle:false,checkable:false,remPath:null,
         open:false,path:'Задачи/пусто',lvl:1,zone:'day'});
@@ -1893,7 +1897,7 @@ function buildTree(){
     /* карточка добавления — последняя в столбике, в архиве не нужна */
     if(!ARCH_VIEW){
       out.push({id:uid(),type:'card',
-        x:0, y:y, w:s.w, h:Math.round(s.h*0.82),
+        x:0, y:y, w:wCard, h:Math.round(s.h*0.82),
         text:'+ задача', color:'gray', fs:s.fs,
         hasKids:false, canToggle:false, checkable:false, remPath:null,
         isAdd:true, open:false, path:ADDKEY(SELDAY), lvl:1, zone:'day'});
@@ -2043,8 +2047,11 @@ function buildTree(){
   const calIt  = buildCalItem(mainZ ? mainZ.box.w : 0);
   out.push(calIt);
 
-  const dayZ   = placeZoneDay('day');
+  /* Цели считаем ПЕРВЫМИ: их ширина задаёт ширину столбца задач.
+     Две колонки справа должны быть одинаковой ширины, иначе край
+     выглядит рвано. */
   const goalsZ = placeZoneV('goals');
+  const dayZ   = placeZoneDay('day', goalsZ ? goalsZ.box.w : 0);
 
   /* две колонки:
      слева  — календарь, под ним схема жизни;
