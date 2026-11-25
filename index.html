@@ -142,6 +142,47 @@ canvas{display:block;position:fixed;inset:0;cursor:default;
   margin-top:8px;padding:8px 4px 2px;border-top:1px solid var(--line);
   font-size:11px;color:var(--tx3)}
 
+/* ---------- редактор карточки ----------
+   Полноценное окно: панель инструментов, поле ввода, сохранение.
+   Раньше правка шла прямо на холсте одним textarea — без разметки. */
+#edt{position:fixed;inset:0;z-index:215;display:none;
+  background:rgba(4,8,14,.66);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+  align-items:center;justify-content:center;padding:16px}
+#edt.show{display:flex}
+#edt .box{width:min(760px,100%);max-height:94vh;display:flex;flex-direction:column;
+  background:rgba(18,24,33,.99);border:1px solid var(--line2);border-radius:16px;
+  box-shadow:0 28px 80px rgba(0,0,0,.75);overflow:hidden}
+#edt .hdr{padding:13px 16px 11px;border-bottom:1px solid var(--line)}
+#edt .hdr .cap{font-size:13.5px;font-weight:700;color:var(--tx)}
+#edt .hdr .sub{font-size:11px;color:var(--tx3);margin-top:3px}
+#edt .bar{display:flex;flex-wrap:wrap;gap:5px;align-items:center;
+  padding:9px 12px;border-bottom:1px solid var(--line);background:rgba(11,16,24,.5)}
+#edt .bar .sep{width:1px;height:20px;background:var(--line2);margin:0 3px}
+#edt .bar button{min-width:30px;height:28px;padding:0 8px;border-radius:7px;
+  border:1px solid var(--line2);background:#16202e;color:var(--tx);
+  font-size:12.5px;cursor:pointer;font-family:inherit;line-height:1}
+#edt .bar button:hover{background:#243044;border-color:var(--acc)}
+#edt .bar .dot{width:22px;height:22px;border-radius:50%;cursor:pointer;
+  border:2px solid transparent;box-sizing:border-box;display:inline-block}
+#edt .bar .dot:hover{border-color:#fff}
+#edt .area{flex:1;min-height:170px;max-height:54vh;overflow:auto;
+  padding:16px 18px;font-size:14.5px;line-height:1.55;color:var(--tx);
+  outline:none;background:#0f1620;word-break:break-word}
+#edt .area:focus{box-shadow:inset 0 0 0 1px var(--acc)}
+#edt .area:empty:before{content:'Введите текст…';color:var(--tx3)}
+#edt .area ul,#edt .area ol{margin:4px 0;padding-left:22px}
+#edt .area h1{font-size:1.42em;margin:6px 0 3px}
+#edt .area h2{font-size:1.22em;margin:6px 0 3px}
+#edt .area h3{font-size:1.08em;margin:6px 0 3px}
+#edt .row{display:flex;gap:8px;justify-content:flex-end;
+  padding:12px 16px;border-top:1px solid var(--line)}
+#edt .row button{border:1px solid var(--line2);background:#1a2434;color:var(--tx);
+  border-radius:9px;padding:8px 16px;font-size:13px;cursor:pointer;font-family:inherit}
+#edt .row button.ok{background:var(--acc);border-color:var(--acc);
+  color:#101a26;font-weight:700}
+#edt .row button.reset{margin-right:auto;color:var(--tx3)}
+#edt .row button:hover{filter:brightness(1.1)}
+
 /* ---------- окно ввода ----------
    Раньше здесь стоял prompt(), но в Electron его нет вообще: вызов
    молча возвращает null, и выглядит это как «кнопка не работает».
@@ -242,6 +283,42 @@ canvas{display:block;position:fixed;inset:0;cursor:default;
   <textarea></textarea>
   <input type="text" style="display:none">
   <div class="row"><button class="no">Отмена</button><button class="ok">Готово</button></div>
+</div></div>
+
+<!-- редактор карточки с форматированием -->
+<div id="edt"><div class="box">
+  <div class="hdr">
+    <div class="cap"></div>
+    <div class="sub">Выдели текст и нажми инструмент. Ctrl+B, Ctrl+I, Ctrl+U тоже работают.</div>
+  </div>
+  <div class="bar">
+    <button data-cmd="bold" title="Полужирный (Ctrl+B)"><b>Ж</b></button>
+    <button data-cmd="italic" title="Курсив (Ctrl+I)"><i>К</i></button>
+    <button data-cmd="underline" title="Подчёркнутый (Ctrl+U)"><u>Ч</u></button>
+    <button data-cmd="strikeThrough" title="Зачёркнутый" class="st">З</button>
+    <span class="sep"></span>
+    <button data-blk="h1" title="Заголовок">H1</button>
+    <button data-blk="h2" title="Подзаголовок">H2</button>
+    <button data-blk="h3" title="Мелкий заголовок">H3</button>
+    <button data-blk="p" title="Обычный текст">Абзац</button>
+    <span class="sep"></span>
+    <button data-cmd="insertUnorderedList" title="Маркированный список">• список</button>
+    <button data-cmd="insertOrderedList" title="Нумерованный список">1. список</button>
+    <span class="sep"></span>
+    <span class="dot" data-c="red" style="background:#c0392b" title="красный"></span>
+    <span class="dot" data-c="green" style="background:#1e7a46" title="зелёный"></span>
+    <span class="dot" data-c="blue" style="background:#1f5fa8" title="синий"></span>
+    <span class="dot" data-c="orange" style="background:#b3651a" title="оранжевый"></span>
+    <span class="dot" data-c="gray" style="background:#5b6472" title="серый"></span>
+    <span class="sep"></span>
+    <button data-cmd="removeFormat" title="Убрать форматирование">Очистить</button>
+  </div>
+  <div class="area" contenteditable="true" spellcheck="false"></div>
+  <div class="row">
+    <button class="reset">Сбросить к исходному</button>
+    <button class="no">Отмена</button>
+    <button class="ok">Готово</button>
+  </div>
 </div></div>
 
 <!-- кнопка и панель напоминаний -->
@@ -442,6 +519,86 @@ function remSet(path,val){
   }
   remLevels(); remSave();
   try{ renderPanel(); }catch(e){}
+}
+
+/* ================= ФОРМАТИРОВАННЫЙ ТЕКСТ КАРТОЧЕК =================
+   Текст карточек задан в схеме (TREE), а правится в редакторе. Здесь
+   хранятся только ИЗМЕНЕНИЯ относительно схемы: путь → разметка.
+   Ключ — путь карточки, поэтому переименование текста не ломает
+   напоминания и вложения: они привязаны к пути, а не к подписи. */
+const RTX_KEY='board.rtx.v1';
+let RTX={};
+(function rtxLoad(){
+  try{
+    const raw=localStorage.getItem(RTX_KEY);
+    if(raw){ const p=JSON.parse(raw); if(p&&typeof p==='object') RTX=p; }
+  }catch(e){}
+})();
+function rtxSaveLocal(){
+  try{ localStorage.setItem(RTX_KEY,JSON.stringify(RTX)); }catch(e){}
+}
+const rtxOf=p=>(p&&RTX[p])||null;
+
+/* цвета выделения — ровно те, что в панели редактора */
+const RTX_COL={
+  red:'#c0392b', green:'#1e7a46', blue:'#1f5fa8',
+  orange:'#b3651a', gray:'#5b6472'
+};
+const RTX_HEX={};
+Object.keys(RTX_COL).forEach(k=>{ RTX_HEX[RTX_COL[k]]=k; });
+
+/* Допустимые теги. Всё остальное вырезается: в разметку попадает
+   только то, что умеет рисоваться на холсте. */
+const RTX_OK=/^(b|strong|i|em|u|s|strike|del|br|div|p|span|ul|ol|li|h1|h2|h3|font)$/i;
+
+function rtxClean(html){
+  let s=String(html||'');
+  s=s.replace(/<!--[\s\S]*?-->/g,'');
+  /* содержимое script/style вырезаем вместе с тегами: иначе остаётся
+     голый текст вроде «alert(1)» прямо в карточке */
+  s=s.replace(/<(script|style|iframe|object|embed)\b[\s\S]*?<\/\1\s*>/gi,'');
+  s=s.replace(/<\s*(\/?)\s*([a-zA-Z0-9]+)([^>]*?)(\/?)\s*>/g,(m,close,tag,attrs)=>{
+    if(!RTX_OK.test(tag)) return '';
+    /* font — это цвет; на холсте он живёт в span data-c */
+    const t=tag.toLowerCase()==='font' ? 'span' : tag.toLowerCase();
+    if(close) return '</'+t+'>';
+    if(t==='span'){
+      /* цвет переносим в data-c: привязка к имени цвета, а не к оттенку */
+      let hex=null;
+      const st=/color\s*:\s*([^;"]+)/i.exec(attrs) || /color\s*=\s*["']?([^"'>]+)/i.exec(attrs);
+      if(st){
+        const v=String(st[1]).trim().toLowerCase();
+        if(/^#[0-9a-f]{6}$/.test(v)) hex=v;
+        else{
+          const rgb=/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i.exec(v);
+          if(rgb) hex='#'+[1,2,3].map(i=>('0'+parseInt(rgb[i],10).toString(16)).slice(-2)).join('');
+        }
+      }
+      const key=(hex&&RTX_HEX[hex]) || /data-c\s*=\s*["']([a-z]+)["']/i.exec(attrs);
+      const kk=typeof key==='string'?key:(key?key[1]:null);
+      return kk && RTX_COL[kk] ? '<span data-c="'+kk+'">' : '<span>';
+    }
+    return '<'+t+'>';
+  });
+  return s;
+}
+const rtxPlain=h=>String(h||'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+
+function rtxSet(path,html){
+  if(!path) return;
+  const clean=rtxClean(html);
+  if(!rtxPlain(clean)) delete RTX[path];
+  else RTX[path]=clean;
+  rtxSaveLocal();
+  pushHist();                 /* правка текста попадает в Ctrl+Z */
+  relayout(null); redraw();
+}
+function rtxClear(path){
+  if(!path) return;
+  delete RTX[path];
+  rtxSaveLocal();
+  pushHist();
+  relayout(null); redraw();
 }
 
 /* ================= ЧЕК-ЛИСТЫ =================
@@ -1364,9 +1521,11 @@ if(!items.length){items=DB.items;edges=DB.edges;}
    телефон не копит мусор и не восстанавливает старую раскрытость. */
 const saveDB=()=>{};
 
-/* ================= ИСТОРИЯ ================= */
+/* ================= ИСТОРИЯ =================
+   Снимок включает и текст с форматированием: иначе Ctrl+Z откатывал
+   перемещение карточек, но не правку содержимого. */
 function snapshot(){
-  return JSON.stringify({items,edges});
+  return JSON.stringify({items,edges,rtx:RTX});
 }
 function pushHist(){
   const s=snapshot();
@@ -1378,16 +1537,22 @@ function pushHist(){
   saveDB();
 }
 function undo(){
-  if(hIdx<=0) return;
+  if(hIdx<=0){ toast('Отменять нечего'); return; }
   hIdx--;
   const s=JSON.parse(history[hIdx]);
-  items=s.items; edges=s.edges; sel.clear(); saveDB(); redraw();
+  items=s.items; edges=s.edges; sel.clear();
+  RTX=s.rtx||{}; rtxSaveLocal();
+  saveDB(); redraw();
+  toast('Отменено');
 }
 function redo(){
-  if(hIdx>=history.length-1) return;
+  if(hIdx>=history.length-1){ toast('Возвращать нечего'); return; }
   hIdx++;
   const s=JSON.parse(history[hIdx]);
-  items=s.items; edges=s.edges; sel.clear(); saveDB(); redraw();
+  items=s.items; edges=s.edges; sel.clear();
+  RTX=s.rtx||{}; rtxSaveLocal();
+  saveDB(); redraw();
+  toast('Возвращено');
 }
 
 /* ================= КООРДИНАТЫ ================= */
@@ -1878,7 +2043,12 @@ function drawItem(it,lw){
     const textW=(it.canToggle ? it.w-42 : it.w-26) - (chk?10:0);
     const textH=it.h-26-(rem?16:0);
     if(don) ctx.globalAlpha=0.55;
-    wrapText(it.text||'',it.x+13,it.y+13,textW,Math.round(fs*1.33),textH);
+    const rich=rtxOf(it.path);
+    if(rich){
+      drawRich(rich,it.x+13,it.y+13,textW,textH,fs,pal.tx);
+    }else{
+      wrapText(it.text||'',it.x+13,it.y+13,textW,Math.round(fs*1.33),textH);
+    }
     ctx.globalAlpha=1;
 
     /* галочка чек-листа справа */
@@ -2043,6 +2213,192 @@ function wrapText(text,x,y,maxW,lh,maxH){
       ctx.fillText(ln,x,y);
       y+=lh;
     });
+  });
+  ctx.textBaseline='alphabetic';
+}
+
+/* ---------- разметка → блоки ----------
+   Разбираем не DOM-ом, а вручную: нужен предсказуемый результат и
+   возможность прогнать это в Node без браузера. Понимаем ровно те
+   теги, которые ставит панель редактора и execCommand. */
+function rtxBlocks(html){
+  const out=[];
+  let cur={li:null,head:0,runs:[]};
+  const stack=[];          /* стили открытых тегов */
+  const lists=[];          /* ul / ol */
+
+  const flags=()=>{
+    const f={b:false,i:false,u:false,s:false,c:null,head:0};
+    stack.forEach(o=>{
+      if(o.b) f.b=true;
+      if(o.i) f.i=true;
+      if(o.u) f.u=true;
+      if(o.s) f.s=true;
+      if(o.c) f.c=o.c;
+      if(o.head) f.head=o.head;
+    });
+    return f;
+  };
+  const flush=(force)=>{
+    if(cur.runs.length || force) out.push(cur);
+    cur={li:null,head:0,runs:[]};
+  };
+  const addText=t=>{
+    if(!t) return;
+    const f=flags();
+    if(f.head) cur.head=f.head;
+    let s=t.replace(/&nbsp;/g,' ').replace(/&amp;/g,'&')
+             .replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/\s+/g,' ');
+    if(!s) return;
+    const last=cur.runs[cur.runs.length-1];
+    if(last && last.b===f.b && last.i===f.i && last.u===f.u &&
+       last.s===f.s && last.c===f.c) last.t+=s;
+    else cur.runs.push({t:s,b:f.b,i:f.i,u:f.u,s:f.s,c:f.c});
+  };
+
+  const re=/<[^>]+>|[^<]+/g;
+  let m;
+  const src=String(html||'');
+  while((m=re.exec(src))){
+    const tok=m[0];
+    if(tok[0]!=='<'){ addText(tok); continue; }
+    const tagM=/^<\s*(\/?)\s*([a-zA-Z0-9]+)/.exec(tok);
+    if(!tagM) continue;
+    const close=!!tagM[1], tag=tagM[2].toLowerCase();
+
+    if(tag==='br'){ flush(true); continue; }
+    if(tag==='ul'||tag==='ol'){
+      flush();
+      if(close) lists.pop(); else lists.push(tag);
+      continue;
+    }
+    if(tag==='li'){
+      flush();
+      cur.li=lists.length?lists[lists.length-1]:'ul';
+      continue;
+    }
+    if(tag==='div'||tag==='p'){
+      flush(tag!=='div'||close);      /* пустой div = пустая строка */
+      continue;
+    }
+    if(tag==='h1'||tag==='h2'||tag==='h3'){
+      flush();
+      if(close){
+        cur.head=0;
+        /* снимаем заголовок со стека, иначе он «протекает» на все
+           следующие абзацы до конца текста */
+        for(let i=stack.length-1;i>=0;i--){
+          if(stack[i].head){ stack.splice(i,1); break; }
+        }
+      }else{
+        stack.push({head:+tag[1]}); cur.head=+tag[1];
+      }
+      continue;
+    }
+    if(!close){
+      const o={};
+      if(tag==='b'||tag==='strong') o.b=true;
+      else if(tag==='i'||tag==='em') o.i=true;
+      else if(tag==='u') o.u=true;
+      else if(tag==='s'||tag==='strike'||tag==='del') o.s=true;
+      else if(tag==='span'||tag==='font'){
+        const c=/data-c\s*=\s*["']([a-z]+)["']/i.exec(tok);
+        if(c && RTX_COL[c[1]]) o.c=c[1];
+      }
+      stack.push(o);
+    }else{
+      /* закрываем ближайший подходящий тег */
+      for(let i=stack.length-1;i>=0;i--){
+        const o=stack[i];
+        const isB=o.b, isI=o.i, isU=o.u, isS=o.s, isC=!!o.c, isH=!!o.head;
+        if((tag==='b'||tag==='strong')&&isB){ stack.splice(i,1); break; }
+        if((tag==='i'||tag==='em')&&isI){ stack.splice(i,1); break; }
+        if(tag==='u'&&isU){ stack.splice(i,1); break; }
+        if((tag==='s'||tag==='strike'||tag==='del')&&isS){ stack.splice(i,1); break; }
+        if((tag==='span'||tag==='font')&&isC){ stack.splice(i,1); break; }
+        if((tag==='h1'||tag==='h2'||tag==='h3')&&isH){ stack.splice(i,1); break; }
+      }
+    }
+  }
+  flush();
+  return out.filter(b=>b.runs.length || b.li || b.head);
+}
+
+const RTX_HEAD={1:1.42, 2:1.22, 3:1.08};
+const rtxFont=(fs,st)=>(st.b?'700 ':'600 ')+(st.i?'italic ':'')+
+  Math.round(fs*10)/10+'px '+FONT_UI;
+
+/* блоки → строки с переносом; стиль каждого куска сохраняется */
+function rtxWrap(blocks,fs,maxW){
+  const lines=[];
+  blocks.forEach(bl=>{
+    const bf=bl.head ? fs*(RTX_HEAD[bl.head]||1) : fs;
+    const indent=bl.li ? Math.max(12,bf*0.95) : 0;
+    const avail=Math.max(20,maxW-indent);
+    let cur=[], curW=0;
+    const pushLine=()=>{ lines.push({runs:cur,li:bl.li,head:bl.head,fs:bf,indent:indent}); cur=[]; curW=0; };
+    const toks=[];
+    bl.runs.forEach(r=>{
+      String(r.t).split(/(\s+)/).forEach(p=>{
+        if(p!=='') toks.push({t:p,sp:/^\s+$/.test(p),src:r});
+      });
+    });
+    toks.forEach(tk=>{
+      const st=tk.src;
+      ctx.font=rtxFont(bf,st);
+      const w=ctx.measureText(tk.t).width;
+      if(tk.sp){
+        if(!cur.length) return;              /* ведущий пробел не нужен */
+        cur.push({t:tk.t,st:st,fs:bf}); curW+=w; return;
+      }
+      if(curW+w>avail && cur.length) pushLine();
+      cur.push({t:tk.t,st:st,fs:bf}); curW+=w;
+    });
+    pushLine();
+  });
+  return lines;
+}
+
+/* Рисуем форматированный текст в рамке карточки. Если не влезает —
+   постепенно уменьшаем кегль. Так раскладка доски остаётся ровной:
+   карточки не растут и не наезжают друг на друга. */
+function drawRich(html,x,y,maxW,maxH,fs,baseColor){
+  const blocks=rtxBlocks(html);
+  if(!blocks.length) return;
+  let lines=null, use=fs;
+  /* ниже 72 % не опускаемся: совсем мелкий текст на доске не читается.
+     Лишнее просто обрежется по высоте карточки. */
+  for(let k=1;k>=0.72-1e-9;k-=0.07){
+    use=fs*k;
+    lines=rtxWrap(blocks,use,maxW);
+    const need=lines.length*use*1.36;
+    if(need<=maxH+1) break;
+  }
+  const lh=Math.round(use*1.36);
+  let cy=y;
+  let olN=0;
+  ctx.textBaseline='top';
+  lines.forEach((ln,i)=>{
+    if(ln.li==='ol') olN++; else if(ln.li!=='ol') olN=0;
+    if(cy+lh>y+maxH+0.5) return;
+    if(ln.li){
+      ctx.fillStyle=baseColor;
+      ctx.font=rtxFont(ln.fs,{b:false,i:false});
+      ctx.fillText(ln.li==='ol' ? (olN+'.') : '•', x, cy);
+    }
+    let cx=x+(ln.indent||0);
+    ln.runs.forEach(r=>{
+      const st=r.st;
+      ctx.font=rtxFont(r.fs,st);
+      ctx.fillStyle=(st.c&&RTX_COL[st.c])||baseColor;
+      ctx.fillText(r.t,cx,cy);
+      const w=ctx.measureText(r.t).width;
+      const th=Math.max(1,r.fs*0.07);
+      if(st.u){ ctx.fillRect(cx, cy+r.fs*0.94, w, th); }
+      if(st.s){ ctx.fillRect(cx, cy+r.fs*0.55, w, th); }
+      cx+=w;
+    });
+    cy+=lh;
   });
   ctx.textBaseline='alphabetic';
 }
@@ -2579,6 +2935,7 @@ cv.addEventListener('wheel',ev=>{
 cv.addEventListener('dblclick',ev=>{
   const w=toWorld(ev.clientX,ev.clientY);
   const it=hitItem(w.x,w.y);
+  if(it && it.type==='card' && !it.isAdd){ openEditor(it); redraw(); return; }
   if(it && it.type!=='draw'){ sel.clear(); sel.add(it.id); startEdit(it); redraw(); return; }
   if(!it){
     const n={id:uid(),type:'card',x:w.x-110,y:w.y-65,w:220,h:130,text:'',color:color};
@@ -2988,6 +3345,13 @@ function openCtxAt(cx,cy,it){
   head.textContent=(it.text||'без названия').slice(0,42);
   ctxEl.appendChild(head);
 
+  /* редактор с форматированием — первым пунктом */
+  if(it.type==='card' && !it.isAdd){
+    ctxEl.appendChild(mkRow('<span class="ic">✎</span>Редактировать текст…','',()=>{
+      ctxClose(); openEditor(it);
+    }));
+  }
+
   /* срок */
   const lbl=document.createElement('div');
   lbl.className='lbl'; lbl.textContent='срок исполнения';
@@ -3288,6 +3652,102 @@ function askText(opt){
     };
   });
 }
+
+/* ── редактор карточки ──
+   Одно окно на всю доску: и для life, и для целей, и для личных блоков.
+   Разметка хранится отдельно от схемы (см. RTX), поэтому правка не
+   трогает пути карточек и не рвёт напоминания с вложениями. */
+const escHtml=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')
+                              .replace(/>/g,'&gt;');
+let edtItem=null;
+
+function openEditor(it){
+  const el=document.getElementById('edt');
+  if(!el||!it) return;
+  edtItem=it;
+  const cap=el.querySelector('.cap');
+  const area=el.querySelector('.area');
+  cap.textContent=it.text||'без названия';
+  const rich=rtxOf(it.path);
+  area.innerHTML=rich || ('<div>'+escHtml(it.text||'')+'</div>');
+  try{ document.execCommand('styleWithCSS',false,true); }catch(e){}
+  el.classList.add('show');
+  setTimeout(()=>{ area.focus(); },30);
+}
+function closeEditor(){
+  const el=document.getElementById('edt');
+  if(el) el.classList.remove('show');
+  edtItem=null;
+}
+function editorCommit(){
+  const el=document.getElementById('edt');
+  if(!el||!edtItem) return;
+  const area=el.querySelector('.area');
+  const path=edtItem.path;
+  const html=area.innerHTML;
+  closeEditor();
+  rtxSet(path,html);
+}
+
+(function wireEditor(){
+  const el=document.getElementById('edt');
+  if(!el) return;
+  const area=el.querySelector('.area');
+
+  /* клик по инструменту не должен снимать выделение в поле */
+  el.querySelectorAll('.bar button').forEach(b=>{
+    b.addEventListener('mousedown',e=>e.preventDefault());
+    b.addEventListener('click',e=>{
+      e.preventDefault();
+      area.focus();
+      const cmd=b.getAttribute('data-cmd');
+      const blk=b.getAttribute('data-blk');
+      try{
+        if(cmd==='removeFormat'){
+          document.execCommand('removeFormat',false,null);
+          document.execCommand('formatBlock',false,'<div>');
+          document.execCommand('unlink',false,null);
+        }else if(cmd){
+          document.execCommand(cmd,false,null);
+        }else if(blk){
+          document.execCommand('formatBlock',false,'<'+blk+'>');
+        }
+      }catch(err){}
+    });
+  });
+
+  /* цвет выделения */
+  el.querySelectorAll('.bar .dot').forEach(d=>{
+    d.addEventListener('mousedown',e=>e.preventDefault());
+    d.addEventListener('click',e=>{
+      e.preventDefault();
+      area.focus();
+      const key=d.getAttribute('data-c');
+      try{
+        document.execCommand('styleWithCSS',false,true);
+        document.execCommand('foreColor',false,RTX_COL[key]||'#e6eef7');
+      }catch(err){}
+    });
+  });
+
+  el.querySelector('.ok').addEventListener('click',e=>{ e.stopPropagation(); editorCommit(); });
+  el.querySelector('.no').addEventListener('click',e=>{ e.stopPropagation(); closeEditor(); });
+  el.querySelector('.reset').addEventListener('click',e=>{
+    e.stopPropagation();
+    const p=edtItem&&edtItem.path;
+    closeEditor();
+    if(p) rtxClear(p);
+    toast('Форматирование сброшено');
+  });
+  el.addEventListener('click',ev=>{ if(ev.target===el) closeEditor(); });
+
+  /* Esc и Ctrl+Enter внутри окна */
+  area.addEventListener('keydown',ev=>{
+    ev.stopPropagation();
+    if(ev.key==='Escape'){ ev.preventDefault(); closeEditor(); }
+    if(ev.key==='Enter'&&(ev.ctrlKey||ev.metaKey)){ ev.preventDefault(); editorCommit(); }
+  });
+})();
 
 /* ---- панель «Напоминания» ---- */
 let SHOWDONE=false;              /* показывать выполненные в панели */
