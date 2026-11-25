@@ -27,12 +27,26 @@ body{font:14px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif
   -webkit-font-smoothing:antialiased;user-select:none;
   -webkit-user-select:none;-webkit-touch-callout:none;
   -webkit-tap-highlight-color:transparent}
-canvas{display:block;position:fixed;inset:0;cursor:default;
+/* Холст закрывает ВЕСЬ экран, включая зону «брови» и нижнюю полосу:
+   иначе по краям оставались тёмные полосы. Кнопки при этом отодвинуты
+   от опасных зон через env(safe-area-inset-*). */
+canvas{display:block;position:fixed;inset:0;width:100%;height:100%;cursor:default;
   touch-action:none;-ms-touch-action:none}
+
+/* ---------- безопасные зоны iPhone ----------
+   На iPhone 13 сверху «бровь», снизу полоска-индикатор. Без отступа
+   кнопки попадали под бровь. env() на обычном компьютере даёт 0,
+   поэтому раскладка на десктопе не меняется. */
+:root{
+  --sat:env(safe-area-inset-top,0px);
+  --sab:env(safe-area-inset-bottom,0px);
+  --sal:env(safe-area-inset-left,0px);
+  --sar:env(safe-area-inset-right,0px);
+}
 
 /* ---------- панель ---------- */
 #bar{
-  position:fixed;top:14px;left:50%;transform:translateX(-50%);
+  position:fixed;top:calc(14px + var(--sat));left:50%;transform:translateX(-50%);
   display:flex;align-items:center;gap:3px;padding:5px;
   background:rgba(21,28,38,.93);backdrop-filter:blur(14px);
   border:1px solid var(--line2);border-radius:13px;
@@ -50,7 +64,7 @@ canvas{display:block;position:fixed;inset:0;cursor:default;
   stroke-linecap:round;stroke-linejoin:round}
 
 /* ---------- цвета ---------- */
-#colors{position:fixed;top:64px;left:50%;transform:translateX(-50%);
+#colors{position:fixed;top:calc(64px + var(--sat));left:50%;transform:translateX(-50%);
   display:none;gap:7px;padding:8px 10px;background:rgba(21,28,38,.95);
   border:1px solid var(--line2);border-radius:11px;z-index:20;
   box-shadow:0 8px 24px rgba(0,0,0,.5)}
@@ -69,7 +83,7 @@ canvas{display:block;position:fixed;inset:0;cursor:default;
   font-variant-numeric:tabular-nums;cursor:pointer}
 
 /* ---------- подсказка ---------- */
-#hint{position:fixed;left:16px;bottom:16px;font-size:11.5px;color:var(--tx3);
+#hint{position:fixed;left:calc(16px + var(--sal));bottom:calc(16px + var(--sab));font-size:11.5px;color:var(--tx3);
   line-height:1.7;z-index:20;pointer-events:none}
 #hint b{color:var(--tx2);font-weight:600}
 #hint kbd{background:#1b2431;border:1px solid var(--line2);border-radius:4px;
@@ -128,13 +142,13 @@ canvas{display:block;position:fixed;inset:0;cursor:default;
 .dot.on{border-color:#fff;box-shadow:0 0 0 2px rgba(255,255,255,.22)}
 
 /* ---------- напоминания: панель ---------- */
-#rbtn{position:fixed;left:16px;bottom:16px;z-index:25;
+#rbtn{position:fixed;left:calc(16px + var(--sal));bottom:calc(16px + var(--sab));z-index:25;
   background:rgba(21,28,38,.94);border:1px solid var(--line2);border-radius:11px;
   padding:9px 13px;font:700 12.5px ui-monospace,SFMono-Regular,Menlo,monospace;
   color:var(--tx2);cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.5);
   transition:.13s;user-select:none}
 #rbtn:hover{color:var(--tx);border-color:var(--acc)}
-#rpanel{position:fixed;left:16px;bottom:62px;width:288px;max-height:62vh;
+#rpanel{position:fixed;left:calc(16px + var(--sal));bottom:calc(62px + var(--sab));width:288px;max-height:62vh;
   display:none;z-index:26;background:rgba(18,24,33,.98);
   border:1px solid var(--line2);border-radius:14px;padding:10px;
   box-shadow:0 20px 52px rgba(0,0,0,.66);backdrop-filter:blur(18px)}
@@ -158,13 +172,14 @@ canvas{display:block;position:fixed;inset:0;cursor:default;
   border-radius:8px;padding:7px 6px;font-size:11.5px;cursor:pointer;transition:.12s}
 .rrow2 button:hover{background:#26344a;color:var(--tx);border-color:var(--acc)}
 .rfoot{display:flex;align-items:center;justify-content:space-between;gap:8px;
+  flex-wrap:wrap;
   margin-top:8px;padding:8px 4px 2px;border-top:1px solid var(--line);
   font-size:11px;color:var(--tx3)}
 
 /* ---------- калькулятор линейного раскроя ----------
    Слева сверху: там было пусто. Считает, сколько хлыстов нужно
    и как разложить детали с наименьшим отходом. */
-#ltools{position:fixed;left:16px;top:16px;z-index:25;
+#ltools{position:fixed;left:calc(16px + var(--sal));top:calc(16px + var(--sat));z-index:25;
   display:flex;gap:6px;align-items:flex-start;flex-wrap:wrap;
   max-width:calc(100vw - 32px)}
 #cbtn,#ubtn{
@@ -175,7 +190,7 @@ canvas{display:block;position:fixed;inset:0;cursor:default;
   white-space:nowrap}
 #cbtn:hover,#ubtn:hover{color:var(--tx);border-color:var(--acc)}
 #cbtn.on,#ubtn.on{color:#0b0f14;background:var(--acc);border-color:var(--acc)}
-#cpanel{position:fixed;left:16px;top:60px;z-index:26;
+#cpanel{position:fixed;left:calc(16px + var(--sal));top:calc(60px + var(--sat));z-index:26;
   width:min(326px,calc(100vw - 32px));
   max-height:calc(100vh - 84px);overflow:auto;display:none;
   background:rgba(18,24,33,.985);border:1px solid var(--line2);border-radius:14px;
@@ -244,7 +259,7 @@ canvas{display:block;position:fixed;inset:0;cursor:default;
    Стоит рядом с раскроем. Показывает сразу все единицы выбранной
    величины: инженеру нужно не «перевести одно в другое», а увидеть
    весь ряд — МПа, кгс/см², кПа разом. */
-#upanel{position:fixed;left:16px;top:60px;z-index:26;
+#upanel{position:fixed;left:calc(16px + var(--sal));top:calc(60px + var(--sat));z-index:26;
   width:min(326px,calc(100vw - 32px));
   max-height:calc(100vh - 84px);overflow:auto;display:none;
   background:rgba(18,24,33,.985);border:1px solid var(--line2);border-radius:14px;
@@ -436,7 +451,7 @@ canvas{display:block;position:fixed;inset:0;cursor:default;
 #tpl button.ok{background:var(--acc);border-color:var(--acc);color:#101a26;font-weight:700}
 
 /* ---------- тост ---------- */
-#toast{position:fixed;left:50%;bottom:74px;transform:translateX(-50%) translateY(14px);
+#toast{position:fixed;left:50%;bottom:calc(74px + var(--sab));transform:translateX(-50%) translateY(14px);
   opacity:0;transition:.24s;z-index:70;max-width:88vw;
   background:rgba(18,24,33,.98);border:1px solid var(--line2);border-radius:12px;
   padding:11px 16px;font-size:13px;color:var(--tx);pointer-events:none;
@@ -840,14 +855,15 @@ const RTXU_KEY='board.rtxu.v1';
 /* Версия сборки. Видна в панели «Напоминания» мелким шрифтом.
    Нужна ровно для одного: отличить старую страницу из кеша GitHub Pages
    от настоящей ошибки. Если версия старая — правки и не должны сохраняться. */
-const BOARD_VER='2026-11-25 23:40';
+const BOARD_VER='2026-11-26 00:10';
 /* сколько карточек с сохранённым текстом — видно рядом с версией */
 function showVer(){
   const v=document.getElementById('verState');
   if(!v) return;
   let n=0;
   try{ n=Object.keys(RTX).filter(k=>RTX[k]).length; }catch(e){}
-  v.textContent='v'+BOARD_VER.slice(11)+(n?' · текст '+n:'');
+  v.textContent='v'+BOARD_VER.slice(11)+(n?' · текст '+n:'')+' · проверить';
+  v.title='Версия от '+BOARD_VER+'. Нажми, чтобы проверить обновление.';
 }
 let RTX={};
 let RTXU={};              /* путь → время правки, для слияния устройств */
@@ -2182,11 +2198,17 @@ let wasLand=null, userTouched=false;
 function resize(){
   DPR=window.devicePixelRatio||1;
   const pw=W, ph=H;
-  /* visualViewport даёт РЕАЛЬНУЮ видимую высоту: на телефоне
-     innerHeight включает полосу браузера, и низ доски уходил за кадр */
+  /* Холст должен закрывать экран ЦЕЛИКОМ.
+     На iPhone в режиме приложения visualViewport иногда отдаёт высоту без
+     нижней зоны — из-за этого внизу оставалась чёрная полоса. Поэтому берём
+     наибольшую из трёх доступных высот: сама страница, окно, видимая часть.
+     Лишний запас по высоте безвреден: холст рисует фон, а содержимое
+     центрируется трансформацией. */
+  const de=document.documentElement;
   const vv=window.visualViewport;
-  W=Math.round(vv?vv.width:window.innerWidth);
-  H=Math.round(vv?vv.height:window.innerHeight);
+  W=Math.round(Math.max(de.clientWidth||0, window.innerWidth||0, vv?vv.width:0));
+  H=Math.round(Math.max(de.clientHeight||0, window.innerHeight||0, vv?vv.height:0));
+  if(!W||!H){ W=window.innerWidth||360; H=window.innerHeight||640; }
   cv.width=Math.floor(W*DPR); cv.height=Math.floor(H*DPR);
   cv.style.width=W+'px'; cv.style.height=H+'px';
   bgBuf=null; /* буфер фона пересоберём под новый размер */
@@ -5744,24 +5766,73 @@ loop();
   }catch(e){}
 })();
 
-/* ── самопроверка версии ──
-   GitHub Pages отдаёт index.html из кеша до 10 минут. Из-за этого
-   исправленная страница не появляется, и правки «не сохраняются»:
-   работает-то старая сборка. Здесь страница сверяет свою версию
-   с файлом ver.txt и один раз перезагружается в обход кеша.
-   Повторной перезагрузки не будет: метка остаётся в адресе (?v=). */
+/* ── проверка обновлений ──
+   GitHub Pages отдаёт index.html из кеша до 10 минут, поэтому страница
+   сверяет свою версию с файлом ver.txt. Обновление теперь ВИДИМОЕ:
+   внизу справа в панели написано, какая версия работает и когда
+   проверяли; по нажатию — проверка вручную с ответом. */
+let updBusy=false;
+
+function verLabel(){
+  const v=document.getElementById('verState');
+  if(!v) return;
+  v.textContent='v'+BOARD_VER.slice(11)+' · проверить';
+  v.title='Версия от '+BOARD_VER+'. Нажми, чтобы проверить обновление.';
+}
+
+/* одна проверка; ifManual — показать ответ словами */
+function checkUpdate(ifManual){
+  if(updBusy){ if(ifManual) toast('Проверяю…'); return; }
+  updBusy=true;
+  const done=()=>{ updBusy=false; };
+  fetch('ver.txt?t='+Date.now(),{cache:'no-store'})
+    .then(r=>r.ok?r.text():'')
+    .then(t=>{
+      t=(t||'').replace(/^\uFEFF/,'').trim();
+      done();
+      if(!t){ if(ifManual) toast('Сервер не ответил — проверь связь'); return; }
+      if(t===BOARD_VER){ if(ifManual) toast('У тебя последняя версия · '+t); return; }
+      /* версия другая — обновляемся и говорим об этом */
+      toast('Вышла новая версия — обновляю…');
+      setTimeout(()=>{
+        location.replace(location.pathname+'?v='+Date.now());
+      },900);
+    })
+    .catch(()=>{ done(); if(ifManual) toast('Сервер не ответил — проверь связь'); });
+}
+
+/* при запуске: тихо, без всплывашек, один раз.
+   Метка ?v= в адресе защищает от петли перезагрузок. */
 (function autoUpdate(){
   try{
-    if(/[?&]v=\d+/.test(location.search||'')) return;   /* уже обновлялись */
+    if(/[?&]v=\d+/.test(location.search||'')) return;
     fetch('ver.txt?t='+Date.now(),{cache:'no-store'})
       .then(r=>r.ok?r.text():'')
       .then(t=>{
         t=(t||'').replace(/^\uFEFF/,'').trim();
         if(!t||t===BOARD_VER) return;
-        location.replace(location.pathname+'?v='+Date.now());
+        toast('Обновляю до '+t+'…');
+        setTimeout(()=>{
+          location.replace(location.pathname+'?v='+Date.now());
+        },900);
       })
       .catch(()=>{});
   }catch(e){}
+})();
+
+/* проверка раз в 10 минут, пока страница открыта */
+setInterval(()=>{ if(!document.hidden) checkUpdate(false); },600000);
+document.addEventListener('visibilitychange',()=>{
+  if(!document.hidden) checkUpdate(false);
+});
+
+/* нажатие на версию в панели — проверить вручную */
+(function wireVer(){
+  const v=document.getElementById('verState');
+  if(!v) return;
+  v.style.cursor='pointer';
+  v.addEventListener('click',ev=>{ ev.stopPropagation(); checkUpdate(true); });
+  verLabel();
 })();
 
 })();
