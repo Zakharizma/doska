@@ -164,13 +164,17 @@ canvas{display:block;position:fixed;inset:0;cursor:default;
 /* ---------- калькулятор линейного раскроя ----------
    Слева сверху: там было пусто. Считает, сколько хлыстов нужно
    и как разложить детали с наименьшим отходом. */
-#cbtn{position:fixed;left:16px;top:16px;z-index:25;
+#ltools{position:fixed;left:16px;top:16px;z-index:25;
+  display:flex;gap:6px;align-items:flex-start;flex-wrap:wrap;
+  max-width:calc(100vw - 32px)}
+#cbtn,#ubtn{
   background:rgba(21,28,38,.94);border:1px solid var(--line2);border-radius:11px;
   padding:9px 13px;font:700 12px ui-monospace,SFMono-Regular,Menlo,monospace;
   letter-spacing:.04em;color:var(--tx2);cursor:pointer;
-  box-shadow:0 8px 24px rgba(0,0,0,.5);transition:.13s;user-select:none}
-#cbtn:hover{color:var(--tx);border-color:var(--acc)}
-#cbtn.on{color:#0b0f14;background:var(--acc);border-color:var(--acc)}
+  box-shadow:0 8px 24px rgba(0,0,0,.5);transition:.13s;user-select:none;
+  white-space:nowrap}
+#cbtn:hover,#ubtn:hover{color:var(--tx);border-color:var(--acc)}
+#cbtn.on,#ubtn.on{color:#0b0f14;background:var(--acc);border-color:var(--acc)}
 #cpanel{position:fixed;left:16px;top:60px;z-index:26;
   width:min(326px,calc(100vw - 32px));
   max-height:calc(100vh - 84px);overflow:auto;display:none;
@@ -235,6 +239,53 @@ canvas{display:block;position:fixed;inset:0;cursor:default;
   color:var(--tx2);border-radius:9px;padding:7px 6px;font-size:11.5px;cursor:pointer;
   font-family:inherit}
 #cpanel .ccopy:hover{background:#26344a;color:var(--tx);border-color:var(--acc)}
+
+/* ---------- преобразователь единиц ----------
+   Стоит рядом с раскроем. Показывает сразу все единицы выбранной
+   величины: инженеру нужно не «перевести одно в другое», а увидеть
+   весь ряд — МПа, кгс/см², кПа разом. */
+#upanel{position:fixed;left:16px;top:60px;z-index:26;
+  width:min(326px,calc(100vw - 32px));
+  max-height:calc(100vh - 84px);overflow:auto;display:none;
+  background:rgba(18,24,33,.985);border:1px solid var(--line2);border-radius:14px;
+  padding:10px;box-shadow:0 20px 52px rgba(0,0,0,.66);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+#upanel.show{display:block}
+#upanel .chead{display:flex;align-items:center;justify-content:space-between;
+  padding:2px 4px 9px;font-size:10.5px;letter-spacing:.08em;font-weight:700;
+  color:var(--tx3);border-bottom:1px solid var(--line);margin-bottom:9px}
+#uclose{cursor:pointer;color:var(--tx2);font-size:13px;padding:0 3px}
+#uclose:hover{color:var(--tx)}
+#upanel .ucats{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px}
+#upanel .ucats button{background:#1b2431;border:1px solid var(--line2);color:var(--tx2);
+  border-radius:7px;padding:5px 9px;font-size:11px;cursor:pointer;transition:.12s}
+#upanel .ucats button:hover{background:#26344a;color:var(--tx)}
+#upanel .ucats button.on{background:var(--acc);border-color:var(--acc);
+  color:#0b0f14;font-weight:700}
+#upanel .urow{display:flex;align-items:center;gap:7px;margin-bottom:9px}
+#upanel .urow input{flex:1;min-width:0;background:#0f1620;border:1px solid var(--line2);
+  border-radius:8px;color:var(--tx);padding:8px 10px;outline:none;color-scheme:dark;
+  font:13px ui-monospace,SFMono-Regular,Menlo,monospace}
+#upanel .urow input:focus{border-color:var(--acc)}
+#upanel .urow select{flex:0 0 auto;max-width:132px;background:#0f1620;
+  border:1px solid var(--line2);border-radius:8px;color:var(--tx);
+  padding:8px 6px;outline:none;font:12px ui-monospace,monospace;cursor:pointer}
+#upanel .urow select:focus{border-color:var(--acc)}
+#upanel .ulist{border-top:1px solid var(--line);padding-top:7px}
+#upanel .uitem{display:flex;align-items:baseline;gap:8px;padding:6px 4px;
+  border-radius:7px;cursor:pointer}
+#upanel .uitem:hover{background:#22303f}
+#upanel .uitem .un{flex:0 0 auto;width:78px;font-size:11.5px;color:var(--tx3)}
+#upanel .uitem .uv{flex:1;text-align:right;font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace;
+  color:var(--tx);font-variant-numeric:tabular-nums;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+#upanel .uitem.src .un{color:var(--acc);font-weight:700}
+#upanel .uitem.src .uv{color:var(--acc)}
+#upanel .uitem.copied .uv{color:#5fce8c}
+#upanel .uhint{font-size:10.5px;color:var(--tx3);line-height:1.55;
+  margin-top:8px;border-top:1px solid var(--line);padding-top:7px}
+#upanel .uerr{font-size:11.5px;color:#e0a35c;line-height:1.5;
+  background:#241a10;border:1px solid #7a4a12;border-radius:8px;padding:7px 9px}
 
 /* ---------- редактор карточки ----------
    Полноценное окно: панель инструментов, поле ввода, сохранение.
@@ -526,8 +577,11 @@ canvas{display:block;position:fixed;inset:0;cursor:default;
 </div></div>
 
 <!-- кнопка и панель напоминаний -->
-<!-- калькулятор линейного раскроя -->
-<div id="cbtn" title="Калькулятор линейного раскроя">✂ РАСКРОЙ</div>
+<!-- калькулятор линейного раскроя и преобразователь единиц -->
+<div id="ltools">
+  <div id="cbtn" title="Калькулятор линейного раскроя">✂ РАСКРОЙ</div>
+  <div id="ubtn" title="Преобразователь единиц измерения">⇄ ЕДИНИЦЫ</div>
+</div>
 <div id="cpanel">
   <div class="chead"><span>ЛИНЕЙНЫЙ РАСКРОЙ</span><span id="cclose">✕</span></div>
 
@@ -557,6 +611,18 @@ canvas{display:block;position:fixed;inset:0;cursor:default;
   </div>
 
   <div id="cOut" class="res"></div>
+</div>
+
+<!-- преобразователь единиц -->
+<div id="upanel">
+  <div class="chead"><span>ЕДИНИЦЫ ИЗМЕРЕНИЯ</span><span id="uclose">✕</span></div>
+  <div class="ucats" id="uCats"></div>
+  <div class="urow">
+    <input id="uVal" type="text" inputmode="decimal" value="1" autocomplete="off">
+    <select id="uFrom"></select>
+  </div>
+  <div class="ulist" id="uList"></div>
+  <div class="uhint" id="uHint">Нажми на строку — значение скопируется.</div>
 </div>
 
 <div id="rbtn" title="Напоминания">⏰ 0</div>
@@ -774,7 +840,7 @@ const RTXU_KEY='board.rtxu.v1';
 /* Версия сборки. Видна в панели «Напоминания» мелким шрифтом.
    Нужна ровно для одного: отличить старую страницу из кеша GitHub Pages
    от настоящей ошибки. Если версия старая — правки и не должны сохраняться. */
-const BOARD_VER='2026-11-25 22:50';
+const BOARD_VER='2026-11-25 23:15';
 /* сколько карточек с сохранённым текстом — видно рядом с версией */
 function showVer(){
   const v=document.getElementById('verState');
@@ -5918,6 +5984,11 @@ function copyPlan(){
 
 /* ── показ и скрытие панели ── */
 function openPan(){
+  /* две панели в одном углу — открываем по одной */
+  const up=document.getElementById('upanel');
+  const ub=document.getElementById('ubtn');
+  if(up) up.classList.remove('show');
+  if(ub) ub.classList.remove('on');
   pan.classList.add('show');
   btn.classList.add('on');
   render();
@@ -5972,6 +6043,238 @@ elParts.addEventListener('keydown',ev=>{
   /* панель при загрузке не раскрываем: доска должна быть видна сразу,
      но если в списке уже есть детали — считаем и держим результат готовым */
   if(c.parts&&String(c.parts).trim()) render();
+})();
+
+})();
+</script>
+<script>
+/* ================= ПРЕОБРАЗОВАТЕЛЬ ЕДИНИЦ =================
+   Стоит рядом с раскроем. Показывает сразу ВЕСЬ ряд единиц выбранной
+   величины: инженеру нужно не «перевести одно в другое», а видеть
+   МПа, кгс/см² и кПа одновременно.
+
+   Коэффициенты — точные, из определений:
+     1 кгс = 9,80665 Н            (нормальное ускорение 9,80665 м/с²)
+     1 кгс/см² = 98 066,5 Па
+     1 кгс/м²  = 9,80665 Па
+     1 дюйм = 25,4 мм             (точно, с 1959 г.)
+     1 фут  = 304,8 мм            (точно)
+     1 бар  = 100 000 Па          (точно)
+     1 рад  = 180/π градуса
+   Температура — не умножение, а сдвиг: считается отдельной ветвью. */
+(function(){
+'use strict';
+
+const btn=document.getElementById('ubtn');
+const pan=document.getElementById('upanel');
+if(!btn||!pan) return;
+
+const elCats=document.getElementById('uCats');
+const elVal =document.getElementById('uVal');
+const elFrom=document.getElementById('uFrom');
+const elList=document.getElementById('uList');
+const elHint=document.getElementById('uHint');
+const KEY='board.units.v1';
+
+const CATS=[
+  {id:'len', name:'длина', units:[
+    ['мм',1],['см',10],['м',1000],['км',1e6],['дюйм',25.4],['фут',304.8]
+  ]},
+  {id:'area', name:'площадь', units:[
+    ['мм²',1],['см²',100],['м²',1e6],['га',1e10],['км²',1e12]
+  ]},
+  {id:'vol', name:'объём', units:[
+    ['см³',1e-6],['л',1e-3],['м³',1]
+  ]},
+  {id:'mass', name:'масса', units:[
+    ['г',0.001],['кг',1],['т',1000]
+  ]},
+  {id:'force', name:'сила', units:[
+    ['Н',1],['кН',1000],['МН',1e6],['кгс',9.80665],['тс',9806.65]
+  ]},
+  {id:'press', name:'давление', units:[
+    ['Па',1],['кПа',1000],['МПа',1e6],['кгс/м²',9.80665],['кгс/см²',98066.5],['бар',1e5]
+  ]},
+  {id:'mom', name:'момент', units:[
+    ['Н·м',1],['кН·м',1000],['кгс·м',9.80665],['тс·м',9806.65]
+  ]},
+  {id:'temp', name:'температура', units:[
+    ['°C',1],['°F',1],['K',1]
+  ]},
+  {id:'angle', name:'угол', units:[
+    ['°',1],['рад',180/Math.PI]
+  ]}
+];
+
+let catId='len', fromIdx=0;
+
+/* ── форматирование чисел ──
+   Разряды через пробел, дробная часть через запятую — как принято
+   в русской технической документации. Хвостовые нули убираем. */
+function ufmt(v){
+  if(!isFinite(v)) return '—';
+  if(v===0) return '0';
+  const a=Math.abs(v);
+  if(a>=1e12 || a<1e-9) return v.toExponential(4).replace('.',',');
+  let s;
+  if(a>=1e6)      s=v.toFixed(0);
+  else if(a>=1000) s=v.toFixed(2);
+  else if(a>=1)    s=v.toFixed(4);
+  else             s=v.toFixed(6);
+  if(s.indexOf('.')>=0) s=s.replace(/0+$/,'').replace(/\.$/,'');
+  return s.replace('.',',');
+}
+function group(s){
+  const neg=s.charAt(0)==='-';
+  if(neg) s=s.slice(1);
+  const p=s.split(',');
+  if(p[0].length>4) p[0]=p[0].replace(/\B(?=(\d{3})+(?!\d))/g,' ');
+  return (neg?'-':'')+p.join(',');
+}
+
+/* ── перевод ── */
+function convert(cat, v, fromU, toU){
+  if(cat.id==='temp'){
+    let c;
+    if(fromU[0]==='°F')      c=(v-32)*5/9;
+    else if(fromU[0]==='K')  c=v-273.15;
+    else                     c=v;
+    if(toU[0]==='°F')        return c*9/5+32;
+    if(toU[0]==='K')         return c+273.15;
+    return c;
+  }
+  return v*fromU[1]/toU[1];
+}
+
+/* ── сохранение выбранной величины ── */
+function saveCfg(){
+  try{ localStorage.setItem(KEY,JSON.stringify({cat:catId,from:fromIdx,val:elVal.value})); }catch(e){}
+}
+function loadCfg(){
+  try{ return JSON.parse(localStorage.getItem(KEY)||'{}')||{}; }catch(e){ return {}; }
+}
+
+/* ── отрисовка ── */
+function buildCats(){
+  elCats.innerHTML='';
+  CATS.forEach(c=>{
+    const b=document.createElement('button');
+    b.type='button';
+    b.textContent=c.name;
+    b.setAttribute('data-cat',c.id);
+    if(c.id===catId) b.classList.add('on');
+    b.addEventListener('click',()=>{
+      catId=c.id; fromIdx=0;
+      buildCats(); render(); saveCfg();
+    });
+    elCats.appendChild(b);
+  });
+}
+
+function render(){
+  const cat=CATS.filter(c=>c.id===catId)[0]||CATS[0];
+
+  /* список единиц пересобираем только при смене величины */
+  if(elFrom.getAttribute('data-cat')!==cat.id){
+    elFrom.innerHTML='';
+    cat.units.forEach((u,i)=>{
+      const o=document.createElement('option');
+      o.value=String(i);
+      o.textContent=u[0];
+      elFrom.appendChild(o);
+    });
+    elFrom.setAttribute('data-cat',cat.id);
+    fromIdx=0;
+  }
+  if(!(fromIdx>=0&&fromIdx<cat.units.length)) fromIdx=0;
+  elFrom.value=String(fromIdx);
+
+  const raw=String(elVal.value||'').replace(/\s/g,'').replace(',','.');
+  const v=parseFloat(raw);
+
+  elList.innerHTML='';
+  if(!isFinite(v)){
+    const d=document.createElement('div');
+    d.className='uerr';
+    d.textContent='Впиши число — например 12,5';
+    elList.appendChild(d);
+    return;
+  }
+
+  const from=cat.units[fromIdx];
+  cat.units.forEach((u,i)=>{
+    const val=convert(cat,v,from,u);
+    const row=document.createElement('div');
+    row.className='uitem'+(i===fromIdx?' src':'');
+
+    const n=document.createElement('span');
+    n.className='un';
+    n.textContent=u[0];
+
+    const t=document.createElement('span');
+    t.className='uv';
+    t.textContent=group(ufmt(val));
+
+    row.appendChild(n); row.appendChild(t);
+    row.addEventListener('click',()=>{
+      copyVal(ufmt(val));
+      row.classList.add('copied');
+      setTimeout(()=>{ row.classList.remove('copied'); },900);
+    });
+    elList.appendChild(row);
+  });
+}
+
+function copyVal(txt){
+  try{
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).catch(()=>{});
+    }else{
+      const ta=document.createElement('textarea');
+      ta.value=txt;
+      ta.style.position='fixed';
+      ta.style.left='-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+    }
+  }catch(e){}
+}
+
+/* ── показ и скрытие ── */
+function openPan(){
+  const cp=document.getElementById('cpanel');
+  const cb=document.getElementById('cbtn');
+  if(cp) cp.classList.remove('show');
+  if(cb) cb.classList.remove('on');
+  pan.classList.add('show');
+  btn.classList.add('on');
+  render();
+}
+function closePan(){
+  pan.classList.remove('show');
+  btn.classList.remove('on');
+}
+btn.addEventListener('click',()=>{
+  if(pan.classList.contains('show')) closePan(); else openPan();
+});
+document.getElementById('uclose').addEventListener('click',closePan);
+
+elVal.addEventListener('input',()=>{ render(); saveCfg(); });
+elFrom.addEventListener('change',()=>{
+  fromIdx=parseInt(elFrom.value,10)||0;
+  render(); saveCfg();
+});
+
+/* ── восстановление ── */
+(function restore(){
+  const c=loadCfg();
+  if(c.cat && CATS.some(x=>x.id===c.cat)) catId=c.cat;
+  if(c.val!==undefined&&c.val!=='') elVal.value=c.val;
+  if(typeof c.from==='number') fromIdx=c.from;
+  buildCats();
+  render();          /* держим результат готовым, панель не раскрываем */
 })();
 
 })();
