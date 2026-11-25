@@ -447,12 +447,58 @@ function isDone(path){
 /* годится ли карточка под галочку чек-листа */
 const isChk=it=>!!(it && it.type==='card' && (it.checkable || (it.lvl===2 && !it.hasKids)));
 
+/* ── ПРАЗДНИКИ И ПЕРЕНОСЫ ──────────────────────────────────────────
+   Перечень нерабочих праздничных дней — ст. 112 ТК РФ
+   (ТК РФ от 30.12.2001 № 197-ФЗ, ред. от 25.05.2026).
+   Переносы выходных — постановления Правительства РФ:
+     2026 — от 24.09.2025 № 1466 (опубл. 24.09.2025, № 0001202509240023)
+     2027 — от 17.09.2026 № 1187
+   Проверено 25.11.2026 по publication.pravo.gov.ru и КонсультантПлюс.
+   Новый год добавляется сюда же — по очередному постановлению. */
+const HOLIDAYS={
+  '1-1':'Новый год',
+  '1-2':'Новогодние каникулы','1-3':'Новогодние каникулы',
+  '1-4':'Новогодние каникулы','1-5':'Новогодние каникулы',
+  '1-6':'Новогодние каникулы','1-8':'Новогодние каникулы',
+  '1-7':'Рождество Христово',
+  '2-23':'День защитника Отечества',
+  '3-8':'Международный женский день',
+  '5-1':'Праздник Весны и Труда',
+  '5-9':'День Победы',
+  '6-12':'День России',
+  '11-4':'День народного единства'
+};
+/* off — дополнительный нерабочий день (перенос),
+   work — суббота, которая стала рабочей */
+const TRANSFERS={
+  '2026-01-09':{off:true,  name:'перенос с 3 января'},
+  '2026-12-31':{off:true,  name:'перенос с 4 января'},
+  '2027-11-05':{off:true,  name:'перенос с 2 января'},
+  '2027-12-31':{off:true,  name:'перенос с 3 января'},
+  '2027-02-22':{off:true,  name:'перенос с 20 февраля'},
+  '2027-02-20':{work:true, name:'рабочая суббота'}
+};
+
+/* что за день: праздник, выходной, рабочая суббота */
+function dayInfo(key){
+  const d=parseKey(key);
+  const md=(d.getMonth()+1)+'-'+d.getDate();
+  const weekend=(d.getDay()===0||d.getDay()===6);
+  let holiday=HOLIDAYS[md]||null;
+  let dayOff=!!holiday||weekend;
+  let working=false;
+
+  const tr=TRANSFERS[key];
+  if(tr){
+    if(tr.work){ working=true; dayOff=false; holiday=null; }
+    else { dayOff=true; holiday=tr.name; }
+  }
+  return {holiday:holiday, dayOff:dayOff, working:working, weekend:weekend};
+}
 /* ================= КАЛЕНДАРЬ НА МЕСЯЦ =================
-   Месяц целиком, недели идут отдельными полосами — так видно, где
-   кончается одна неделя и начинается другая. Сегодняшний день
-   выделен заливкой, рамкой и кружком вокруг числа.
-   В клетку дня попадают задачи всех блоков схемы: как только карточке
-   назначен срок (напоминание), она появляется в своём дне. */
+   Месяц целиком, недели идут отдельными полосами. Сегодня выделен
+   заливкой и кружком. Праздники и переносы — из официальных источников
+   (см. блок ниже). В клетку дня попадают задачи всех блоков схемы. */
 const pad2=n=>String(n).padStart(2,'0');
 const dayKey=d=>d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());
 const parseKey=k=>{ const a=String(k).split('-'); return new Date(+a[0],+a[1]-1,+a[2]); };
@@ -507,6 +553,11 @@ function calTasksMap(){
 }
 const tasksOn=k=>calTasksMap()[k]||[];
 const remDone=p=>{ const r=remOf(p); return !!(r&&r.done); };
+/* подпись дня: дата + праздник, если он есть */
+function dayTitle(k){
+  const di=dayInfo(k);
+  return longDay(k)+(di.holiday?' · '+di.holiday:'');
+}
 const shortDay=k=>{ const d=parseKey(k); return pad2(d.getDate())+'.'+pad2(d.getMonth()+1); };
 const longDay=k=>{
   const d=parseKey(k), wd=['вс','пн','вт','ср','чт','пт','сб'][d.getDay()];
@@ -746,9 +797,11 @@ function buildCalItem(){
     const dd=new Date(y,m,1-dow+i);
     const k=dayKey(dd);
     const r=Math.floor(i/7), c=i%7;
+    const di=dayInfo(k);
     cells.push({
       key:k, day:dd.getDate(), inMonth:dd.getMonth()===m,
       isToday:k===todayK, isSel:k===SELDAY,
+      holiday:di.holiday, dayOff:di.dayOff, working:di.working,
       x:CALPAD + c*(CALW+CALGX),
       y:CALHEAD + r*(CALH+CALGY),
       w:CALW, h:CALH
@@ -1096,7 +1149,7 @@ function buildTree(){
       title:title, accent:accent});
   };
   addZone([calIt], 'КАЛЕНДАРЬ', '#e08a3c');
-  addZone(dayZ&&dayZ.seg, 'ЗАДАЧИ · '+longDay(SELDAY), '#e08a3c');
+  addZone(dayZ&&dayZ.seg, 'ЗАДАЧИ · '+dayTitle(SELDAY), '#e08a3c');
   addZone(mainZ&&mainZ.seg, 'life', '#6f8fb8');
   addZone(goalsZ&&goalsZ.seg, 'ЦЕЛИ 2027', '#c9a24a');
 
@@ -1402,7 +1455,7 @@ function frameZones(){
     const base=ZONE_META[z]||{title:z,accent:'#6f8fb8'};
     /* у зоны задач заголовок — выбранная дата, он меняется каждый день */
     const meta=(z==='day')
-      ? {title:'ЗАДАЧИ · '+longDay(SELDAY), accent:'#e08a3c'}
+      ? {title:'ЗАДАЧИ · '+dayTitle(SELDAY), accent:'#e08a3c'}
       : (z==='cal')
         ? {title:'КАЛЕНДАРЬ', accent:'#e08a3c'}
         : base;
@@ -1497,13 +1550,16 @@ function drawCal(it,lw){
     const cx=X+c.x, cy=Y+c.y;
 
     roundRect(ctx,cx,cy,c.w,c.h,10);
-    if(c.isToday)      ctx.fillStyle='rgba(224,138,60,.16)';
-    else if(c.inMonth) ctx.fillStyle='rgba(18,26,38,.58)';
-    else               ctx.fillStyle='rgba(18,26,38,.24)';
+    if(c.holiday && c.inMonth) ctx.fillStyle='rgba(206,84,74,.17)';
+    else if(c.isToday)         ctx.fillStyle='rgba(224,138,60,.16)';
+    else if(c.inMonth && c.dayOff) ctx.fillStyle='rgba(24,33,46,.44)';
+    else if(c.inMonth)         ctx.fillStyle='rgba(18,26,38,.58)';
+    else                       ctx.fillStyle='rgba(18,26,38,.24)';
     ctx.fill();
 
     if(c.isSel){ ctx.strokeStyle=acc; ctx.lineWidth=2.2*lw; }
     else if(c.isToday){ ctx.strokeStyle='rgba(224,138,60,.62)'; ctx.lineWidth=1.5*lw; }
+    else if(c.holiday && c.inMonth){ ctx.strokeStyle='rgba(206,84,74,.42)'; ctx.lineWidth=lw; }
     else { ctx.strokeStyle='rgba(255,255,255,.08)'; ctx.lineWidth=lw; }
     ctx.stroke();
 
@@ -1519,9 +1575,35 @@ function drawCal(it,lw){
       ctx.fillText(String(c.day), cx+18, cy+18.5);
       ctx.textAlign='left';
     }else{
-      ctx.fillStyle=c.inMonth ? '#e6eef7' : 'rgba(230,238,247,.30)';
+      ctx.fillStyle=c.holiday&&c.inMonth ? '#f2a099'
+                  : (c.inMonth ? '#e6eef7' : 'rgba(230,238,247,.30)');
       ctx.font='700 13.5px '+ff;
       ctx.fillText(String(c.day), cx+11, cy+18);
+    }
+
+    /* рабочая суббота (перенос) — помечаем прямо в клетке */
+    if(c.working && c.inMonth && c.h*view.z>=52){
+      ctx.fillStyle='rgba(230,238,247,.42)';
+      ctx.font='600 9px '+ff;
+      ctx.textAlign='right'; ctx.textBaseline='middle';
+      ctx.fillText('раб.', cx+c.w-9, cy+18);
+      ctx.textAlign='left';
+    }
+
+    /* название праздника — строкой под числом */
+    let chipTop=cy+34;
+    if(c.holiday && c.inMonth){
+      const zshrH=c.h*view.z;
+      if(zshrH>=52){
+        ctx.fillStyle='rgba(242,160,153,.92)';
+        ctx.font='600 9.5px '+ff;
+        ctx.textBaseline='middle';
+        let s=c.holiday;
+        while(s.length>2 && ctx.measureText(s).width>c.w-18) s=s.slice(0,-1);
+        if(s!==c.holiday) s=s.slice(0,-1)+'…';
+        ctx.fillText(s, cx+10, cy+33);
+        chipTop=cy+46;
+      }
     }
 
     /* задачи этого дня */
@@ -1531,11 +1613,12 @@ function drawCal(it,lw){
 
     if(zshr>=88){
       /* крупно — строки с подписями */
-      const maxN=Math.min(3,ts.length);
+      const room=Math.floor((cy+c.h-8-chipTop)/17);
+      const maxN=Math.min(Math.max(0,room),ts.length);
       for(let i=0;i<maxN;i++){
         const t=ts[i];
         const pal=PAL[t.color]||PAL.orange;
-        const chipY=cy+34+i*17;
+        const chipY=chipTop+i*17;
         roundRect(ctx,cx+7,chipY,c.w-14,15,4);
         ctx.globalAlpha=t.done?0.40:(c.inMonth?0.95:0.42);
         ctx.fillStyle=pal.bg; ctx.fill();
