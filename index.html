@@ -532,7 +532,7 @@ const RTXU_KEY='board.rtxu.v1';
 /* Версия сборки. Видна в панели «Напоминания» мелким шрифтом.
    Нужна ровно для одного: отличить старую страницу из кеша GitHub Pages
    от настоящей ошибки. Если версия старая — правки и не должны сохраняться. */
-const BOARD_VER='2026-11-25 15:35';
+const BOARD_VER='2026-11-25 15:46';
 /* сколько карточек с сохранённым текстом — видно рядом с версией */
 function showVer(){
   const v=document.getElementById('verState');
@@ -551,18 +551,47 @@ let RTXU={};              /* путь → время правки, для сли
     if(raw2){ const p=JSON.parse(raw2); if(p&&typeof p==='object') RTXU=p; }
   }catch(e){}
 })();
-function rtxSaveLocal(){
+/* ── запись в хранилище браузера ──
+   Текст карточек весит копейки, а вот вложения — нет: data-URL картинки
+   на мегабайт занимает квоту целиком. Когда места не хватает, браузер
+   отказывает в записи, и правка терялась. Поэтому при отказе освобождаем
+   место: сначала выбрасываем локальные копии уже выгруженных в облако
+   файлов (они не нужны — есть ссылка), затем самые тяжёлые.
+   Предупреждений не показываем: текст сохраняется в любом случае. */
+function lsSet(key,value){
+  try{ localStorage.setItem(key,value); return true; }catch(e){}
+  if(typeof LATT==='undefined') return false;
+  /* 1. копии, которые уже лежат в облаке — удаляем без потерь */
   try{
-    localStorage.setItem(RTX_KEY,JSON.stringify(RTX));
-    localStorage.setItem(RTXU_KEY,JSON.stringify(RTXU));
-    showVer();
+    let freed=0;
+    Object.keys(LATT).forEach(k=>{
+      const a=LATT[k];
+      if(a && a.path && /^https?:/.test(a.path)){ delete LATT[k]; freed++; }
+    });
+    if(freed) localStorage.setItem(LATT_KEY,JSON.stringify(LATT));
+    localStorage.setItem(key,value);
     return true;
-  }catch(e){
-    /* молча терять текст нельзя: переполненное хранилище — частая причина
-       «всё сбрасывается после обновления» */
-    try{ toast('Текст не сохранился: хранилище браузера переполнено'); }catch(_){}
-    return false;
-  }
+  }catch(e){}
+  /* 2. всё ещё не влезает — освобождаем самые тяжёлые локальные файлы */
+  try{
+    const keys=Object.keys(LATT).sort((a,b)=>
+      JSON.stringify(LATT[b]||'').length-JSON.stringify(LATT[a]||'').length);
+    for(const k of keys){
+      delete LATT[k];
+      try{
+        localStorage.setItem(LATT_KEY,JSON.stringify(LATT));
+        localStorage.setItem(key,value);
+        return true;
+      }catch(e){}
+    }
+  }catch(e){}
+  return false;
+}
+function rtxSaveLocal(){
+  const ok1=lsSet(RTX_KEY,JSON.stringify(RTX));
+  lsSet(RTXU_KEY,JSON.stringify(RTXU));
+  showVer();
+  return ok1;
 }
 /* пустая строка — надгробие: значит «вернуть исходный текст»,
    и это тоже должно уехать на другое устройство */
@@ -955,12 +984,7 @@ let LATT={};
   }catch(e){}
 })();
 function lattSave(){
-  try{ localStorage.setItem(LATT_KEY,JSON.stringify(LATT)); return true; }
-  catch(e){
-    /* не влезло в квоту браузера — говорим прямо, а не теряем молча */
-    try{ toast('В браузере не хватает места для файла'); }catch(x){}
-    return false;
-  }
+  return lsSet(LATT_KEY,JSON.stringify(LATT));
 }
 /* вложение карточки: облачное важнее локального */
 function attOf(path){
@@ -4022,7 +4046,23 @@ document.getElementById('ricex').addEventListener('click',()=>{ exportICS(); });
 document.getElementById('rdone').addEventListener('click',()=>{ SHOWDONE=!SHOWDONE; renderPanel(); });
 
 /* ---- тикающая перерисовка + уведомление о наступлении срока ---- */
-const notified={};
+/* Об отметке «уже сообщил» помним и после перезагрузки: иначе просроченное
+   напоминание всплывало заново при каждом обновлении страницы. Ключ включает
+   сам срок — если перенести дату, напоминание сработает по-новому. */
+const NOTIF_KEY='board.notified.v1';
+let notified={};
+try{
+  const raw=localStorage.getItem(NOTIF_KEY);
+  if(raw){ const p=JSON.parse(raw); if(p&&typeof p==='object') notified=p; }
+}catch(e){}
+function notifSave(){
+  try{
+    const ks=Object.keys(notified);
+    /* журнал не растёт бесконечно: держим последние 300 отметок */
+    if(ks.length>300){ ks.slice(0,ks.length-300).forEach(k=>{ delete notified[k]; }); }
+    localStorage.setItem(NOTIF_KEY,JSON.stringify(notified));
+  }catch(e){}
+}
 let lastTick=0;
 function remTick(){
   const now=Date.now();
@@ -4033,8 +4073,10 @@ function remTick(){
     const r=REM[p];
     if(!r||!r.due||r.done) return;
     active=true;
-    if(r.due<=now && !notified[p]){
-      notified[p]=1;
+    const nk=p+'|'+r.due;
+    if(r.due<=now && !notified[nk]){
+      notified[nk]=1;
+      notifSave();
       toast('Срок: '+p.split('/').pop());
       try{
         if(window.Notification&&Notification.permission==='granted'){
