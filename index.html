@@ -10,6 +10,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0b0f14">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <title>Доска</title>
 <style>
 :root{
@@ -208,6 +211,88 @@ canvas{display:block;position:fixed;inset:0;cursor:default;
 #ask button.ok{background:var(--acc);border-color:var(--acc);color:#101a26;font-weight:700}
 #ask button:hover{filter:brightness(1.1)}
 
+/* микрофон рядом с полем ввода */
+#ask .mic{border:1px solid var(--line2);background:#16202e;color:var(--tx2);
+  border-radius:9px;padding:8px 12px;font-size:13px;cursor:pointer;
+  font-family:inherit;margin-top:8px;display:none}
+#ask .mic:hover{border-color:var(--acc);color:var(--tx)}
+#ask .mic.rec{background:#c0392b;border-color:#c0392b;color:#fff}
+
+/* ---------- поиск по доске ----------
+   Ctrl+K: одно поле и список совпадений. Прыжок к карточке по клику. */
+#srch{position:fixed;inset:0;z-index:220;display:none;
+  background:rgba(4,8,14,.72);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+  align-items:flex-start;justify-content:center;padding:8vh 18px 18px}
+#srch.show{display:flex}
+#srch .box{width:min(620px,100%);background:rgba(18,24,33,.99);
+  border:1px solid var(--line2);border-radius:15px;overflow:hidden;
+  box-shadow:0 26px 70px rgba(0,0,0,.72);display:flex;flex-direction:column;max-height:76vh}
+#srch .q{width:100%;box-sizing:border-box;background:#0f1620;border:0;
+  border-bottom:1px solid var(--line2);color:var(--tx);padding:15px 17px;
+  font-size:15px;font-family:inherit;outline:none}
+#srch .q::placeholder{color:var(--tx3)}
+#srch .res{overflow:auto;flex:1;padding:6px}
+#srch .ri{padding:9px 12px;border-radius:9px;cursor:pointer;
+  display:flex;align-items:center;gap:9px;font-size:13px;color:var(--tx)}
+#srch .ri:hover,#srch .ri.on{background:#22303f}
+#srch .ri .dotc{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+#srch .ri .t{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#srch .ri .p{font-size:10.5px;color:var(--tx3);flex:0 0 auto;max-width:42%;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#srch .empty{padding:18px 14px;color:var(--tx3);font-size:12.5px;text-align:center}
+#srch .hint{padding:9px 15px;border-top:1px solid var(--line);
+  font-size:10.5px;color:var(--tx3)}
+
+/* ---------- сводка недели ---------- */
+#week{position:fixed;inset:0;z-index:215;display:none;
+  background:rgba(4,8,14,.62);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+  align-items:center;justify-content:center;padding:18px}
+#week.show{display:flex}
+#week .box{width:min(600px,100%);background:rgba(18,24,33,.99);
+  border:1px solid var(--line2);border-radius:15px;padding:16px;
+  box-shadow:0 26px 70px rgba(0,0,0,.72);max-height:90vh;overflow:auto}
+#week .cap{font-size:14px;font-weight:700;color:var(--tx)}
+#week .sub{font-size:11.5px;color:var(--tx3);margin:4px 0 14px}
+#week .nums{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px}
+#week .n{background:#121a25;border:1px solid var(--line);border-radius:11px;
+  padding:11px 12px;text-align:center}
+#week .n b{display:block;font-size:22px;color:var(--tx);line-height:1.15}
+#week .n span{font-size:10.5px;color:var(--tx3);text-transform:uppercase;letter-spacing:.4px}
+#week .bars{display:flex;flex-direction:column;gap:7px;margin-bottom:12px}
+#week .bl{display:flex;align-items:center;gap:9px;font-size:11.5px;color:var(--tx2)}
+#week .bl .nm{width:118px;flex:0 0 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#week .bl .tr{flex:1;height:9px;background:#0f1620;border-radius:5px;overflow:hidden}
+#week .bl .fl{height:100%;border-radius:5px;background:var(--acc)}
+#week .bl .vv{width:52px;text-align:right;color:var(--tx3);flex:0 0 auto}
+#week .row{display:flex;justify-content:flex-end;margin-top:6px}
+#week button{border:1px solid var(--line2);background:#1a2434;color:var(--tx);
+  border-radius:9px;padding:8px 15px;font-size:13px;cursor:pointer;font-family:inherit}
+#week button.ok{background:var(--acc);border-color:var(--acc);color:#101a26;font-weight:700}
+
+/* ---------- шаблоны дня ---------- */
+#tpl{position:fixed;inset:0;z-index:216;display:none;
+  background:rgba(4,8,14,.62);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+  align-items:center;justify-content:center;padding:18px}
+#tpl.show{display:flex}
+#tpl .box{width:min(520px,100%);background:rgba(18,24,33,.99);
+  border:1px solid var(--line2);border-radius:15px;padding:16px;
+  box-shadow:0 26px 70px rgba(0,0,0,.72);max-height:88vh;overflow:auto}
+#tpl .cap{font-size:13.5px;font-weight:700;color:var(--tx)}
+#tpl .sub{font-size:11.5px;color:var(--tx3);margin:4px 0 12px}
+#tpl .tl{display:flex;flex-direction:column;gap:7px;margin-bottom:12px}
+#tpl .ti{display:flex;align-items:center;gap:9px;background:#121a25;
+  border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+#tpl .ti .nm{flex:1;font-size:13px;color:var(--tx)}
+#tpl .ti .ct{font-size:10.5px;color:var(--tx3)}
+#tpl .ti button{border:1px solid var(--line2);background:#1a2434;color:var(--tx);
+  border-radius:8px;padding:6px 11px;font-size:12px;cursor:pointer;font-family:inherit}
+#tpl .ti button.go{background:var(--acc);border-color:var(--acc);color:#101a26;font-weight:700}
+#tpl .ti button.dl{color:#e5484d}
+#tpl .row{display:flex;gap:8px;justify-content:flex-end}
+#tpl button{border:1px solid var(--line2);background:#1a2434;color:var(--tx);
+  border-radius:9px;padding:8px 15px;font-size:13px;cursor:pointer;font-family:inherit}
+#tpl button.ok{background:var(--acc);border-color:var(--acc);color:#101a26;font-weight:700}
+
 /* ---------- тост ---------- */
 #toast{position:fixed;left:50%;bottom:74px;transform:translateX(-50%) translateY(14px);
   opacity:0;transition:.24s;z-index:70;max-width:88vw;
@@ -282,7 +367,35 @@ canvas{display:block;position:fixed;inset:0;cursor:default;
   <div class="sub"></div>
   <textarea></textarea>
   <input type="text" style="display:none">
+  <button class="mic">🎤 Говорить</button>
   <div class="row"><button class="no">Отмена</button><button class="ok">Готово</button></div>
+</div></div>
+
+<!-- поиск по доске (Ctrl+K) -->
+<div id="srch"><div class="box">
+  <input class="q" type="text" placeholder="Найти карточку, задачу, заметку…" autocomplete="off">
+  <div class="res"></div>
+  <div class="hint">↑ ↓ — выбор · Enter — перейти · Esc — закрыть</div>
+</div></div>
+
+<!-- сводка недели -->
+<div id="week"><div class="box">
+  <div class="cap">Сводка за неделю</div>
+  <div class="sub"></div>
+  <div class="nums"></div>
+  <div class="bars"></div>
+  <div class="row"><button class="ok">Закрыть</button></div>
+</div></div>
+
+<!-- шаблоны дня -->
+<div id="tpl"><div class="box">
+  <div class="cap">Шаблоны дня</div>
+  <div class="sub"></div>
+  <div class="tl"></div>
+  <div class="row">
+    <button class="no">Закрыть</button>
+    <button class="save">Сохранить текущий день</button>
+  </div>
 </div></div>
 
 <!-- редактор карточки с форматированием -->
@@ -329,6 +442,10 @@ canvas{display:block;position:fixed;inset:0;cursor:default;
   <div class="rrow2">
     <button id="rdone">готово: 0</button>
     <button id="ricex">в календарь .ics</button>
+  </div>
+  <div class="rrow2">
+    <button id="rfind">поиск</button>
+    <button id="rweek">сводка недели</button>
   </div>
   <div class="rfoot">
     <span id="syncState">подключаюсь…</span>
@@ -516,7 +633,8 @@ function remSet(path,val){
     REM[path]=Object.assign(cur,val);
     REM[path].u=Date.now();          /* метка времени — для слияния устройств */
     const e=REM[path];
-    if(!e.due && !e.done && !e.label && !e.note && !e.att && !e.every && !e.text) delete REM[path];
+    if(!e.due && !e.done && !e.label && !e.note && !e.att && !e.every && !e.text
+       && !e.goal && !(e.hist&&e.hist.length)) delete REM[path];
   }
   remLevels(); remSave();
   try{ renderPanel(); }catch(e){}
@@ -532,7 +650,7 @@ const RTXU_KEY='board.rtxu.v1';
 /* Версия сборки. Видна в панели «Напоминания» мелким шрифтом.
    Нужна ровно для одного: отличить старую страницу из кеша GitHub Pages
    от настоящей ошибки. Если версия старая — правки и не должны сохраняться. */
-const BOARD_VER='2026-11-25 15:58';
+const BOARD_VER='2026-11-25 16:20';
 /* сколько карточек с сохранённым текстом — видно рядом с версией */
 function showVer(){
   const v=document.getElementById('verState');
@@ -824,6 +942,8 @@ const WDAYS=['ПН','ВТ','СР','ЧТ','ПТ','СБ','ВС'];
 
 let SELDAY=dayKey(new Date());
 let CALM={y:new Date().getFullYear(), m:new Date().getMonth()};
+/* клетка календаря, на которую сейчас тащат задачу (подсветка) */
+let DROPKEY=null;
 
 /* индекс «путь → подпись и цвет»: нужен, чтобы по записи напоминания
    найти саму карточку. Строится один раз, дерево не меняется. */
@@ -857,7 +977,8 @@ function calTasksMap(){
     const k=dayKey(new Date(r.due));
     (map[k]=map[k]||[]).push({
       path:p, text:meta.text, color:meta.color,
-      done:!!r.done, due:r.due, own:!idx[p], arch:!!r.arch
+      done:!!r.done, due:r.due, own:!idx[p], arch:!!r.arch,
+      every:r.every||null, goal:r.goal||null
     });
   });
   Object.keys(map).forEach(k=>{
@@ -949,6 +1070,42 @@ function purgeArch(p){
   if(!isOwnTask(p)) lattDel(p);
   remLevels(); remSave();
   relayout(null); refitSoon(); redraw();
+}
+/* отметка «готово» для задачи из списка дня.
+   У повторяющейся задачи отметка сразу переносит срок на следующее
+   наступление, а факт выполнения остаётся в истории (hist) — иначе
+   привычка либо висела бы выполненной навсегда, либо теряла историю. */
+function toggleTaskDone(p){
+  const r=REM[p]||{};
+  const now=!r.done;
+  if(now && r.every){
+    const h=(r.hist||[]).slice(-59);
+    h.push(Date.now());
+    const nd=nextOccurrence(r.every, r.due||Date.now(), Date.now());
+    remSet(p,{done:false, hist:h, due: nd||r.due});
+  }else{
+    remSet(p,{done:now});
+  }
+  return now;
+}
+
+/* ── ПЕРЕНОС ЗАДАЧИ НА ДРУГОЙ ДЕНЬ ──
+   Тянешь карточку задачи на клетку календаря — срок переезжает на этот
+   день, время суток сохраняется. Работает мышью и долгим нажатием
+   на телефоне. */
+function moveTaskToDay(p,key){
+  if(!p||!key) return false;
+  const r=REM[p];
+  if(!r) return false;
+  const old=r.due?dayKey(new Date(r.due)):null;
+  if(old===key) return false;
+  const d=parseKey(key);
+  const src=r.due?new Date(r.due):null;
+  d.setHours(src?src.getHours():9, src?src.getMinutes():0, 0, 0);
+  remSet(p,{due:d.getTime()});
+  relayout(null); refitSoon(); redraw();
+  toast('Перенесено на '+longDay(key));
+  return true;
 }
 const tasksOn=k=>calTasksMap()[k]||[];
 const tasksArch=k=>(calTasksMap()[k]||[]).filter(t=>t.arch);
@@ -1136,18 +1293,153 @@ function openAtt(att){
 }
 
 /* ================= ПОВТОРЫ =================
-   every: число дней либо 'month'. После отметки «готово» срок
-   сам переезжает на следующий период — разовое напоминание мертво,
-   повторяющееся живёт. */
+   every:
+     1, 7, 30 …    — раз в N дней
+     'month'       — раз в месяц (то же число)
+     'weekdays'    — по будням, Пн–Пт
+     {wd:[1,3,5]}  — по выбранным дням недели (0 = Вс … 6 = Сб)
+   Срок сдвигается только после отметки «готово»: иначе повторяющееся
+   дело копилось бы в прошлом и список распухал. */
+const WD_SHORT=['вс','пн','вт','ср','чт','пт','сб'];
+
+function everyLabel(e){
+  if(!e) return '';
+  if(e==='month') return 'каждый месяц';
+  if(e==='weekdays') return 'по будням';
+  if(typeof e==='object'&&e.wd&&e.wd.length){
+    const wd=e.wd.map(Number).slice().sort((a,b)=>a-b);
+    return 'по '+wd.map(d=>WD_SHORT[d]).join(', ');
+  }
+  const n=Number(e);
+  if(!n||n<=0) return '';
+  if(n===1) return 'каждый день';
+  if(n===7) return 'каждую неделю';
+  if(n===30) return 'каждый месяц';
+  return 'раз в '+n+' дн.';
+}
+/* дни недели из every; null — значит повтор по календарным суткам */
+function everyWeekdays(e){
+  if(e==='weekdays') return [1,2,3,4,5];
+  if(e&&typeof e==='object'&&e.wd) return e.wd.map(Number).filter(x=>x>=0&&x<=6);
+  return null;
+}
+/* ближайшее наступление строго после after (по умолчанию — после «сейчас»).
+   Часы и минуты берём от базовой даты: привычка в 09:00 остаётся в 09:00. */
+function nextOccurrence(every, base, after){
+  if(!every||!base) return null;
+  const afterT=(after===undefined)?Date.now():after;
+  const b=new Date(base);
+  if(every==='month'){
+    const d=new Date(b);
+    let guard=0;
+    while(d.getTime()<=afterT && guard++<2400) d.setMonth(d.getMonth()+1);
+    return d.getTime();
+  }
+  const wd=everyWeekdays(every);
+  if(wd && wd.length){
+    const d=new Date(b);
+    let guard=0;
+    while(guard++<4000){
+      if(d.getTime()>afterT && wd.indexOf(d.getDay())>=0) return d.getTime();
+      d.setDate(d.getDate()+1);
+    }
+    return null;
+  }
+  const step=Number(every)*864e5;
+  if(!step||step<=0) return null;
+  let t=b.getTime(), guard=0;
+  while(t<=afterT && guard++<20000) t+=step;
+  return t;
+}
 function nextDue(rem){
   if(!rem||!rem.due||!rem.every) return null;
-  const step = (rem.every==='month') ? 30*864e5 : Number(rem.every)*864e5;
-  if(!step||step<=0) return null;
-  let d=rem.due;
-  const now=Date.now();
-  let guard=0;
-  while(d<=now && guard++<5000) d+=step;
-  return d;
+  return nextOccurrence(rem.every, rem.due, Date.now());
+}
+/* догоняем пропущенные повторы при запуске: привычка, не отмеченная
+   неделю назад, должна висеть на сегодня, а не в прошлом месяце */
+function catchUpRepeats(){
+  const startToday=new Date(); startToday.setHours(0,0,0,0);
+  let ch=0;
+  Object.keys(REM).forEach(p=>{
+    const r=REM[p];
+    if(!r||!r.every||!r.due||r.done||r.arch) return;
+    if(r.due>=startToday.getTime()) return;
+    let t=r.due, guard=0, moved=false;
+    while(guard++<4000){
+      const n=nextOccurrence(r.every, t, t);
+      if(!n||n>Date.now()) break;
+      t=n; moved=true;
+    }
+    if(moved){ r.due=t; r.u=Date.now(); ch++; }
+  });
+  if(ch){ remLevels(); remSaveLocal(); }
+  return ch;
+}
+
+/* ── ПРИВЯЗКА ЗАДАЧ К ЦЕЛЯМ ──
+   Задача может «работать на цель»: тогда её закрытие двигает прогресс
+   самой цели. Привязка лежит в записи напоминания (поле goal), поэтому
+   едет в облако вместе с задачами и работает на всех устройствах. */
+function goalPaths(){
+  const out=[];
+  TREE.forEach(sp=>{
+    if((sp.zone||'main')!=='goals') return;
+    const bp=pathOf('',sp.t);
+    (sp.kids||[]).forEach(k=>{
+      const g=typeof k==='string'?{t:k}:k;
+      out.push({path:pathOf(bp,g.t), text:g.t, color:sp.c});
+    });
+  });
+  return out;
+}
+function goalLinked(path){
+  const out=[];
+  Object.keys(REM).forEach(p=>{
+    const r=REM[p];
+    if(r && r.goal===path) out.push(p);
+  });
+  return out;
+}
+function goalStat(path){
+  const ls=goalLinked(path);
+  let done=0;
+  ls.forEach(p=>{
+    const r=REM[p];
+    /* повторяющаяся задача после отметки снова «не выполнена», но факт
+       выполнения остаётся в истории — его и считаем */
+    if(r && (r.done || (r.hist && r.hist.length))) done++;
+  });
+  return {total:ls.length, done:done,
+          pct: ls.length ? Math.round(done/ls.length*100) : 0};
+}
+/* прогресс карточки-цели: подпункты + привязанные задачи вместе */
+function goalPctOf(path, dn, n){
+  const st=goalStat(path);
+  if(!st.total) return {pct:n?Math.round(dn/n*100):0, doneN:dn, allN:n, linked:0};
+  const allN=n+st.total, doneN=dn+st.done;
+  return {pct:Math.round(doneN/allN*100), doneN:doneN, allN:allN, linked:st.total};
+}
+
+/* ── ШАБЛОНЫ ДНЯ ──
+   Набор задач, который ставится одним нажатием: «рабочий день»,
+   «выходной», «командировка». Хранится отдельно от задач. */
+const TPL_KEY='board.tpl.v1';
+let TPL=[];
+(function tplLoad(){
+  try{
+    const raw=localStorage.getItem(TPL_KEY);
+    if(raw){ const p=JSON.parse(raw); if(Array.isArray(p)) TPL=p; }
+  }catch(e){}
+})();
+function tplSave(){ try{ lsSet(TPL_KEY,JSON.stringify(TPL)); }catch(e){} }
+function tplApply(t,k){
+  if(!t||!t.tasks||!t.tasks.length) return 0;
+  t.tasks.forEach(s=>addDayTask(k,s));
+  return t.tasks.length;
+}
+function tplFromDay(k){
+  const ts=tasksOn(k).filter(x=>!x.arch);
+  return ts.map(x=>x.text);
 }
 
 const lvsz=d=>{
@@ -1230,7 +1522,8 @@ function dayTasksNode(){
   const ts=tasksOn(SELDAY).filter(x=> ARCH_VIEW ? x.arch : !x.arch);
   return {t:'Задачи', c:'orange', zone:'day',
     kids:ts.map(x=>({t:x.text, p:x.path, rp:x.path, c:x.color,
-                     arch:!!x.arch, done:!!x.done}))};
+                     arch:!!x.arch, done:!!x.done,
+                     every:x.every||null, goal:x.goal||null}))};
 }
 
 /* собирает ВИДИМЫЕ узлы; свёрнутые дети не создаются вовсе */
@@ -1361,6 +1654,7 @@ function buildTree(){
           hasKids:false, canToggle:false,
           checkable:!!k.rp, remPath:k.rp||null,
           isArch:!!k.arch,
+          every:k.every||null, goal:k.goal||null,
           open:false, path:k.p||pathOf(path,k.t), lvl:1, zone:'day'});
         y+=s.h+GAP;
         count++;
@@ -1436,15 +1730,17 @@ function buildTree(){
         const gy=y;                     // цель всегда сверху слота
 
         const gid=uid();
-        /* процент считается сам по отмеченным подпунктам */
+        /* процент считается сам: подпункты цели + привязанные задачи */
         const paths=g.items.map(x=>pathOf(g.path,x.t));
         const dn=paths.filter(p=>isDone(p)).length;
-        const autoPct=n ? Math.round(dn/n*100) : (g.g.pct||0);
+        const gp=goalPctOf(g.path, dn, n);
+        const autoPct = n ? gp.pct : (gp.linked ? gp.pct : (g.g.pct||0));
         out.push({id:gid,type:'card',
           x:GOALX, y:gy, w:s1.w, h:s1.h,
           text:g.g.t, color:b.sp.c, fs:s1.fs,
           hasKids:n>0, canToggle:true, open:gOpen,
-          pct:autoPct, doneN:dn, allN:n, path:g.path, lvl:1});
+          pct:autoPct, doneN:gp.doneN, allN:gp.allN, linkedN:gp.linked,
+          path:g.path, lvl:1});
         outE.push({id:uid(),from:bid,to:gid});
 
         if(gOpen && n){
@@ -1894,7 +2190,7 @@ function frameZones(){
         : base;
     const zo={x:minX-PAD, y:minY-PAD, w:(maxX-minX)+PAD*2, h:(maxY-minY)+PAD*2,
       kind:z, title:meta.title, accent:meta.accent};
-    /* кнопка «АРХИВ» в правом верхнем углу зоны задач — как в Trello */
+    /* кнопки в правом верхнем углу зоны задач — как в Trello */
     if(z==='day'){
       const label=ARCH_VIEW?'К СПИСКУ':'АРХИВ';
       const n=(ARCH_VIEW?0:tasksArch(SELDAY).length);
@@ -1903,6 +2199,14 @@ function frameZones(){
       const bw=ctx.measureText(txt).width+22;
       zo.btn={x:zo.x+zo.w-16-bw, y:zo.y-13, w:bw, h:26};
       zo.btnLabel=txt;
+
+      /* шаблоны дня — левее архива, в архиве не нужны */
+      if(!ARCH_VIEW){
+        const t2='ШАБЛОНЫ';
+        const bw2=ctx.measureText(t2).width+22;
+        zo.btn2={x:zo.btn.x-8-bw2, y:zo.y-13, w:bw2, h:26};
+        zo.btn2Label=t2;
+      }
     }
     res.push(zo);
   });
@@ -1950,6 +2254,21 @@ function drawZone(z,lw){
     ctx.font='700 11px '+FONT_UI;
     ctx.textAlign='center';
     ctx.fillText(z.btnLabel, b.x+b.w/2, b.y+b.h/2+0.5);
+    ctx.textAlign='left';
+  }
+  /* кнопка шаблонов — левее архива */
+  if(z.btn2){
+    const b=z.btn2;
+    roundRect(ctx,b.x,b.y,b.w,b.h,b.h/2);
+    ctx.fillStyle='rgba(111,143,184,.18)';
+    ctx.fill();
+    ctx.strokeStyle='#6f8fb8';
+    ctx.lineWidth=1.3*lw;
+    ctx.stroke();
+    ctx.fillStyle='#c3d3e6';
+    ctx.font='700 11px '+FONT_UI;
+    ctx.textAlign='center';
+    ctx.fillText(z.btn2Label, b.x+b.w/2, b.y+b.h/2+0.5);
     ctx.textAlign='left';
   }
   ctx.textBaseline='alphabetic';
@@ -2024,6 +2343,14 @@ function drawCal(it,lw){
     else if(c.holiday && c.inMonth){ ctx.strokeStyle='rgba(206,84,74,.42)'; ctx.lineWidth=lw; }
     else { ctx.strokeStyle='rgba(255,255,255,.08)'; ctx.lineWidth=lw; }
     ctx.stroke();
+
+    /* куда упадёт задача при перетаскивании */
+    if(DROPKEY && c.key===DROPKEY){
+      roundRect(ctx,cx,cy,c.w,c.h,10);
+      ctx.fillStyle='rgba(78,161,255,.20)'; ctx.fill();
+      ctx.strokeStyle='#4ea1ff'; ctx.lineWidth=2.4*lw;
+      ctx.setLineDash([6,4]); ctx.stroke(); ctx.setLineDash([]);
+    }
 
     /* число: у сегодняшнего дня — в залитом кружке */
     ctx.textBaseline='middle';
@@ -2206,6 +2533,24 @@ function drawItem(it,lw){
         ctx.fillText('PDF',tx+tw/2,ty+th/2+0.4);
         ctx.textAlign='left'; ctx.textBaseline='alphabetic';
       }
+    }
+
+    /* повтор и привязка к цели — маленькими значками в правом нижнем углу */
+    if(shr>=14 && (it.every || it.goal)){
+      let bxx=it.x+it.w-13;
+      const byy=it.y+it.h-13;
+      ctx.textBaseline='middle'; ctx.textAlign='right';
+      ctx.font='700 11px '+FONT_UI;
+      if(it.goal){
+        ctx.fillStyle='rgba(15,20,28,.45)';
+        ctx.fillText('◎', bxx, byy);
+        bxx-=13;
+      }
+      if(it.every){
+        ctx.fillStyle='rgba(15,20,28,.45)';
+        ctx.fillText('⟳', bxx, byy);
+      }
+      ctx.textAlign='left'; ctx.textBaseline='alphabetic';
     }
 
     /* плашка срока с цифровым отсчётом */
@@ -2682,14 +3027,22 @@ function attAt(w){
   return null;
 }
 
-/* кнопка «АРХИВ» на рамке зоны задач */
+/* кнопки на рамке зоны задач: архив и шаблоны */
 function zoneBtnAt(w){
   for(let i=0;i<zones.length;i++){
     const z=zones[i];
     if(z.btn && w.x>=z.btn.x && w.x<=z.btn.x+z.btn.w &&
-       w.y>=z.btn.y && w.y<=z.btn.y+z.btn.h) return z;
+       w.y>=z.btn.y && w.y<=z.btn.y+z.btn.h) return {z:z, which:'btn'};
+    if(z.btn2 && w.x>=z.btn2.x && w.x<=z.btn2.x+z.btn2.w &&
+       w.y>=z.btn2.y && w.y<=z.btn2.y+z.btn2.h) return {z:z, which:'btn2'};
   }
   return null;
+}
+function zoneBtnPress(hit){
+  if(!hit) return false;
+  if(hit.which==='btn2'){ openTpl(SELDAY); return true; }
+  archToggle();
+  return true;
 }
 
 cv.addEventListener('pointerdown',ev=>{
@@ -2716,10 +3069,10 @@ cv.addEventListener('pointerdown',ev=>{
 
   const w=toWorld(ev.clientX,ev.clientY);
 
-  /* кнопка «АРХИВ» на рамке зоны задач */
+  /* кнопки «АРХИВ» и «ШАБЛОНЫ» на рамке зоны задач */
   if(tool==='select'){
     const zb=zoneBtnAt(w);
-    if(zb){ archToggle(); return; }
+    if(zb){ zoneBtnPress(zb); return; }
   }
 
   /* клик по календарю: день, листание, «сегодня» */
@@ -2737,8 +3090,7 @@ cv.addEventListener('pointerdown',ev=>{
     if(ck){
       if(ck.remPath){
         /* задача из календаря: отметка живёт в самом напоминании */
-        const r=remOf(ck.remPath)||{};
-        remSet(ck.remPath,{done:!r.done});
+        toggleTaskDone(ck.remPath);
       }else{
         const now=!isDone(ck.path);
         setDone(ck.path, now);
@@ -2757,8 +3109,15 @@ cv.addEventListener('pointerdown',ev=>{
     /* карточка «+ задача» */
     const addIt=hitItem(w.x,w.y);
     if(addIt && addIt.isAdd){ askDayTask(SELDAY); return; }
-    /* карточка из списка задач — показать её блок на схеме */
-    if(addIt && addIt.remPath && !isOwnTask(addIt.remPath)){ gotoSource(addIt.remPath); return; }
+    /* задача из списка дня: тянется на клетку календаря,
+       а короткий клик по-прежнему показывает её блок на схеме */
+    if(addIt && addIt.zone==='day' && !addIt.isAdd &&
+       (addIt.remPath || isOwnTask(addIt.path))){
+      drag={type:'taskday', it:addIt, path:addIt.remPath||addIt.path,
+            moved:false, sx:ev.clientX, sy:ev.clientY};
+      cv.setPointerCapture(ev.pointerId);
+      redraw(); return;
+    }
   }
 
   if(tool==='eraser'){
@@ -2854,6 +3213,15 @@ cv.addEventListener('pointermove',ev=>{
     return;
   }
 
+  if(drag.type==='taskday'){
+    if(Math.hypot(ev.clientX-drag.sx, ev.clientY-drag.sy)>6) drag.moved=true;
+    const cr=calHit(w);
+    const nk=(cr&&cr.kind==='day')?cr.key:null;
+    if(nk!==DROPKEY){ DROPKEY=nk; }
+    cv.style.cursor = nk ? 'copy' : 'grabbing';
+    redraw(); return;
+  }
+
   if(drag.type==='pan'){
     if(drag.moved!==undefined){
       drag.moved=Math.max(drag.moved,
@@ -2919,6 +3287,15 @@ cv.addEventListener('pointerup',ev=>{
     pushHist();
     if(it.type==='card'){ startEdit(it); }
   }
+  if(t==='taskday'){
+    const p=drag.path, k=DROPKEY;
+    DROPKEY=null;
+    if(drag.moved && k && moveTaskToDay(p,k)){ /* уже перерисовано */ }
+    else if(!drag.moved){
+      /* клик без сдвига — старое поведение: показать блок на схеме */
+      if(!isOwnTask(p)) gotoSource(p);
+    }
+  }
   if(t==='pen'){ pushHist(); }
   if(t==='move'||t==='resize'){ pushHist(); }
 
@@ -2940,24 +3317,50 @@ cv.addEventListener('touchstart',ev=>{
   if(ts.length===1){
     const p=ts[0];
     T={mode:'pan', x0:p.clientX, y0:p.clientY, vx0:view.x, vy0:view.y,
-       d0:1, z0:view.z, wx:0, wy:0, moved:0, t0:Date.now()};
+       d0:1, z0:view.z, wx:0, wy:0, moved:0, t0:Date.now(), lp:null, path:null};
+    /* долгое нажатие на задаче дня — начинаем перенос на другой день */
+    const w=toWorld(p.clientX,p.clientY);
+    const hit=hitItem(w.x,w.y);
+    if(hit && hit.zone==='day' && !hit.isAdd &&
+       (hit.remPath || isOwnTask(hit.path))){
+      T.path=hit.remPath||hit.path;
+      T.lp=setTimeout(()=>{
+        if(T.mode==='pan' && T.moved<10){
+          T.mode='taskdrag';
+          try{ if(navigator.vibrate) navigator.vibrate(18); }catch(e){}
+          toast('Веди на нужный день');
+          redraw();
+        }
+      },450);
+    }
   }else if(ts.length>=2){
+    if(T.lp){ clearTimeout(T.lp); T.lp=null; }
     const m=tMid(ts[0],ts[1]);
     T={mode:'pinch', x0:m.x, y0:m.y, vx0:view.x, vy0:view.y,
        d0:tDist(ts[0],ts[1]), z0:view.z,
        wx:(m.x-W/2)/view.z+view.x, wy:(m.y-H/2)/view.z+view.y,
-       moved:99, t0:Date.now()};
+       moved:99, t0:Date.now(), lp:null, path:null};
   }
 },{passive:false});
 
 cv.addEventListener('touchmove',ev=>{
   ev.preventDefault();
   const ts=ev.touches;
+  if(T.mode==='taskdrag' && ts.length===1){
+    const p=ts[0];
+    const w=toWorld(p.clientX,p.clientY);
+    const cr=calHit(w);
+    const nk=(cr&&cr.kind==='day')?cr.key:null;
+    if(nk!==DROPKEY){ DROPKEY=nk; redraw(); }
+    return;
+  }
   if(T.mode==='pan' && ts.length===1){
     const p=ts[0];
     const dx=p.clientX-T.x0, dy=p.clientY-T.y0;
     const d=Math.hypot(dx,dy);
     if(d>T.moved) T.moved=d;
+    /* палец поехал — это панорама, а не долгое нажатие */
+    if(T.lp && d>12){ clearTimeout(T.lp); T.lp=null; }
     view.x=T.vx0-dx/view.z;
     view.y=T.vy0-dy/view.z;
     redraw();
@@ -2975,12 +3378,28 @@ cv.addEventListener('touchmove',ev=>{
 cv.addEventListener('touchend',ev=>{
   ev.preventDefault();
   const ts=ev.touches;
+  if(T.lp){ clearTimeout(T.lp); T.lp=null; }
+
+  /* перенос задачи на другой день */
+  if(T.mode==='taskdrag'){
+    const p=T.path, k=DROPKEY;
+    const cx=T.x0, cy=T.y0;
+    DROPKEY=null; T.mode=null; T.path=null;
+    if(k) moveTaskToDay(p,k);
+    else{
+      /* отпустил мимо календаря — значит нужно меню, а не перенос */
+      const w=toWorld(cx,cy);
+      const it=hitItem(w.x,w.y);
+      if(it&&it.type==='card') openCtxAt(cx,cy,it);
+    }
+    redraw(); return;
+  }
 
   /* короткое касание без сдвига = тап */
   if(T.mode==='pan' && T.moved<12 && (Date.now()-T.t0)<700){
     const w=toWorld(T.x0,T.y0);
-    /* кнопка «АРХИВ» */
-    if(zoneBtnAt(w)){ archToggle(); T.mode=null; return; }
+    /* кнопки «АРХИВ» и «ШАБЛОНЫ» */
+    if(zoneBtnPress(zoneBtnAt(w))){ T.mode=null; return; }
     /* календарь */
     const cr=calHit(w);
     if(cr && cr.kind!=='none'){ calAction(cr); T.mode=null; return; }
@@ -2988,8 +3407,7 @@ cv.addEventListener('touchend',ev=>{
     const ck=chkAt(w);
     if(ck){
       if(ck.remPath){
-        const r=remOf(ck.remPath)||{};
-        remSet(ck.remPath,{done:!r.done});
+        toggleTaskDone(ck.remPath);
       }else{
         const now=!isDone(ck.path);
         setDone(ck.path, now);
@@ -3022,12 +3440,12 @@ cv.addEventListener('touchend',ev=>{
   }
 },{passive:false});
 
-cv.addEventListener('touchcancel',ev=>{ T.mode=null; },{passive:true});
+cv.addEventListener('touchcancel',ev=>{ if(T.lp) clearTimeout(T.lp); T.mode=null; T.lp=null; DROPKEY=null; redraw(); },{passive:true});
 
 cv.addEventListener('pointercancel',ev=>{
   PTR.delete(ev.pointerId);
   if(PTR.size<2) pinch=null;
-  drag=null; redraw();
+  drag=null; DROPKEY=null; redraw();
 });
 
 /* колесо: обычное — зум, ctrl (пинч на тачпаде) — тоже зум */
@@ -3550,7 +3968,8 @@ function openCtxAt(cx,cy,it){
   ctxEl.appendChild(rl);
   const rq=document.createElement('div');
   rq.className='quick';
-  [['нет',null],['каждый день',1],['каждую нед.',7],['каждый мес.','month']].forEach(([t,v])=>{
+  [['нет',null],['каждый день',1],['по будням','weekdays'],
+   ['каждую нед.',7],['каждый мес.','month']].forEach(([t,v])=>{
     const b=document.createElement('button');
     b.textContent=t;
     if((rem.every||null)===v) b.style.borderColor='#4ea1ff';
@@ -3562,6 +3981,61 @@ function openCtxAt(cx,cy,it){
     rq.appendChild(b);
   });
   ctxEl.appendChild(rq);
+
+  /* по каким дням недели — точная настройка повтора */
+  const wq=document.createElement('div');
+  wq.className='quick';
+  const curWd=everyWeekdays(rem.every);
+  [1,2,3,4,5,6,0].forEach(wd=>{
+    const b=document.createElement('button');
+    b.textContent=WD_SHORT[wd];
+    const on=curWd && curWd.indexOf(wd)>=0;
+    if(on) b.style.borderColor='#4ea1ff';
+    b.addEventListener('click',ev=>{
+      ev.stopPropagation();
+      let set=(curWd?curWd.slice():[]);
+      if(set.indexOf(wd)>=0) set=set.filter(x=>x!==wd);
+      else set.push(wd);
+      if(!set.length) remSet(it.path,{every:null});
+      else if(set.length===5 && [1,2,3,4,5].every(d=>set.indexOf(d)>=0))
+        remSet(it.path,{every:'weekdays'});
+      else remSet(it.path,{every:{wd:set}});
+      relayout(null); redraw(); ctxClose();
+    });
+    wq.appendChild(b);
+  });
+  ctxEl.appendChild(wq);
+  if(rem.every){
+    const hint=document.createElement('div');
+    hint.className='lbl';
+    hint.style.opacity='.75';
+    hint.textContent='сейчас: '+everyLabel(rem.every);
+    ctxEl.appendChild(hint);
+  }
+
+  /* цель, на которую работает задача */
+  const goals=goalPaths();
+  if(goals.length){
+    const gl=document.createElement('div');
+    gl.className='lbl'; gl.textContent='работает на цель';
+    ctxEl.appendChild(gl);
+    const gq=document.createElement('div');
+    gq.className='quick';
+    const mkGoalBtn=(t,v)=>{
+      const b=document.createElement('button');
+      b.textContent=t;
+      if((rem.goal||null)===v) b.style.borderColor='#4ea1ff';
+      b.addEventListener('click',ev=>{
+        ev.stopPropagation();
+        remSet(it.path,{goal:v});
+        relayout(null); redraw(); ctxClose();
+      });
+      gq.appendChild(b);
+    };
+    mkGoalBtn('нет',null);
+    goals.forEach(g=>mkGoalBtn(g.text, g.path));
+    ctxEl.appendChild(gq);
+  }
 
   /* вложение */
   const attNow=attOf(it.path);
@@ -3698,6 +4172,9 @@ cv.addEventListener('touchstart',ev=>{
     if(typeof T!=='undefined'&&T) T.moved=999;   /* гасим тап-раскрытие */
     const w=toWorld(p.clientX,p.clientY);
     const it=hitItem(w.x,w.y);
+    /* задачу дня долгое нажатие уже взяло под перенос: там своё меню
+       откроется, если палец отпустить мимо календаря */
+    if(it && it.zone==='day' && !it.isAdd) return;
     if(it&&it.type==='card') openCtxAt(p.clientX,p.clientY,it);
   },550);
 },{passive:true});
@@ -3745,6 +4222,15 @@ function askText(opt){
   const field=multi?ta:inp;
   field.value=opt.value||'';
 
+  /* микрофон: есть распознавание — показываем, нет — не мешаем */
+  const mic=box.querySelector('.mic');
+  if(mic){
+    mic.style.display=SR?'inline-block':'none';
+    mic.classList.remove('rec');
+    mic.textContent='🎤 Говорить';
+    mic.onclick=ev=>{ ev.stopPropagation(); voiceToggle(mic,field); };
+  }
+
   el.classList.add('show');
   setTimeout(()=>{ field.focus(); field.select(); },30);
 
@@ -3757,6 +4243,9 @@ function askText(opt){
       ta.onkeydown=null; inp.onkeydown=null;
       bOk.onclick=null; bNo.onclick=null;
       el.onclick=null;
+      if(mic) mic.onclick=null;
+      /* распознавание не должно работать после закрытия окна */
+      if(srObj){ try{ srObj.stop(); }catch(e){} srObj=null; }
       resolve(v);
     };
     const ok=()=>finish(field.value);
@@ -4044,8 +4533,372 @@ document.getElementById('rclose').addEventListener('click',()=>{
 /* ---- кнопки панели напоминаний ---- */
 document.getElementById('ricex').addEventListener('click',()=>{ exportICS(); });
 document.getElementById('rdone').addEventListener('click',()=>{ SHOWDONE=!SHOWDONE; renderPanel(); });
+document.getElementById('rfind').addEventListener('click',()=>{ openSearch(); });
+document.getElementById('rweek').addEventListener('click',()=>{ openWeek(); });
 
-/* ---- тикающая перерисовка ----
+/* ================= ПОИСК ПО ДОСКЕ (Ctrl+K) =================
+   Ищет по подписи карточки, по её тексту с форматированием и по заметкам
+   напоминаний. Карточек много — глазами искать долго. */
+let srchIdx=-1, srchHits=[];
+
+function plainOf(html){
+  return String(html||'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+}
+function searchAll(q){
+  const s=String(q||'').trim().toLowerCase();
+  if(!s) return [];
+  const out=[];
+  const seen={};
+  items.forEach(it=>{
+    if(it.type!=='card' || it.isAdd) return;
+    const rich=plainOf(rtxOf(it.path));
+    const r=remOf(it.path)||{};
+    const hay=[it.text||'', rich, r.text||'', r.note||''].join(' ').toLowerCase();
+    if(hay.indexOf(s)<0) return;
+    if(seen[it.path]) return;
+    seen[it.path]=1;
+    out.push({path:it.path, id:it.id, text:it.text||rich||'без названия',
+              color:it.color, sub:it.lvl===0?'блок':(it.lvl===1?'карточка':'подпункт')});
+  });
+  /* задачи, добавленные вручную: карточек в дереве у них нет */
+  Object.keys(REM).forEach(p=>{
+    const r=REM[p];
+    if(!r) return;
+    if(seen[p]) return;
+    const hay=[r.text||'', r.note||'', p].join(' ').toLowerCase();
+    if(hay.indexOf(s)<0) return;
+    seen[p]=1;
+    out.push({path:p, id:null, text:r.text||p, color:r.color||'orange',
+              sub:'задача'});
+  });
+  return out.slice(0,80);
+}
+function openSearch(){
+  const el=document.getElementById('srch');
+  if(!el) return;
+  el.classList.add('show');
+  const q=el.querySelector('.q');
+  q.value='';
+  srchIdx=-1;
+  renderSearch('');
+  setTimeout(()=>q.focus(),30);
+}
+function closeSearch(){
+  const el=document.getElementById('srch');
+  if(el) el.classList.remove('show');
+}
+function renderSearch(q){
+  const el=document.getElementById('srch');
+  if(!el) return;
+  const box=el.querySelector('.res');
+  box.innerHTML='';
+  srchHits=searchAll(q);
+  srchIdx = srchHits.length ? 0 : -1;
+  if(!q.trim()){
+    box.innerHTML='<div class="empty">Начни вводить — найдётся и карточка, и задача, и заметка.</div>';
+    return;
+  }
+  if(!srchHits.length){
+    box.innerHTML='<div class="empty">Ничего не найдено.</div>';
+    return;
+  }
+  const pal=PAL;
+  srchHits.forEach((h,i)=>{
+    const d=document.createElement('div');
+    d.className='ri'+(i===0?' on':'');
+    const c=document.createElement('span');
+    c.className='dotc';
+    c.style.background=(pal[h.color]||pal.orange).bg;
+    const t=document.createElement('span');
+    t.className='t'; t.textContent=h.text;
+    const p=document.createElement('span');
+    p.className='p'; p.textContent=h.sub;
+    d.appendChild(c); d.appendChild(t); d.appendChild(p);
+    d.addEventListener('click',()=>{ gotoSearch(i); });
+    box.appendChild(d);
+  });
+}
+function markSearch(i){
+  const el=document.getElementById('srch');
+  if(!el) return;
+  const rows=el.querySelectorAll('.ri');
+  rows.forEach((r,k)=>r.classList.toggle('on',k===i));
+  if(rows[i] && rows[i].scrollIntoView) rows[i].scrollIntoView({block:'nearest'});
+}
+function gotoSearch(i){
+  const h=srchHits[i];
+  if(!h) return;
+  closeSearch();
+  /* карточка на доске — прыгаем к ней */
+  const it=items.find(x=>x.id===h.id) || items.find(x=>x.path===h.path && x.type==='card');
+  if(it){
+    sel.clear(); sel.add(it.id);
+    view.x=it.x+it.w/2; view.y=it.y+it.h/2;
+    if(view.z<0.85) view.z=1;
+    updZoom(); redraw();
+    return;
+  }
+  /* задачи без карточки — показываем её день */
+  const r=remOf(h.path);
+  if(r && r.due){
+    const k=dayKey(new Date(r.due));
+    SELDAY=k;
+    const d=parseKey(k);
+    CALM={y:d.getFullYear(), m:d.getMonth()};
+    relayout(null); redraw();
+    toast('Задача на '+longDay(k));
+  }
+}
+(function wireSearch(){
+  const el=document.getElementById('srch');
+  if(!el) return;
+  const q=el.querySelector('.q');
+  q.addEventListener('input',()=>{ renderSearch(q.value); });
+  q.addEventListener('keydown',ev=>{
+    ev.stopPropagation();
+    if(ev.key==='Escape'){ ev.preventDefault(); closeSearch(); return; }
+    if(ev.key==='ArrowDown'){
+      ev.preventDefault();
+      if(srchHits.length){ srchIdx=(srchIdx+1)%srchHits.length; markSearch(srchIdx); }
+      return;
+    }
+    if(ev.key==='ArrowUp'){
+      ev.preventDefault();
+      if(srchHits.length){ srchIdx=(srchIdx-1+srchHits.length)%srchHits.length; markSearch(srchIdx); }
+      return;
+    }
+    if(ev.key==='Enter'){ ev.preventDefault(); gotoSearch(srchIdx<0?0:srchIdx); }
+  });
+  el.addEventListener('click',ev=>{ if(ev.target===el) closeSearch(); });
+
+  /* Ctrl+K / Cmd+K — поиск из любого места страницы */
+  window.addEventListener('keydown',ev=>{
+    const k=(ev.key||'').toLowerCase();
+    if((ev.ctrlKey||ev.metaKey) && k==='k'){
+      ev.preventDefault();
+      const s=document.getElementById('srch');
+      if(s && s.classList.contains('show')) closeSearch();
+      else openSearch();
+      return;
+    }
+    if(k==='escape'){
+      const s=document.getElementById('srch');
+      if(s && s.classList.contains('show')) closeSearch();
+    }
+  });
+})();
+
+/* ================= СВОДКА НЕДЕЛИ =================
+   Что сделано, что просрочено, где провал по сферам.
+   Открывается кнопкой в панели напоминаний, ничего не всплывает само. */
+function weekStat(days){
+  const back=days||7;
+  const now=Date.now();
+  const from=new Date(); from.setHours(0,0,0,0);
+  from.setDate(from.getDate()-(back-1));
+  const fromT=from.getTime();
+  const st={days:back, done:0, open:0, overdue:0, byColor:{}, list:[]};
+  /* задачи: срок внутри недели */
+  Object.keys(REM).forEach(p=>{
+    const r=REM[p];
+    if(!r||!r.due) return;
+    if(r.arch) return;
+    const idx=pathIndex()[p];
+    const text=idx?idx.text:(r.text||p.split('/').pop());
+    const color=idx?idx.color:(r.color||'orange');
+    const hist=(r.hist||[]);
+    const doneIn=hist.filter(t=>t>=fromT&&t<=now).length;
+    const doneNow=(r.done && r.due>=fromT && r.due<=now) ? 1 : 0;
+    if(doneIn||doneNow){
+      st.done+=doneIn||doneNow;
+      const key=color;
+      st.byColor[key]=(st.byColor[key]||0)+((doneIn||doneNow));
+    }
+    if(!r.done && r.due<now){
+      /* повторяющаяся задача, отмеченная на этой неделе, — она сделана,
+         а не просрочена: срок просто уже переехал на следующий раз */
+      const doneThisWeek=(r.hist||[]).some(t=>t>=fromT&&t<=now);
+      if(!doneThisWeek){
+        st.overdue++;
+        if(st.list.length<6) st.list.push({text:text, due:r.due});
+      }
+    }
+    if(!r.done && r.due>=now) st.open++;
+  });
+  /* галочки чек-листов за неделю */
+  Object.keys(DONE).forEach(p=>{
+    const t=DONE[p];
+    if(t>=fromT && t<=now) st.done++;
+  });
+  return st;
+}
+const COLOR_RU={yellow:'цели',orange:'дела',green:'рост',blue:'планы',
+                pink:'люди',purple:'идеи',gray:'прочее'};
+function openWeek(){
+  const el=document.getElementById('week');
+  if(!el) return;
+  const st=weekStat(7);
+  el.querySelector('.sub').textContent=
+    'с '+longDay(dayKey(new Date(Date.now()-6*864e5)))+' по '+longDay(dayKey(new Date()));
+  const nums=el.querySelector('.nums');
+  nums.innerHTML='';
+  [['сделано',st.done,'#2f9e57'],['в работе',st.open,'#4ea1ff'],
+   ['просрочено',st.overdue,'#e5484d']].forEach(([t,v,c])=>{
+    const d=document.createElement('div');
+    d.className='n';
+    d.innerHTML='<b style="color:'+c+'">'+v+'</b><span>'+t+'</span>';
+    nums.appendChild(d);
+  });
+  const bars=el.querySelector('.bars');
+  bars.innerHTML='';
+  const keys=Object.keys(st.byColor).filter(k=>st.byColor[k]>0)
+    .sort((a,b)=>st.byColor[b]-st.byColor[a]);
+  if(!keys.length){
+    bars.innerHTML='<div class="bl"><span class="nm" style="width:auto">'+
+      'за неделю ничего не отмечено</span></div>';
+  }else{
+    const max=Math.max.apply(null,keys.map(k=>st.byColor[k]));
+    keys.forEach(k=>{
+      const v=st.byColor[k];
+      const d=document.createElement('div');
+      d.className='bl';
+      d.innerHTML='<span class="nm">'+(COLOR_RU[k]||k)+'</span>'+
+        '<span class="tr"><span class="fl" style="width:'+
+          Math.round(v/max*100)+'%;background:'+((PAL[k]||PAL.orange).bg)+'"></span></span>'+
+        '<span class="vv">'+v+'</span>';
+      bars.appendChild(d);
+    });
+  }
+  if(st.list.length){
+    const lst=document.createElement('div');
+    lst.className='bars';
+    lst.innerHTML='<div class="bl"><span class="nm" style="width:auto;color:#e5484d">'+
+      'просрочено:</span></div>'+
+      st.list.map(x=>'<div class="bl"><span class="nm">'+escHtml(x.text)+
+        '</span><span class="vv">'+shortDay(dayKey(new Date(x.due)))+'</span></div>').join('');
+    bars.appendChild(lst);
+  }
+  el.classList.add('show');
+}
+(function wireWeek(){
+  const el=document.getElementById('week');
+  if(!el) return;
+  el.querySelector('.ok').addEventListener('click',()=>el.classList.remove('show'));
+  el.addEventListener('click',ev=>{ if(ev.target===el) el.classList.remove('show'); });
+})();
+
+/* ================= ШАБЛОНЫ ДНЯ =================
+   «Рабочий день», «выходной», «командировка» — набор задач одним нажатием.
+   Шаблон можно собрать из текущего дня и потом ставить в любой день. */
+let tplFor=null;
+function openTpl(k){
+  const el=document.getElementById('tpl');
+  if(!el) return;
+  tplFor=k||SELDAY;
+  el.querySelector('.sub').textContent='Ставятся задачи на '+longDay(tplFor)+'.';
+  renderTpl();
+  el.classList.add('show');
+}
+function renderTpl(){
+  const el=document.getElementById('tpl');
+  if(!el) return;
+  const box=el.querySelector('.tl');
+  box.innerHTML='';
+  if(!TPL.length){
+    box.innerHTML='<div class="ti"><span class="nm" style="color:var(--tx3)">'+
+      'Шаблонов пока нет. Собери день и нажми «Сохранить текущий день».</span></div>';
+    return;
+  }
+  TPL.forEach((t,i)=>{
+    const d=document.createElement('div');
+    d.className='ti';
+    const nm=document.createElement('span');
+    nm.className='nm'; nm.textContent=t.name;
+    const ct=document.createElement('span');
+    ct.className='ct'; ct.textContent=(t.tasks||[]).length+' задач';
+    const go=document.createElement('button');
+    go.className='go'; go.textContent='Поставить';
+    go.addEventListener('click',()=>{
+      const n=tplApply(t,tplFor);
+      document.getElementById('tpl').classList.remove('show');
+      toast('Из шаблона добавлено: '+n);
+    });
+    const dl=document.createElement('button');
+    dl.className='dl'; dl.textContent='Удалить';
+    dl.addEventListener('click',()=>{
+      TPL.splice(i,1); tplSave(); renderTpl();
+    });
+    d.appendChild(nm); d.appendChild(ct); d.appendChild(go); d.appendChild(dl);
+    box.appendChild(d);
+  });
+}
+(function wireTpl(){
+  const el=document.getElementById('tpl');
+  if(!el) return;
+  el.querySelector('.no').addEventListener('click',()=>el.classList.remove('show'));
+  el.querySelector('.save').addEventListener('click',()=>{
+    const tasks=tplFromDay(tplFor);
+    if(!tasks.length){ toast('В этот день нет задач'); return; }
+    askText({title:'Название шаблона',
+             hint:'Например: «Рабочий день», «Выходной», «Командировка». '+
+                  'Задач в шаблоне: '+tasks.length+'.',
+             value:'Рабочий день', ok:'Сохранить'}).then(v=>{
+      const name=String(v||'').trim();
+      if(!name) return;
+      const i=TPL.findIndex(t=>t.name===name);
+      if(i>=0) TPL[i].tasks=tasks.slice();
+      else TPL.push({name:name, tasks:tasks.slice()});
+      tplSave(); renderTpl();
+      toast('Шаблон сохранён: '+name);
+    });
+  });
+  el.addEventListener('click',ev=>{ if(ev.target===el) el.classList.remove('show'); });
+})();
+
+/* ================= ГОЛОСОВОЙ ВВОД =================
+   Встроенное распознавание браузера (Chrome, Edge). Если его нет —
+   кнопка просто не показывается, ничего не ломается. */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition||null;
+let srObj=null, srBtn=null;
+function voiceToggle(btn,field){
+  if(!SR){ return; }
+  if(srObj){
+    try{ srObj.stop(); }catch(e){}
+    srObj=null;
+    btn.classList.remove('rec');
+    btn.textContent='🎤 Говорить';
+    return;
+  }
+  try{
+    srObj=new SR();
+    srObj.lang='ru-RU';
+    srObj.interimResults=true;
+    srObj.continuous=false;
+    const base=field.value;
+    srObj.onresult=ev=>{
+      let txt='';
+      for(let i=ev.resultIndex;i<ev.results.length;i++){
+        txt+=ev.results[i][0].transcript;
+      }
+      field.value=(base?base+' ':'')+txt;
+    };
+    srObj.onerror=()=>{
+      srObj=null; btn.classList.remove('rec'); btn.textContent='🎤 Говорить';
+      toast('Не расслышал — попробуй ещё раз');
+    };
+    srObj.onend=()=>{
+      srObj=null; btn.classList.remove('rec'); btn.textContent='🎤 Говорить';
+    };
+    srObj.start();
+    srBtn=btn;
+    btn.classList.add('rec');
+    btn.textContent='■ Стоп';
+  }catch(e){
+    srObj=null;
+    toast('Голосовой ввод недоступен');
+  }
+}
+
 /* ---- тикающая перерисовка ----
    Всплывающих сообщений о наступившем сроке нет: они мешали и появлялись
    повторно при каждой правке и перезагрузке. Срок виден на самой карточке
@@ -4632,7 +5485,23 @@ try{
     window.addEventListener('online',()=>{ if(syncOn()) syncPull(true); });
   }
 }catch(e){}
+/* пропущенные повторы подтягиваем к сегодняшнему дню, иначе привычка
+   висела бы в прошлом месяце */
+try{ if(catchUpRepeats()){ relayout(null); } }catch(e){}
 loop();
+
+/* ── установка на телефон как приложение ──
+   Манифест и служебный скрипт лежат рядом со страницей. Без них
+   «Добавить на главный экран» даёт закладку с адресной строкой,
+   а с ними — полноэкранное приложение с иконкой. */
+(function pwa(){
+  try{
+    if(!('serviceWorker' in navigator)) return;
+    /* регистрируем только когда страница отдана по http(s) */
+    if(location.protocol!=='https:' && location.hostname!=='localhost') return;
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  }catch(e){}
+})();
 
 /* ── самопроверка версии ──
    GitHub Pages отдаёт index.html из кеша до 10 минут. Из-за этого
