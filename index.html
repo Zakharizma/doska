@@ -21,9 +21,10 @@
   --acc:#4ea1ff;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-/* фон страницы задаётся из скрипта: картину нужно ставить на html,
-   чтобы iOS растянул её на весь экран вместе с нижней зоной */
-html,body{height:100%;height:100dvh;overflow:hidden;background:transparent;
+/* Тёмный цвет стоит всегда, картинка ложится ПОВЕРХ него.
+   Раньше здесь было background:transparent — и если картинка не успевала
+   примениться, окно становилось белым. Теперь под ней всегда тёмный фон. */
+html,body{height:100%;height:100dvh;overflow:hidden;background:#162414;
   overscroll-behavior:none;-webkit-text-size-adjust:100%}
 body{font:14px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--tx);
   -webkit-font-smoothing:antialiased;user-select:none;
@@ -950,7 +951,7 @@ function bgFill(on){
       st.backgroundColor=OFF;
       st.backgroundImage='none';
     }
-    document.body.style.backgroundColor='transparent';
+    document.body.style.backgroundColor=EDGE;
     if(!d) return;
     d.style.backgroundColor='transparent';
     if(CH>0){ d.style.width=W+'px'; d.style.height=CH+'px'; }
@@ -1107,7 +1108,7 @@ const RTXU_KEY='board.rtxu.v1';
 /* Версия сборки. Видна в панели «Напоминания» мелким шрифтом.
    Нужна ровно для одного: отличить старую страницу из кеша GitHub Pages
    от настоящей ошибки. Если версия старая — правки и не должны сохраняться. */
-const BOARD_VER='2026-11-26 11:11';
+const BOARD_VER='2026-11-26 11:14';
 /* сколько карточек с сохранённым текстом — видно рядом с версией */
 function showVer(){
   const v=document.getElementById('verState');
