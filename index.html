@@ -1162,7 +1162,7 @@ const RTXU_KEY='board.rtxu.v1';
 /* Версия сборки. Видна в панели «Напоминания» мелким шрифтом.
    Нужна ровно для одного: отличить старую страницу из кеша GitHub Pages
    от настоящей ошибки. Если версия старая — правки и не должны сохраняться. */
-const BOARD_VER='2026-11-26 13:09';
+const BOARD_VER='2026-11-26 13:21';
 /* сколько карточек с сохранённым текстом — видно рядом с версией */
 function showVer(){
   const v=document.getElementById('verState');
@@ -2737,21 +2737,29 @@ function drawBackdrop(){
         if(cnt) stops.push('rgb('+Math.round(r/cnt)+','+Math.round(g/cnt)+','+Math.round(b/cnt)+')');
       }
       if(stops.length>1){
+        /* Средний цвет ВСЕЙ строки.
+           В режиме «иконка на домашнем экране» iOS закрашивает нижнюю
+           зону только background-color, а градиент (background-image)
+           туда не рисует. Поэтому цветом ставим не левый край строки
+           (он мог оказаться ярко-зелёным), а усреднение по всей ширине —
+           тогда полоса совпадает по тону с тем, что над ней. */
+        let sr=0,sg=0,sb=0;
+        stops.forEach(s=>{
+          const m2=/rgb\((\d+),(\d+),(\d+)\)/.exec(s);
+          if(m2){ sr+=+m2[1]; sg+=+m2[2]; sb+=+m2[3]; }
+        });
+        const n=stops.length;
+        const mid='rgb('+Math.round(sr/n)+','+Math.round(sg/n)+','+Math.round(sb/n)+')';
         const grad='linear-gradient(to right,'+stops.join(',')+')';
-        /* ВАЖНО: ставим на ОБА элемента.
-           body лежит поверх html и, имея свой backgroundColor, полностью
-           перекрывал градиент на html — поэтому полоса оставалась ровной.
-           Теперь градиент есть и на html (его iOS закрашивает в нижней
-           зоне), и на body (он закрывает html в видимой области). */
         const sh=document.documentElement.style, sb2=document.body.style;
         [sh,sb2].forEach(st=>{
-          st.backgroundColor=stops[0];
-          st.backgroundImage=grad;
+          st.backgroundColor=mid;   /* это рисует iOS в нижней зоне */
+          st.backgroundImage=grad;  /* это работает в браузере */
           st.backgroundSize='auto';
           st.backgroundPosition='center center';
           st.backgroundRepeat='no-repeat';
         });
-        EDGE_SYNC=grad;
+        EDGE_SYNC=mid;
       }
     }catch(e){}
   }
