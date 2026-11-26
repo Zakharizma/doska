@@ -1108,7 +1108,7 @@ const RTXU_KEY='board.rtxu.v1';
 /* Версия сборки. Видна в панели «Напоминания» мелким шрифтом.
    Нужна ровно для одного: отличить старую страницу из кеша GitHub Pages
    от настоящей ошибки. Если версия старая — правки и не должны сохраняться. */
-const BOARD_VER='2026-11-26 11:21';
+const BOARD_VER='2026-11-26 11:24';
 /* сколько карточек с сохранённым текстом — видно рядом с версией */
 function showVer(){
   const v=document.getElementById('verState');
@@ -2504,13 +2504,12 @@ function resize(){
   const dvh=dvhHeight();
   const sab=safeBottom();
   H=Math.round(Math.max(H, dvh, H+sab));
-  /* Если панель ещё не развернулась, все размеры нулевые — холст получился
-     бы 0×0, и было бы видно белую страницу (так и было в боковой панели DSH).
-     Поэтому подставляем минимальные размеры и пересчитаем, когда появится
-     настоящий размер (см. ResizeObserver ниже). */
-  if(!W||!H){ W=W||Math.max(320, window.innerWidth||0); H=H||Math.max(480, window.innerHeight||0); }
-  if(!W) W=320;
-  if(!H) H=480;
+  /* Размер может быть ещё нулевым (панель не развернулась). Подставлять
+     «примерно 320×480» НЕЛЬЗЯ: по нему доска впишется в несуществующий
+     экран, масштаб упадёт до 0.06 и всё станет микроскопическим.
+     Поэтому при неизвестном размере просто ждём: холст не трогаем,
+     вписывание отложится до настоящего размера (см. watchSize и bootFit). */
+  if(W<80||H<80){ return; }
 
   CH=H+CPAD;
   cv.width=Math.floor(W*DPR); cv.height=Math.floor(CH*DPR);
@@ -2544,13 +2543,38 @@ window.addEventListener('orientationchange',()=>setTimeout(()=>{resize();},250))
 (function watchSize(){
   try{
     if(typeof ResizeObserver==='undefined') return;
+    let fitted=false;
     const ro=new ResizeObserver(()=>{
       const w=document.documentElement.clientWidth||window.innerWidth||0;
       const h=document.documentElement.clientHeight||window.innerHeight||0;
-      if(w>0 && h>0 && (Math.abs(w-W)>4 || Math.abs(h-H)>4)) resize();
+      if(w<80||h<80) return;
+      if(Math.abs(w-W)>4 || Math.abs(h-H)>4){
+        resize();
+        fitted=true;
+      }else if(!fitted && items.length){
+        /* первый настоящий размер — вписываем доску заново */
+        fitted=true;
+        fitAll();
+      }
     });
     ro.observe(document.documentElement);
   }catch(e){}
+})();
+
+/* Страховка: пока размер не пришёл, доска не вписана. Несколько раз
+   пробуем вписать — если панель раскрылась без события изменения размера. */
+(function bootFit(){
+  let tries=0;
+  const t=setInterval(()=>{
+    tries++;
+    if(userTouched || tries>20){ clearInterval(t); return; }
+    if(W>=80 && H>=80 && items.length){
+      fitAll();
+      clearInterval(t);
+    }else{
+      resize();
+    }
+  },250);
 })();
 
 function redraw(){needsDraw=true;}
@@ -4155,6 +4179,11 @@ on('zFit','click',fitAll);
 
 function fitAll(){
   if(!items.length){view={x:0,y:0,z:1};updZoom();redraw();return;}
+  /* Не вписываем в несуществующий экран: в боковой панели DSH размер
+     приходит с задержкой, и «вписывание» в 320×480 давало масштаб 0.06 —
+     доска становилась микроскопической, экран выглядел пустым.
+     Ждём настоящий размер (пересчёт сделает watchSize). */
+  if(W<80||H<80){ return; }
   let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
   items.forEach(it=>{
     if(it.type==='draw'){
