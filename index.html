@@ -926,7 +926,7 @@ const uid=()=>'i'+(uidN++)+'_'+Math.random().toString(36).slice(2,6);
 const BG_DATA=window.BG_DATA||"";
 const bgImg=new Image();
 let bgReady=false, BG_ON=true;
-bgImg.onload=()=>{bgReady=true;redraw();};
+bgImg.onload=()=>{bgReady=true;EDGE_SYNC='';redraw();};
 bgImg.src=BG_DATA;
 
 /* Картинка кладётся ЕЩЁ И подложкой под холстом.
@@ -1162,7 +1162,7 @@ const RTXU_KEY='board.rtxu.v1';
 /* Версия сборки. Видна в панели «Напоминания» мелким шрифтом.
    Нужна ровно для одного: отличить старую страницу из кеша GitHub Pages
    от настоящей ошибки. Если версия старая — правки и не должны сохраняться. */
-const BOARD_VER='2026-11-26 13:21';
+const BOARD_VER='2026-11-26 13:27';
 /* сколько карточек с сохранённым текстом — видно рядом с версией */
 function showVer(){
   const v=document.getElementById('verState');
@@ -2722,42 +2722,28 @@ function drawBackdrop(){
      плавными, а строка данных остаётся маленькой. */
   if(!EDGE_SYNC){
     try{
+      /* Берём НЕ одну строку, а нижнюю полосу высотой 40 css-px и
+         усредняем ВСЕ её пиксели.
+         Почему так: раньше снималась одна строка в первом же кадре.
+         Если в этот момент внизу оказывался зелёный элемент (плашка
+         прогресса, метка, карточка) — его цвет залипал навсегда и
+         нижняя зона становилась ЯРКО-ЗЕЛЁНОЙ. Усреднение по полосе
+         такие случайные пятна гасит, а тон остаётся верным. */
       const cw=ctx.canvas.width;
-      const y=Math.max(0,Math.floor((H-3)*DPR));
-      const row=ctx.getImageData(0,y,cw,1).data;
-      const N=16, stops=[];
-      for(let i=0;i<N;i++){
-        const x0=Math.floor(cw*i/N), x1=Math.floor(cw*(i+1)/N);
-        const step=Math.max(1,Math.floor((x1-x0)/8));
-        let r=0,g=0,b=0,cnt=0;
-        for(let x=x0;x<x1;x+=step){
-          const o=x*4;
-          r+=row[o]; g+=row[o+1]; b+=row[o+2]; cnt++;
-        }
-        if(cnt) stops.push('rgb('+Math.round(r/cnt)+','+Math.round(g/cnt)+','+Math.round(b/cnt)+')');
+      const bandH=Math.max(1,Math.floor(40*DPR));
+      const y0=Math.max(0,Math.floor((H-40)*DPR));
+      const band=ctx.getImageData(0,y0,cw,bandH).data;
+      let sr=0,sg=0,sb=0,n=0;
+      /* каждый 4-й пиксель — достаточно точно и в 4 раза быстрее */
+      for(let o=0;o<band.length;o+=16){
+        sr+=band[o]; sg+=band[o+1]; sb+=band[o+2]; n++;
       }
-      if(stops.length>1){
-        /* Средний цвет ВСЕЙ строки.
-           В режиме «иконка на домашнем экране» iOS закрашивает нижнюю
-           зону только background-color, а градиент (background-image)
-           туда не рисует. Поэтому цветом ставим не левый край строки
-           (он мог оказаться ярко-зелёным), а усреднение по всей ширине —
-           тогда полоса совпадает по тону с тем, что над ней. */
-        let sr=0,sg=0,sb=0;
-        stops.forEach(s=>{
-          const m2=/rgb\((\d+),(\d+),(\d+)\)/.exec(s);
-          if(m2){ sr+=+m2[1]; sg+=+m2[2]; sb+=+m2[3]; }
-        });
-        const n=stops.length;
+      if(n>0){
         const mid='rgb('+Math.round(sr/n)+','+Math.round(sg/n)+','+Math.round(sb/n)+')';
-        const grad='linear-gradient(to right,'+stops.join(',')+')';
         const sh=document.documentElement.style, sb2=document.body.style;
         [sh,sb2].forEach(st=>{
-          st.backgroundColor=mid;   /* это рисует iOS в нижней зоне */
-          st.backgroundImage=grad;  /* это работает в браузере */
-          st.backgroundSize='auto';
-          st.backgroundPosition='center center';
-          st.backgroundRepeat='no-repeat';
+          st.backgroundColor=mid;   /* этот цвет iOS рисует в нижней зоне */
+          st.backgroundImage='none';
         });
         EDGE_SYNC=mid;
       }
