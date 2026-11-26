@@ -23,7 +23,14 @@
 *{box-sizing:border-box;margin:0;padding:0}
 /* фон страницы задаётся из скрипта: картину нужно ставить на html,
    чтобы iOS растянул её на весь экран вместе с нижней зоной */
-html,body{height:100%;height:100dvh;overflow:hidden;background:#0b0f14;
+/* Высота — 100%, без dvh.
+   Почему: на iPhone 100dvh иногда МЕНЬШЕ полного экрана (iOS не учитывает
+   зону под индикатором «Домой»). Картинка на html задана через
+   background-size:cover, а cover считается по высоте САМОГО элемента.
+   Получалось: картинка растянута только до 100dvh, ниже неё просвечивал
+   background-color и появлялась ровная полоса.
+   С 100% элемент занимает весь экран, и полосы не остаётся. */
+html,body{height:100%;overflow:hidden;background:#0b0f14;
   overscroll-behavior:none;-webkit-text-size-adjust:100%}
 body{font:14px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--tx);
   -webkit-font-smoothing:antialiased;user-select:none;
@@ -945,7 +952,11 @@ function bgFill(on){
       st.backgroundSize='cover';
       st.backgroundPosition='center center';
       st.backgroundRepeat='no-repeat';
-      st.backgroundAttachment='scroll';
+      /* fixed — фон привязан к ОКНУ, а не к размеру элемента.
+         Именно это закрывает нижнюю полосу: cover считается от экрана,
+         а не от высоты html, и картинка доходит до самого низа,
+         включая зону под индикатором «Домой». */
+      st.backgroundAttachment='fixed';
     }else{
       st.backgroundColor=OFF;
       st.backgroundImage='none';
@@ -1151,7 +1162,7 @@ const RTXU_KEY='board.rtxu.v1';
 /* Версия сборки. Видна в панели «Напоминания» мелким шрифтом.
    Нужна ровно для одного: отличить старую страницу из кеша GitHub Pages
    от настоящей ошибки. Если версия старая — правки и не должны сохраняться. */
-const BOARD_VER='2026-11-26 12:48';
+const BOARD_VER='2026-11-26 12:56';
 /* сколько карточек с сохранённым текстом — видно рядом с версией */
 function showVer(){
   const v=document.getElementById('verState');
