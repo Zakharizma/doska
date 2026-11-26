@@ -1108,7 +1108,7 @@ const RTXU_KEY='board.rtxu.v1';
 /* Версия сборки. Видна в панели «Напоминания» мелким шрифтом.
    Нужна ровно для одного: отличить старую страницу из кеша GitHub Pages
    от настоящей ошибки. Если версия старая — правки и не должны сохраняться. */
-const BOARD_VER='2026-11-26 11:14';
+const BOARD_VER='2026-11-26 11:21';
 /* сколько карточек с сохранённым текстом — видно рядом с версией */
 function showVer(){
   const v=document.getElementById('verState');
@@ -2504,7 +2504,13 @@ function resize(){
   const dvh=dvhHeight();
   const sab=safeBottom();
   H=Math.round(Math.max(H, dvh, H+sab));
-  if(!W||!H){ W=window.innerWidth||360; H=window.innerHeight||640; }
+  /* Если панель ещё не развернулась, все размеры нулевые — холст получился
+     бы 0×0, и было бы видно белую страницу (так и было в боковой панели DSH).
+     Поэтому подставляем минимальные размеры и пересчитаем, когда появится
+     настоящий размер (см. ResizeObserver ниже). */
+  if(!W||!H){ W=W||Math.max(320, window.innerWidth||0); H=H||Math.max(480, window.innerHeight||0); }
+  if(!W) W=320;
+  if(!H) H=480;
 
   CH=H+CPAD;
   cv.width=Math.floor(W*DPR); cv.height=Math.floor(CH*DPR);
@@ -2531,6 +2537,21 @@ function resize(){
 }
 window.addEventListener('resize',resize);
 window.addEventListener('orientationchange',()=>setTimeout(()=>{resize();},250));
+
+/* Боковая панель DSH (и любой контейнер, который раскрывается не сразу)
+   сначала имеет нулевой размер. Как только он появился — пересчитываем,
+   иначе холст остался бы 0×0, а окно белым. */
+(function watchSize(){
+  try{
+    if(typeof ResizeObserver==='undefined') return;
+    const ro=new ResizeObserver(()=>{
+      const w=document.documentElement.clientWidth||window.innerWidth||0;
+      const h=document.documentElement.clientHeight||window.innerHeight||0;
+      if(w>0 && h>0 && (Math.abs(w-W)>4 || Math.abs(h-H)>4)) resize();
+    });
+    ro.observe(document.documentElement);
+  }catch(e){}
+})();
 
 function redraw(){needsDraw=true;}
 function loop(){
