@@ -1162,7 +1162,7 @@ const RTXU_KEY='board.rtxu.v1';
 /* Версия сборки. Видна в панели «Напоминания» мелким шрифтом.
    Нужна ровно для одного: отличить старую страницу из кеша GitHub Pages
    от настоящей ошибки. Если версия старая — правки и не должны сохраняться. */
-const BOARD_VER='2026-11-26 13:02';
+const BOARD_VER='2026-11-26 13:04';
 /* сколько карточек с сохранённым текстом — видно рядом с версией */
 function showVer(){
   const v=document.getElementById('verState');
@@ -2704,25 +2704,48 @@ function drawBackdrop(){
   ctx.fillStyle=g;
   ctx.fillRect(0,0,W,CH);
 
-  /* ===== ЦВЕТ ПОЛОСЫ ПОД ИНДИКАТОРОМ «ДОМОЙ» =====
-     Установлено опытом: нижнюю зону iOS закрашивает ЦВЕТОМ СТРАНИЦЫ,
-     а картинка туда не доходит — отсюда ровная полоса (была чёрной при
-     #0b0f14, стала тёмно-зелёной при #162414).
-     Поэтому цвет страницы больше не задаётся «на глаз»: он снимается
-     пикселем с готового холста у нижней кромки экрана. Тогда полоса
-     ВСЕГДА совпадает с тем, что нарисовано над ней, при любой картинке
-     и любом размере экрана — перехода не видно.
-     Снимаем один раз за пересчёт размера, не каждый кадр. */
+  /* ===== ПРОДОЛЖЕНИЕ КАРТИНКИ В НИЖНЕЙ ЗОНЕ ЭКРАНА =====
+     Установлено опытом: нижнюю зону (под индикатором «Домой») iOS
+     закрашивает фоном страницы, а холст туда не достаёт. Ровная
+     заливка выглядела как полоса — пусть и цвета холста.
+
+     Решение: снимаем НИЖНЮЮ СТРОКУ холста и растягиваем её по ширине
+     горизонтальным градиентом на фоне страницы. Тогда в зоне видно
+     не плоский цвет, а продолжение пейзажа — как будто картинка
+     просто длиннее экрана.
+
+     Почему градиент виден ТОЛЬКО внизу: холст лежит поверх (z-index 1)
+     и закрывает всю видимую область. Фон страницы виден лишь там,
+     куда холст не достаёт — то есть ровно в нижней зоне.
+
+     Снимаем 16 точек по ширине: этого хватает, чтобы переходы были
+     плавными, а строка данных остаётся маленькой. */
   if(!EDGE_SYNC){
     try{
-      const px=ctx.getImageData(
-        Math.max(0,Math.floor(W*DPR/2)),
-        Math.max(0,Math.floor((H-4)*DPR)),1,1).data;
-      if(px && px[3]>0){
-        const col='rgb('+px[0]+','+px[1]+','+px[2]+')';
-        document.documentElement.style.backgroundColor=col;
-        document.body.style.backgroundColor=col;
-        EDGE_SYNC=col;
+      const cw=ctx.canvas.width;
+      const y=Math.max(0,Math.floor((H-3)*DPR));
+      const row=ctx.getImageData(0,y,cw,1).data;
+      const N=16, stops=[];
+      for(let i=0;i<N;i++){
+        const x0=Math.floor(cw*i/N), x1=Math.floor(cw*(i+1)/N);
+        const step=Math.max(1,Math.floor((x1-x0)/8));
+        let r=0,g=0,b=0,cnt=0;
+        for(let x=x0;x<x1;x+=step){
+          const o=x*4;
+          r+=row[o]; g+=row[o+1]; b+=row[o+2]; cnt++;
+        }
+        if(cnt) stops.push('rgb('+Math.round(r/cnt)+','+Math.round(g/cnt)+','+Math.round(b/cnt)+')');
+      }
+      if(stops.length>1){
+        const grad='linear-gradient(to right,'+stops.join(',')+')';
+        const st=document.documentElement.style;
+        st.backgroundColor=stops[0];
+        st.backgroundImage=grad;
+        st.backgroundSize='auto';
+        st.backgroundPosition='center center';
+        st.backgroundRepeat='no-repeat';
+        document.body.style.backgroundColor=stops[0];
+        EDGE_SYNC=grad;
       }
     }catch(e){}
   }
