@@ -1162,7 +1162,7 @@ const RTXU_KEY='board.rtxu.v1';
 /* Версия сборки. Видна в панели «Напоминания» мелким шрифтом.
    Нужна ровно для одного: отличить старую страницу из кеша GitHub Pages
    от настоящей ошибки. Если версия старая — правки и не должны сохраняться. */
-const BOARD_VER='2026-11-26 13:04';
+const BOARD_VER='2026-11-26 13:09';
 /* сколько карточек с сохранённым текстом — видно рядом с версией */
 function showVer(){
   const v=document.getElementById('verState');
@@ -2738,13 +2738,19 @@ function drawBackdrop(){
       }
       if(stops.length>1){
         const grad='linear-gradient(to right,'+stops.join(',')+')';
-        const st=document.documentElement.style;
-        st.backgroundColor=stops[0];
-        st.backgroundImage=grad;
-        st.backgroundSize='auto';
-        st.backgroundPosition='center center';
-        st.backgroundRepeat='no-repeat';
-        document.body.style.backgroundColor=stops[0];
+        /* ВАЖНО: ставим на ОБА элемента.
+           body лежит поверх html и, имея свой backgroundColor, полностью
+           перекрывал градиент на html — поэтому полоса оставалась ровной.
+           Теперь градиент есть и на html (его iOS закрашивает в нижней
+           зоне), и на body (он закрывает html в видимой области). */
+        const sh=document.documentElement.style, sb2=document.body.style;
+        [sh,sb2].forEach(st=>{
+          st.backgroundColor=stops[0];
+          st.backgroundImage=grad;
+          st.backgroundSize='auto';
+          st.backgroundPosition='center center';
+          st.backgroundRepeat='no-repeat';
+        });
         EDGE_SYNC=grad;
       }
     }catch(e){}
