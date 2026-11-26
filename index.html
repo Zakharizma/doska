@@ -21,10 +21,9 @@
   --acc:#4ea1ff;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-/* Тёмный цвет стоит всегда, картинка ложится ПОВЕРХ него.
-   Раньше здесь было background:transparent — и если картинка не успевала
-   примениться, окно становилось белым. Теперь под ней всегда тёмный фон. */
-html,body{height:100%;height:100dvh;overflow:hidden;background:#162414;
+/* фон страницы задаётся из скрипта: картину нужно ставить на html,
+   чтобы iOS растянул её на весь экран вместе с нижней зоной */
+html,body{height:100%;height:100dvh;overflow:hidden;background:transparent;
   overscroll-behavior:none;-webkit-text-size-adjust:100%}
 body{font:14px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--tx);
   -webkit-font-smoothing:antialiased;user-select:none;
@@ -46,12 +45,8 @@ body{font:14px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif
 /* Холст закрывает ВЕСЬ экран, включая зону «брови» и нижнюю полосу:
    иначе по краям оставались тёмные полосы. Кнопки при этом отодвинуты
    от опасных зон через env(safe-area-inset-*). */
-/* Холст всегда растянут на весь экран средствами CSS.
-   Это важно: если скрипт почему-то не смог узнать размер окна, холст
-   всё равно займёт весь экран и будет виден, а не превратится в
-   квадратик 300×150 в углу (так было в боковой панели DSH). */
-canvas{display:block;position:fixed;inset:0;width:100%;height:100%;
-  cursor:default;touch-action:none;-ms-touch-action:none;z-index:1}
+canvas{display:block;position:fixed;top:0;left:0;cursor:default;
+  touch-action:none;-ms-touch-action:none;z-index:1}
 
 /* Подложка с пейзажем.
    На iPhone холст, даже растянутый с запасом, иногда не доходит до самого
@@ -955,7 +950,7 @@ function bgFill(on){
       st.backgroundColor=OFF;
       st.backgroundImage='none';
     }
-    document.body.style.backgroundColor=EDGE;
+    document.body.style.backgroundColor='transparent';
     if(!d) return;
     d.style.backgroundColor='transparent';
     if(CH>0){ d.style.width=W+'px'; d.style.height=CH+'px'; }
@@ -1112,7 +1107,7 @@ const RTXU_KEY='board.rtxu.v1';
 /* Версия сборки. Видна в панели «Напоминания» мелким шрифтом.
    Нужна ровно для одного: отличить старую страницу из кеша GitHub Pages
    от настоящей ошибки. Если версия старая — правки и не должны сохраняться. */
-const BOARD_VER='2026-11-26 11:35';
+const BOARD_VER='2026-11-26 05:20';
 /* сколько карточек с сохранённым текстом — видно рядом с версией */
 function showVer(){
   const v=document.getElementById('verState');
@@ -2497,18 +2492,8 @@ function resize(){
      центрируется трансформацией. */
   const de=document.documentElement;
   const vv=window.visualViewport;
-  /* Размер берём из всех доступных источников и выбираем наибольший.
-     Холст растянут на весь экран через CSS, поэтому его собственный
-     прямоугольник — самый надёжный источник: он верен даже там, где
-     clientHeight и innerHeight врут (боковая панель DSH). */
-  let rectW=0, rectH=0;
-  try{
-    const r=cv.getBoundingClientRect();
-    rectW=Math.round(r.width)||0;
-    rectH=Math.round(r.height)||0;
-  }catch(e){}
-  W=Math.round(Math.max(de.clientWidth||0, window.innerWidth||0, vv?vv.width:0, rectW));
-  H=Math.round(Math.max(de.clientHeight||0, window.innerHeight||0, vv?vv.height:0, rectH));
+  W=Math.round(Math.max(de.clientWidth||0, window.innerWidth||0, vv?vv.width:0));
+  H=Math.round(Math.max(de.clientHeight||0, window.innerHeight||0, vv?vv.height:0));
   /* ГЛАВНОЕ ДЛЯ iPhone: высота берётся по наибольшему из трёх значений.
      1) окно (innerHeight / visualViewport);
      2) 100dvh — динамическая высота, включает зону под индикатором «Домой»;
@@ -2518,34 +2503,11 @@ function resize(){
   const dvh=dvhHeight();
   const sab=safeBottom();
   H=Math.round(Math.max(H, dvh, H+sab));
-  /* Размер может быть ещё нулевым (панель не развернулась).
-     Тогда рисуем хоть что-то в разумной рамке, но НЕ вписываем доску:
-     вписывание в несуществующий экран дало бы масштаб 0.06 и пустоту.
-     Как только придёт настоящий размер — впишем (см. loop). */
-  const sizeOk = (W>=80 && H>=80);
+  if(!W||!H){ W=window.innerWidth||360; H=window.innerHeight||640; }
 
-  /* ВАЖНО. Раньше здесь при неопределённом размере холсту ставились
-     пиксели 320×480 — и он превращался в маленький квадрат в углу,
-     а вокруг был тёмный фон страницы. Именно это выглядело как
-     «ничего не видно» в боковой панели DSH.
-     Теперь при неопределённом размере пиксели НЕ ставятся: холст остаётся
-     растянутым на весь экран через CSS (width:100%;height:100%),
-     а буферу задаётся крупный размер, чтобы не было мыла.
-     Когда настоящий размер придёт — всё пересчитается. */
-  if(sizeOk){
-    CH=H+CPAD;
-    cv.width=Math.floor(W*DPR); cv.height=Math.floor(CH*DPR);
-    cv.style.width=W+'px'; cv.style.height=CH+'px';
-  }else{
-    /* Размер неизвестен. Для рисования берём разумную рамку, чтобы доска
-       нарисовалась нормально, а CSS растянет холст на весь экран.
-       Как только придёт настоящий размер — пересчитаем точно. */
-    W=W||1024; H=H||768;
-    CH=H;
-    cv.width=Math.floor(W*DPR); cv.height=Math.floor(CH*DPR);
-    cv.style.width='';
-    cv.style.height='';
-  }
+  CH=H+CPAD;
+  cv.width=Math.floor(W*DPR); cv.height=Math.floor(CH*DPR);
+  cv.style.width=W+'px'; cv.style.height=CH+'px';
   /* подложка под холстом — ровно те же размеры, чтобы картинка на ней
      совпадала с картинкой на холсте пиксель в пиксель */
   try{
@@ -2557,10 +2519,8 @@ function resize(){
   const land=W>=H;
   /* доска не перестраивается при повороте, но если размер реально изменился
      (телефон отдал его с задержкой после загрузки) — заново вписываем,
-     иначе часть доски остаётся за кадром.
-     Вписываем ТОЛЬКО при настоящем размере: иначе доска сожмётся
-     в несуществующий экран и станет микроскопической. */
-  if(items.length && sizeOk && (land!==wasLand || (changed && !userTouched))){
+     иначе часть доски остаётся за кадром */
+  if(items.length && (land!==wasLand || (changed && !userTouched))){
     wasLand=land;
     fitAll();
     return;
@@ -2571,64 +2531,8 @@ function resize(){
 window.addEventListener('resize',resize);
 window.addEventListener('orientationchange',()=>setTimeout(()=>{resize();},250));
 
-/* Боковая панель DSH (и любой контейнер, который раскрывается не сразу)
-   сначала имеет нулевой размер. Как только он появился — пересчитываем,
-   иначе холст остался бы 0×0, а окно белым. */
-(function watchSize(){
-  try{
-    if(typeof ResizeObserver==='undefined') return;
-    let fitted=false;
-    const ro=new ResizeObserver(()=>{
-      const w=document.documentElement.clientWidth||window.innerWidth||0;
-      const h=document.documentElement.clientHeight||window.innerHeight||0;
-      if(w<80||h<80) return;
-      if(Math.abs(w-W)>4 || Math.abs(h-H)>4){
-        resize();
-        fitted=true;
-      }else if(!fitted && items.length){
-        /* первый настоящий размер — вписываем доску заново */
-        fitted=true;
-        fitAll();
-      }
-    });
-    ro.observe(document.documentElement);
-  }catch(e){}
-})();
-
-/* Страховка: пока размер не пришёл, доска не вписана. Несколько раз
-   пробуем вписать — если панель раскрылась без события изменения размера. */
-(function bootFit(){
-  let tries=0;
-  const t=setInterval(()=>{
-    tries++;
-    if(userTouched || tries>20){ clearInterval(t); return; }
-    if(W>=80 && H>=80 && items.length){
-      fitAll();
-      clearInterval(t);
-    }else{
-      resize();
-    }
-  },250);
-})();
-
 function redraw(){needsDraw=true;}
-let loopFitted=false;
 function loop(){
-  /* САМОВОССТАНОВЛЕНИЕ РАЗМЕРА.
-     Боковая панель DSH открывается с нулевым размером, и событие resize
-     может не прийти вообще. Тогда холст остаётся 300×150 и не рисуется —
-     виден только фон страницы, то есть «пусто».
-     Здесь на каждом кадре проверяем: если размер ещё не годный — пробуем
-     снова; если стал годным, а доска не вписана — вписываем.
-     Это дешёвая проверка (два числа), зато панель оживает сама. */
-  try{
-    const w=document.documentElement.clientWidth||window.innerWidth||0;
-    const h=document.documentElement.clientHeight||window.innerHeight||0;
-    if(w>=80 && h>=80 && (Math.abs(w-W)>4 || Math.abs(h-H)>4 || !loopFitted)){
-      resize();
-      loopFitted=true;
-    }
-  }catch(e){}
   if(needsDraw){ needsDraw=false; render(); }
   try{ remTick(); }catch(e){}
   requestAnimationFrame(loop);
@@ -4229,11 +4133,6 @@ on('zFit','click',fitAll);
 
 function fitAll(){
   if(!items.length){view={x:0,y:0,z:1};updZoom();redraw();return;}
-  /* Не вписываем в несуществующий экран: в боковой панели DSH размер
-     приходит с задержкой, и «вписывание» в 320×480 давало масштаб 0.06 —
-     доска становилась микроскопической, экран выглядел пустым.
-     Ждём настоящий размер (пересчёт сделает watchSize). */
-  if(W<80||H<80){ return; }
   let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
   items.forEach(it=>{
     if(it.type==='draw'){
