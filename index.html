@@ -1058,6 +1058,45 @@ const LABELS={red:'#e5484d', orange:'#f5a524', yellow:'#e3b341',
 let REM={};                       /* path -> {due, done, label, note} */
 let REMLVL=[0,0,0];               /* на каких уровнях есть напоминания */
 
+/* ================= МЕТКИ УДАЛЕНИЙ (НАДГРОБИЯ) =================
+   Раньше удаление нигде не записывалось: запись просто исчезала из REM,
+   а метки удаления оставались пустыми. Из-за этого получался замкнутый
+   круг «воскрешения»:
+     1) в браузере задачу удалили — из REM она ушла;
+     2) телефон про удаление не узнал (метки нет), у него задача осталась;
+     3) телефон при следующей отправке положил её обратно в облако;
+     4) браузер прочитал облако и задача вернулась.
+   Теперь каждая удалённая карточка оставляет метку «путь → время».
+   Она уходит в облако вместе с данными, и другое устройство по ней
+   стирает задачу у себя. Метки старше DEL_KEEP забываются. */
+let DEL={};                       /* path -> время удаления */
+const DEL_KEY='board.del.v1';
+const DEL_KEEP=90*24*60*60*1000;  /* помнить удаление 90 дней */
+function delLoad(){
+  try{
+    const raw=localStorage.getItem(DEL_KEY);
+    if(raw){
+      const p=JSON.parse(raw);
+      if(p&&typeof p==='object'&&!Array.isArray(p)) DEL=p;
+    }
+  }catch(e){}
+}
+function delSave(){
+  try{
+    const now=Date.now();
+    Object.keys(DEL).forEach(k=>{
+      if(now-(DEL[k]||0)>DEL_KEEP) delete DEL[k];
+    });
+    localStorage.setItem(DEL_KEY,JSON.stringify(DEL));
+  }catch(e){}
+}
+function delMark(path){
+  if(!path) return;
+  DEL[path]=Date.now();
+  delSave();
+}
+delLoad();
+
 function remLevels(){
   REMLVL=[0,0,0];
   Object.keys(REM).forEach(k=>{
@@ -1084,14 +1123,19 @@ function remSave(){
 })();
 const remOf=path=>path?REM[path]:null;
 function remSet(path,val){
-  if(!val){ delete REM[path]; }
+  if(!val){ delMark(path); delete REM[path]; }
   else{
     const cur=REM[path]||{};
     REM[path]=Object.assign(cur,val);
     REM[path].u=Date.now();          /* метка времени — для слияния устройств */
     const e=REM[path];
     if(!e.due && !e.done && !e.label && !e.note && !e.att && !e.every && !e.text
-       && !e.goal && !(e.hist&&e.hist.length)) delete REM[path];
+       && !e.goal && !(e.hist&&e.hist.length)){
+      /* Запись опустела — для пользователя это то же удаление.
+         Метку ставим, иначе облако вернёт её обратно. */
+      delMark(path);
+      delete REM[path];
+    }
   }
   remLevels(); remSave();
   try{ renderPanel(); }catch(e){}
@@ -1107,7 +1151,7 @@ const RTXU_KEY='board.rtxu.v1';
 /* Версия сборки. Видна в панели «Напоминания» мелким шрифтом.
    Нужна ровно для одного: отличить старую страницу из кеша GitHub Pages
    от настоящей ошибки. Если версия старая — правки и не должны сохраняться. */
-const BOARD_VER='2026-11-26 05:20';
+const BOARD_VER='2026-11-26 12:48';
 /* сколько карточек с сохранённым текстом — видно рядом с версией */
 function showVer(){
   const v=document.getElementById('verState');
@@ -1478,6 +1522,7 @@ function addDayTask(k,text){
 }
 function delDayTask(p){
   if(!isOwnTask(p)) return;
+  delMark(p);
   delete REM[p];
   lattDel(p);
   remLevels(); remSave();
@@ -1524,6 +1569,7 @@ function unarchTask(p){
   relayout(null); refitSoon(); redraw();
 }
 function purgeArch(p){
+  delMark(p);
   delete REM[p];
   if(!isOwnTask(p)) lattDel(p);
   remLevels(); remSave();
@@ -5493,7 +5539,7 @@ function askNotify(){}
 const SYNC_KEY='board.sync.v1';
 const SYNC_PATH='rem.json';
 let SYNC={tok:'',owner:'',repo:'',sha:null,off:false};
-let DEL={};                       /* path -> время удаления */
+/* DEL объявлен выше, рядом с REM — здесь повторно не объявляем */
 let syncTimer=null, syncBusy=false, syncMsg='';
 
 /* Куда синхронизировать. Доступ вшит, чтобы ничего не настраивать:
@@ -5644,6 +5690,9 @@ async function syncPull(quiet){
       const loc=REM[p];
       if(loc && (loc.u||0)<t){ delete REM[p]; changed++; }
     });
+    /* метки удалений сохраняем сразу: иначе после перезагрузки страницы
+       устройство снова не будет знать, что задача удалена */
+    delSave();
     /* галочки чек-листов */
     const rdone=doc.done||{};
     let dch=0;
