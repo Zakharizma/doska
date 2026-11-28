@@ -442,6 +442,70 @@ canvas{display:block;position:fixed;top:0;left:0;cursor:default;
   font-family:inherit}
 #bpanel .bcopy:hover{background:#26344a;color:var(--tx);border-color:var(--acc)}
 #bpanel .bcopy.ok{background:#12291c;border-color:#2f9e57;color:#7fe0a3}
+/* ---------- ОБЪЁМЫ И РАСХОД ПО КОНСТРУКТИВУ ---------- */
+#vpanel{position:fixed;left:calc(16px + var(--sal));top:calc(60px + var(--sat));z-index:26;
+  width:min(392px,calc(100vw - 32px));
+  max-height:calc(100vh - 84px);overflow:auto;display:none;
+  background:rgba(18,24,33,.985);border:1px solid var(--line2);border-radius:14px;
+  padding:10px;box-shadow:0 20px 52px rgba(0,0,0,.66);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+#vpanel.show{display:block}
+#vpanel .chead{display:flex;align-items:center;justify-content:space-between;
+  padding:2px 4px 9px;font-size:10.5px;letter-spacing:.08em;font-weight:700;
+  color:var(--tx3);border-bottom:1px solid var(--line);margin-bottom:9px}
+#vclose{cursor:pointer;color:var(--tx2);font-size:13px;padding:0 3px}
+#vclose:hover{color:var(--tx)}
+#vpanel .frow{display:flex;align-items:center;gap:7px;margin-bottom:6px}
+#vpanel .frow label{font-size:11.5px;color:var(--tx3);flex:0 0 auto;width:112px;line-height:1.3}
+#vpanel .frow input,#vpanel .frow select{flex:1;min-width:0;background:#0f1620;
+  border:1px solid var(--line2);border-radius:8px;color:var(--tx);padding:6px 8px;
+  outline:none;color-scheme:dark;font:12px ui-monospace,SFMono-Regular,Menlo,monospace}
+#vpanel .frow input:focus,#vpanel .frow select:focus{border-color:var(--acc)}
+#vpanel .frow .u{font-size:10px;color:var(--tx3);flex:0 0 auto;width:30px}
+#vpanel .sect{font-size:10px;letter-spacing:.06em;color:var(--tx3);font-weight:700;
+  margin:11px 0 6px;padding-top:8px;border-top:1px solid var(--line)}
+#vpanel textarea{width:100%;min-height:54px;resize:vertical;background:#0f1620;
+  border:1px solid var(--line2);border-radius:8px;color:var(--tx);padding:7px 8px;
+  outline:none;color-scheme:dark;font:12px ui-monospace,SFMono-Regular,Menlo,monospace;
+  line-height:1.55}
+#vpanel textarea:focus{border-color:var(--acc)}
+#vpanel .vhint{font-size:10.5px;color:var(--tx3);margin:4px 2px 0;line-height:1.4}
+#vpanel .go{display:flex;gap:6px;margin-top:10px}
+#vpanel .go button{flex:1;border:1px solid var(--line2);background:#1a2434;color:var(--tx);
+  border-radius:9px;padding:9px 6px;font-size:12.5px;cursor:pointer;font-family:inherit}
+#vpanel .go button.ok{background:var(--acc);border-color:var(--acc);color:#0b0f14;font-weight:700}
+#vpanel .go button:hover{filter:brightness(1.1)}
+#vpanel .res{margin-top:10px;border-top:1px solid var(--line);padding-top:9px}
+#vpanel .vchips{margin-bottom:7px}
+#vpanel .vchip{display:inline-block;background:#121a25;border:1px solid var(--line);
+  border-radius:8px;padding:5px 8px;font-size:11px;color:var(--tx3);margin:0 4px 5px 0}
+#vpanel .vchip b{color:var(--tx);font-variant-numeric:tabular-nums}
+#vpanel .vkv{display:flex;justify-content:space-between;gap:8px;font-size:11.5px;
+  color:var(--tx3);padding:3px 2px;border-bottom:1px dashed #1e2938}
+#vpanel .vkv b{color:var(--tx);font-variant-numeric:tabular-nums;font-weight:600;text-align:right}
+#vpanel .vkv b.ok{color:#7fe0a3}
+#vpanel .vkv b.bad{color:#ff9a9d}
+#vpanel .vsect{font-size:10px;letter-spacing:.06em;color:var(--tx3);font-weight:700;
+  margin:9px 0 4px}
+#vpanel .vverdict{border-radius:9px;padding:9px 11px;font-size:12px;line-height:1.45;
+  margin:9px 0;font-weight:600}
+#vpanel .vverdict.ok{background:#12291c;border:1px solid #2f9e57;color:#7fe0a3}
+#vpanel .vverdict.bad{background:#2a1416;border:1px solid #a13b3f;color:#ff9a9d}
+#vpanel .vcopy{width:100%;margin-top:8px;border:1px solid var(--line2);background:#1a2434;
+  color:var(--tx2);border-radius:8px;padding:8px;font-size:11.5px;cursor:pointer;
+  font-family:inherit}
+#vpanel .vcopy:hover{background:#26344a;color:var(--tx);border-color:var(--acc)}
+#vpanel .vcopy.ok{background:#12291c;border-color:#2f9e57;color:#7fe0a3}
+#vpanel details.vhelp{margin-top:9px;border-top:1px solid var(--line);padding-top:7px}
+#vpanel summary{list-style:none;cursor:pointer;font-size:11px;color:var(--acc);
+  font-weight:600;padding:2px 0;user-select:none}
+#vpanel summary::-webkit-details-marker{display:none}
+#vpanel summary:before{content:'▸';display:inline-block;width:12px;font-size:9px;opacity:.8}
+#vpanel details[open] summary:before{content:'▾'}
+#vpanel .vform{font:11px/1.62 ui-monospace,SFMono-Regular,Menlo,monospace;
+  color:var(--tx2);margin-top:5px;white-space:pre-wrap;word-break:break-word}
+#vpanel .vform i{color:var(--tx3);font-style:normal}
+#vpanel .vform b{color:var(--tx);font-weight:600}
 #tpanel .chead{display:flex;align-items:center;justify-content:space-between;
   padding:2px 4px 9px;font-size:10.5px;letter-spacing:.08em;font-weight:700;
   color:var(--tx3);border-bottom:1px solid var(--line);margin-bottom:9px}
@@ -796,6 +860,7 @@ canvas{display:block;position:fixed;top:0;left:0;cursor:default;
     <div class="tmi" data-tool="units"><span class="tmi-ic">⇄</span>Единицы измерения</div>
     <div class="tmi" data-tool="heat"><span class="tmi-ic">🌡</span>Теплотехнический расчёт</div>
     <div class="tmi" data-tool="concrete"><span class="tmi-ic">🧱</span>Прочность бетона</div>
+    <div class="tmi" data-tool="volumes"><span class="tmi-ic">📐</span>Объёмы и расход</div>
   </div>
 </div>
 <div id="vchip" title="Версия доски. Обновляется сама.">v—</div>
@@ -941,8 +1006,31 @@ canvas{display:block;position:fixed;top:0;left:0;cursor:default;
   <div class="sect">НОРМИРУЕМАЯ ПРОЧНОСТЬ</div>
   <div class="frow">
     <label>Класс бетона B</label>
-    <input id="bClass" type="number" step="0.5" min="1" value="25">
-    <span class="u">МПа</span>
+    <select id="bClass">
+      <option value="3.5">B3,5</option>
+      <option value="5">B5</option>
+      <option value="7.5">B7,5</option>
+      <option value="10">B10</option>
+      <option value="12.5">B12,5</option>
+      <option value="15">B15</option>
+      <option value="20">B20</option>
+      <option value="22.5">B22,5</option>
+      <option value="25" selected>B25</option>
+      <option value="27.5">B27,5</option>
+      <option value="30">B30</option>
+      <option value="35">B35</option>
+      <option value="40">B40</option>
+      <option value="45">B45</option>
+      <option value="50">B50</option>
+      <option value="55">B55</option>
+      <option value="60">B60</option>
+      <option value="70">B70</option>
+      <option value="80">B80</option>
+      <option value="90">B90</option>
+      <option value="100">B100</option>
+      <option value="110">B110</option>
+      <option value="120">B120</option>
+    </select>
   </div>
   <div class="frow">
     <label>Доля нормируемой</label>
@@ -1025,11 +1113,138 @@ Vr     граничный коэф. вариации, табл. 3
 оценивают отдельно (пп. 3.1.6, 8.1.6). Схема Г применима
 при V ≤ Vr (п. 5.5); иначе нужен контроль по схеме В.
 
+<i>КЛАСС БЕТОНА</i>
+Значения класса — по ГОСТ 26633-2015 «Бетоны тяжёлые
+и мелкозернистые. Технические условия», п. 4.3.1:
+B3,5; B5; B7,5; B10; B12,5; B15; B20; B22,5; B25;
+B27,5; B30; B35; B40; B45; B50; B55; B60; B70;
+B80; B90; B100; B110; B120.
+Промежуточных классов (B6, B13, B23 и подобных)
+стандарт не предусматривает. Класс — это прочность
+с обеспеченностью 95 %, поэтому в расчёте он играет
+роль нормируемой прочности Bнорм.
+
 <i>Норматив.</i> ГОСТ 18105-2018 «Бетоны. Правила контроля
 и оценки прочности», введён 01.01.2020 приказом
 Росстандарта № 130-ст от 12.04.2019, с Поправками
 ИУС № 10-2021 и № 12-2024. Пункты 5.1–5.5, 8.4, 8.5,
-приложение А.</div>
+приложение А. Классы бетона — ГОСТ 26633-2015, п. 4.3.1
+(введён 01.09.2016 приказом Росстандарта № 165-ст,
+взамен ГОСТ 26633-2012).</div>
+  </details>
+</div>
+
+<!-- объёмы и расход по конструктиву -->
+<div id="vpanel">
+  <div class="chead"><span>ОБЪЁМЫ И РАСХОД · КС-2</span><span id="vclose">✕</span></div>
+
+  <div class="sect">КОНСТРУКЦИЯ</div>
+  <div class="frow">
+    <label>Тип</label>
+    <select id="vType">
+      <option value="plate">Плита перекрытия, покрытия</option>
+      <option value="found">Фундаментная плита</option>
+      <option value="wall">Стена</option>
+      <option value="col">Колонна прямоугольная</option>
+      <option value="colr">Колонна круглая</option>
+      <option value="beam">Балка, ригель, ростверк</option>
+    </select>
+  </div>
+  <div class="frow" id="vRow1">
+    <label id="vL1">a — длина</label>
+    <input id="vP1" type="number" step="10" min="0">
+    <span class="u">мм</span>
+  </div>
+  <div class="frow" id="vRow2">
+    <label id="vL2">b — ширина</label>
+    <input id="vP2" type="number" step="10" min="0">
+    <span class="u">мм</span>
+  </div>
+  <div class="frow" id="vRow3">
+    <label id="vL3">h — толщина</label>
+    <input id="vP3" type="number" step="10" min="0">
+    <span class="u">мм</span>
+  </div>
+  <div class="frow">
+    <label>Количество</label>
+    <input id="vCnt" type="number" step="1" min="1" value="1">
+    <span class="u">шт.</span>
+  </div>
+  <div class="vhint" id="vNote"></div>
+
+  <div class="sect">АРМАТУРА ПО СПЕЦИФИКАЦИИ</div>
+  <textarea id="vReb" placeholder="12 6000 10&#10;8 3000 20"></textarea>
+  <div class="vhint">По строке на позицию: диаметр (мм), длина стержня (мм),
+    количество (шт.). Масса 1 м — по ГОСТ 34028-2016.</div>
+
+  <div class="sect">СВЕРКА С АКТОМ КС-2</div>
+  <div class="frow">
+    <label>Бетон по акту</label>
+    <input id="vActV" type="number" step="0.01" min="0">
+    <span class="u">м³</span>
+  </div>
+  <div class="frow">
+    <label>Арматура по акту</label>
+    <input id="vActM" type="number" step="0.1" min="0">
+    <span class="u">кг</span>
+  </div>
+
+  <div class="go">
+    <button class="ok" id="vGo">РАССЧИТАТЬ</button>
+    <button id="vClear">Очистить</button>
+  </div>
+
+  <div class="res" id="vOut"></div>
+
+  <details class="vhelp">
+    <summary>Формулы и норматив</summary>
+    <div class="vform"><i>ГЕОМЕТРИЯ</i> (размеры в мм, результат в м³ и м²)
+Плита, фундаментная плита
+  <b>V = a · b · h</b>
+  <b>A = 2(a + b) · h</b>   боковые грани по периметру
+Стена
+  <b>V = L · h · t</b>
+  <b>A = 2 · L · h</b>      две плоскости
+Колонна прямоугольная
+  <b>V = a · b · h</b>
+  <b>A = 2(a + b) · h</b>   четыре грани
+Колонна круглая
+  <b>V = π · d² / 4 · h</b>
+  <b>A = π · d · h</b>      боковая поверхность
+Балка, ригель, ростверк
+  <b>V = b · h · L</b>
+  <b>A = (2h + b) · L</b>   низ и два бока
+
+<i>ПЕРЕВОД ЕДИНИЦ</i>
+  V, м³ = V, мм³ / 10⁹
+  A, м² = A, мм² / 10⁶
+
+<i>АРМАТУРА</i>
+  <b>M = Σ ( Li · ni · m1(di) )</b>
+  Li — длина стержня, м;  ni — количество, шт.;
+  m1 — масса 1 м, кг (таблица ГОСТ 34028-2016)
+
+<i>УДЕЛЬНЫЕ ПОКАЗАТЕЛИ</i>
+  <b>расход арматуры = M / V</b>, кг/м³
+  <b>опалубка на объём = A / V</b>, м²/м³
+
+<i>СВЕРКА С АКТОМ</i>
+  <b>Δ = (Vрасч − Vакт) / Vакт · 100</b>, %
+  то же для массы арматуры
+
+<i>НОРМАТИВ</i>
+ГОСТ 34028-2016 «Прокат арматурный для железобетонных
+конструкций. Технические условия», введён 01.01.2018
+приказом Росстандарта № 232-ст от 31.03.2017, взамен
+ГОСТ 5781-82, ГОСТ 10884-94 и ГОСТ Р 52544-2006.
+Номинальная масса 1 м длины установлена при плотности
+стали 7,85 г/см³ (примечание 4 к таблице стандарта).
+
+<i>Примечания.</i> Геометрия и опалубка нормативом не
+нормируются — считаются по проектным размерам.
+Объём бетона — без вычета проёмов, ниш и закладных.
+Опалубка учтена только боковая (рабочая поверхность
+щитов), без торцов и доборных элементов.</div>
   </details>
 </div>
 
@@ -1329,7 +1544,7 @@ const RTXU_KEY='board.rtxu.v1';
 /* Версия сборки. Видна в панели «Напоминания» мелким шрифтом.
    Нужна ровно для одного: отличить старую страницу из кеша GitHub Pages
    от настоящей ошибки. Если версия старая — правки и не должны сохраняться. */
-const BOARD_VER='2026-11-28 12:33';
+const BOARD_VER='2026-11-28 12:40';
 /* сколько карточек с сохранённым текстом — видно рядом с версией */
 function showVer(){
   const v=document.getElementById('verState');
@@ -7748,7 +7963,8 @@ function reportText(){
   P.push(' с Поправками ИУС № 10-2021 и № 12-2024)');
   P.push('');
   P.push('ИСХОДНЫЕ ДАННЫЕ');
-  P.push('  Класс бетона B = '+f(L.B,1)+' МПа');
+  P.push('  Класс бетона B'+String(f(L.B,1)).replace(',0','')+' МПа');
+  P.push('    (шкала классов — ГОСТ 26633-2015, п. 4.3.1)');
   P.push('  Доля нормируемой прочности k = '+f(L.share,0)+' %');
   P.push('  Вид бетона: '+KIND_NAME[L.kind]);
   P.push('  Схема контроля: '+L.scheme);
@@ -7846,12 +8062,392 @@ el('bVals').addEventListener('input',()=>{ save(); });
     const raw=localStorage.getItem(KEY);
     if(!raw) return;
     const d=JSON.parse(raw);
-    if(d.b) el('bClass').value=d.b;
+    if(d.b){
+      /* сохраниться могло произвольное число от прежней версии —
+         ставим класс, только если он есть в нормативной шкале */
+      const sel=el('bClass');
+      const ok=Array.prototype.some.call(sel.options,o=>o.value===String(d.b));
+      sel.value=ok?String(d.b):'25';
+    }
     if(d.sh) el('bShare').value=d.sh;
     if(d.k!=null) el('bKind').value=d.k;
     if(d.sc) el('bScheme').value=d.sc;
     if(d.v) el('bVals').value=d.v;
   }catch(e){}
+})();
+
+})();
+</script>
+
+<script>
+/* ================= ОБЪЁМЫ И РАСХОД ПО КОНСТРУКТИВУ =================
+   Проверка объёмов работ против акта КС-2.
+
+   Нормативная часть — только арматура:
+     ГОСТ 34028-2016 «Прокат арматурный для железобетонных конструкций.
+     Технические условия», введён 01.01.2018 приказом Росстандарта
+     № 232-ст от 31.03.2017, взамен ГОСТ 5781-82, ГОСТ 10884-94 и
+     ГОСТ Р 52544-2006. Номинальная масса 1 м длины установлена при
+     плотности стали 7,85 г/см³ (примечание 4 к таблице).
+     Проверено 28.11.2026 по полному тексту (meganorm.ru).
+
+   Геометрия и опалубка — не нормируются: считаются по проектным
+   размерам конструкции. Это и есть предмет сверки с актом.
+
+   Что считается:
+     V  = площадь сечения · длина            объём бетона, м³
+     A  = площадь опалубки                   м²
+     M  = Σ (Li · ni · m1(di))               масса арматуры, кг
+     m1 — масса 1 м стержня по таблице ГОСТ 34028-2016, кг
+     расход арматуры = M / V, кг/м³
+     опалубка на объём = A / V, м²/м³
+   ---------------------------------------------------------------------- */
+(function(){
+'use strict';
+
+const pan=document.getElementById('vpanel');
+if(!pan) return;
+window.TOOLS=window.TOOLS||{};
+window.TOOLS.volumes={panel:pan, name:'Объёмы и расход'};
+
+const KEY='board.volumes.v1';
+let LAST=null;
+
+/* ГОСТ 34028-2016, таблица: номинальный диаметр, площадь Fн (мм²),
+   масса 1 м длины (кг). Масса = Fн · 7,85 / 1000. */
+const REBAR=[
+  [4.0, 12.6, 0.099],[4.5, 15.9, 0.125],[5.0, 19.6, 0.154],[5.5, 23.8, 0.187],
+  [6.0, 28.3, 0.222],[6.5, 33.2, 0.261],[7.0, 38.5, 0.302],[7.5, 44.2, 0.347],
+  [8.0, 50.3, 0.395],[8.5, 56.7, 0.445],[9.0, 63.6, 0.499],[9.5, 70.9, 0.556],
+  [10.0, 78.5, 0.617],[11.0, 95.0, 0.746],[12.0, 113.1, 0.888],[13.0, 132.7, 1.042],
+  [14.0, 153.9, 1.208],[15.0, 176.7, 1.387],[16.0, 201.1, 1.578],[17.0, 227.0, 1.782],
+  [18.0, 254.5, 1.998],[19.0, 283.5, 2.226],[20.0, 314.2, 2.466],[22.0, 380.1, 2.984],
+  [25.0, 490.9, 3.853],[28.0, 615.8, 4.834],[32.0, 804.3, 6.313],[36.0, 1017.9, 7.990],
+  [40.0, 1256.6, 9.865]
+];
+const M1={};
+REBAR.forEach(r=>{ M1[r[0]]=r[2]; });
+
+/* Типы конструкций. Размеры ввода — в миллиметрах.
+   Возвращаем объём в мм³ и площадь опалубки в мм². */
+const TYPES={
+  plate:{
+    name:'Плита перекрытия, покрытия',
+    f:['a — длина','b — ширина','h — толщина'],
+    calc:(a,b,h)=>({V:a*b*h, A:2*(a+b)*h,
+      note:'Опалубка — боковые грани по периметру: 2(a+b)·h'})
+  },
+  found:{
+    name:'Фундаментная плита',
+    f:['a — длина','b — ширина','h — толщина'],
+    calc:(a,b,h)=>({V:a*b*h, A:2*(a+b)*h,
+      note:'Опалубка — боковые грани по периметру: 2(a+b)·h'})
+  },
+  wall:{
+    name:'Стена',
+    f:['L — длина','h — высота','t — толщина'],
+    calc:(L,h,t)=>({V:L*h*t, A:2*L*h,
+      note:'Опалубка — две плоскости: 2·L·h'})
+  },
+  col:{
+    name:'Колонна прямоугольная',
+    f:['a — сечение','b — сечение','h — высота'],
+    calc:(a,b,h)=>({V:a*b*h, A:2*(a+b)*h,
+      note:'Опалубка — четыре грани: 2(a+b)·h'})
+  },
+  colr:{
+    name:'Колонна круглая',
+    f:['d — диаметр','h — высота'],
+    calc:(d,h)=>({V:Math.PI*d*d/4*h, A:Math.PI*d*h,
+      note:'Опалубка — боковая поверхность: π·d·h'})
+  },
+  beam:{
+    name:'Балка, ригель, ростверк',
+    f:['b — ширина','h — высота','L — длина'],
+    calc:(b,h,L)=>({V:b*h*L, A:(2*h+b)*L,
+      note:'Опалубка — низ и два бока: (2h+b)·L'})
+  }
+};
+
+const el=id=>document.getElementById(id);
+const num=v=>{
+  const x=parseFloat(String(v).replace(',','.').replace(/\s/g,''));
+  return isFinite(x)?x:0;
+};
+const fmt=(v,d)=>v==null||!isFinite(v)?'—':(d==null?v.toFixed(2):v.toFixed(d));
+
+function curType(){ return TYPES[el('vType').value]||TYPES.plate; }
+
+/* подписи полей зависят от типа */
+function syncFields(){
+  const t=curType();
+  const boxes=[el('vRow1'),el('vRow2'),el('vRow3')];
+  const labels=[el('vL1'),el('vL2'),el('vL3')];
+  boxes.forEach((b,i)=>{
+    const on=i<t.f.length;
+    b.style.display=on?'':'none';
+    if(on) labels[i].textContent=t.f[i];
+  });
+  el('vNote').textContent=t.note||'';
+}
+
+function readDim(){
+  const t=curType();
+  const vals=[num(el('vP1').value),num(el('vP2').value),num(el('vP3').value)];
+  return vals.slice(0,t.f.length);
+}
+
+function readRebar(){
+  const raw=(el('vReb').value||'').trim();
+  if(!raw) return [];
+  const rows=[];
+  raw.split('\n').forEach(line=>{
+    const s=line.trim();
+    if(!s) return;
+    /* формат строки: диаметр  длина  количество  (через пробел, ; или табуляцию) */
+    const p=s.split(/[\s;]+/).map(x=>x.replace(',','.'));
+    if(p.length<2) return;
+    const d=parseFloat(p[0]);
+    const L=parseFloat(p[1]);
+    const n=p.length>2?parseFloat(p[2]):1;
+    if(!isFinite(d)||!isFinite(L)) return;
+    rows.push({d:d, L:L, n:isFinite(n)&&n>0?n:1});
+  });
+  return rows;
+}
+
+function save(){
+  try{
+    localStorage.setItem(KEY,JSON.stringify({
+      t:el('vType').value, p1:el('vP1').value, p2:el('vP2').value,
+      p3:el('vP3').value, cnt:el('vCnt').value, reb:el('vReb').value,
+      actV:el('vActV').value, actM:el('vActM').value
+    }));
+  }catch(e){}
+}
+
+function calc(){
+  const out=el('vOut');
+  const t=curType();
+  const dim=readDim();
+  const cnt=Math.max(1,num(el('vCnt').value)||1);
+  const reb=readRebar();
+
+  /* проверка размеров */
+  if(dim.length<t.f.length || dim.some(v=>!v||v<=0)){
+    out.innerHTML='<div class="vverdict bad">Заполните все размеры конструкции, мм. '+
+      'Значения должны быть больше нуля.</div>';
+    return;
+  }
+
+  const one=t.calc.apply(null,dim);
+  const V_mm3=one.V, A_mm2=one.A;
+  const V=V_mm3/1e9;              /* м³ на одну конструкцию */
+  const A=A_mm2/1e6;              /* м² на одну конструкцию */
+  const Vt=V*cnt, At=A*cnt;       /* всего */
+
+  /* арматура */
+  let M=0;
+  const rLines=[];
+  reb.forEach(r=>{
+    const m1=M1[r.d];
+    if(m1==null){ rLines.push({bad:true, d:r.d, L:r.L, n:r.n}); return; }
+    const mass=r.L/1000*r.n*m1;   /* кг */
+    M+=mass;
+    rLines.push({d:r.d, L:r.L, n:r.n, m1:m1, mass:mass});
+  });
+  const Mt=M*cnt;
+
+  const perM3=V>0?M/V:null;       /* кг/м³ */
+  const opM3=V>0?A/V:null;        /* м²/м³ */
+
+  /* сверка с актом */
+  const actV=num(el('vActV').value);
+  const actM=num(el('vActM').value);
+  const dV=actV>0?(Vt-actV)/actV*100:null;
+  const dM=actM>0?(Mt-actM)/actM*100:null;
+
+  let h='';
+  h+='<div class="vchips">';
+  h+='<span class="vchip">Бетон <b>'+fmt(Vt,3)+'</b> м³</span>';
+  h+='<span class="vchip">Опалубка <b>'+fmt(At,2)+'</b> м²</span>';
+  h+='<span class="vchip">Арматура <b>'+fmt(Mt,1)+'</b> кг</span>';
+  h+='</div>';
+
+  h+='<div class="vkv"><span>Конструкция</span><b>'+t.name+'</b></div>';
+  h+='<div class="vkv"><span>Размеры, мм</span><b>'+dim.join(' × ')+'</b></div>';
+  h+='<div class="vkv"><span>Количество</span><b>'+cnt+' шт.</b></div>';
+  h+='<div class="vkv"><span>Объём одной</span><b>'+fmt(V,4)+' м³</b></div>';
+  h+='<div class="vkv"><span>Опалубка одной</span><b>'+fmt(A,3)+' м²</b></div>';
+  if(reb.length){
+    h+='<div class="vkv"><span>Арматура одной</span><b>'+fmt(M,2)+' кг</b></div>';
+  }
+  h+='<div class="vkv"><span>Расход арматуры</span><b>'+
+     (perM3!=null?fmt(perM3,1)+' кг/м³':'—')+'</b></div>';
+  h+='<div class="vkv"><span>Опалубка на объём</span><b>'+
+     (opM3!=null?fmt(opM3,2)+' м²/м³':'—')+'</b></div>';
+
+  /* построчно арматура */
+  if(rLines.length){
+    h+='<div class="vsect">АРМАТУРА ПО СПЕЦИФИКАЦИИ</div>';
+    rLines.forEach(r=>{
+      if(r.bad){
+        h+='<div class="vkv"><span>Ø'+fmt(r.d,1)+' мм — нет в ГОСТ 34028-2016</span><b class="bad">проверьте</b></div>';
+        return;
+      }
+      h+='<div class="vkv"><span>Ø'+fmt(r.d,1)+' × '+fmt(r.L,0)+' мм × '+r.n+
+         ' шт. ('+fmt(r.m1,3)+' кг/м)</span><b>'+fmt(r.mass,2)+' кг</b></div>';
+    });
+  }
+
+  /* сверка с актом */
+  if(dV!=null||dM!=null){
+    h+='<div class="vsect">СВЕРКА С АКТОМ КС-2</div>';
+    if(dV!=null){
+      const okV=Math.abs(dV)<=2;
+      h+='<div class="vkv"><span>Бетон: по расчёту '+fmt(Vt,3)+' / по акту '+fmt(actV,3)+' м³</span>'+
+         '<b class="'+(okV?'ok':'bad')+'">'+(dV>0?'+':'')+fmt(dV,1)+' %</b></div>';
+    }
+    if(dM!=null){
+      const okM=Math.abs(dM)<=2;
+      h+='<div class="vkv"><span>Арматура: по расчёту '+fmt(Mt,1)+' / по акту '+fmt(actM,1)+' кг</span>'+
+         '<b class="'+(okM?'ok':'bad')+'">'+(dM>0?'+':'')+fmt(dM,1)+' %</b></div>';
+    }
+    const bad=(dV!=null&&Math.abs(dV)>2)||(dM!=null&&Math.abs(dM)>2);
+    h+='<div class="vverdict '+(bad?'bad':'ok')+'">'+
+       (bad?'РАСХОЖДЕНИЕ С АКТОМ более 2 % — требует проверки':'Расхождение с актом в пределах 2 %')+
+       '</div>';
+  }
+
+  h+='<button class="vcopy" id="vCopy">Скопировать расчёт в отчёт</button>';
+
+  out.innerHTML=h;
+  LAST={type:t.name,dim:dim,cnt:cnt,V:V,A:A,Vt:Vt,At:At,M:M,Mt:Mt,
+        perM3:perM3,opM3:opM3,rLines:rLines,actV:actV,actM:actM,dV:dV,dM:dM};
+  const cp=document.getElementById('vCopy');
+  if(cp) cp.addEventListener('click',copyReport);
+  save();
+}
+
+function reportText(){
+  const L=LAST;
+  if(!L) return '';
+  const f=(v,d)=>v==null||!isFinite(v)?'—'
+    :(d==null?v.toFixed(2):v.toFixed(d)).replace('.',',');
+  const P=[];
+  P.push('РАСЧЁТ ОБЪЁМОВ И РАСХОДА ПО КОНСТРУКТИВУ');
+  P.push('Арматура: ГОСТ 34028-2016 «Прокат арматурный для железобетонных');
+  P.push('конструкций. Технические условия», введён 01.01.2018 приказом');
+  P.push('Росстандарта № 232-ст от 31.03.2017 (взамен ГОСТ 5781-82,');
+  P.push('ГОСТ 10884-94, ГОСТ Р 52544-2006); номинальная масса 1 м —');
+  P.push('при плотности стали 7,85 г/см³.');
+  P.push('');
+  P.push('ИСХОДНЫЕ ДАННЫЕ');
+  P.push('  Конструкция: '+L.type);
+  P.push('  Размеры, мм: '+L.dim.map(v=>f(v,0)).join(' × '));
+  P.push('  Количество: '+L.cnt+' шт.');
+  P.push('');
+  P.push('РАСЧЁТ');
+  P.push('  Объём бетона одной: '+f(L.V,4)+' м³');
+  P.push('  Объём бетона всего: '+f(L.Vt,3)+' м³');
+  P.push('  Площадь опалубки одной: '+f(L.A,3)+' м²');
+  P.push('  Площадь опалубки всего: '+f(L.At,2)+' м²');
+  if(L.rLines.length){
+    P.push('  Арматура по спецификации:');
+    L.rLines.forEach(r=>{
+      if(r.bad){ P.push('    Ø'+f(r.d,1)+' — нет в ГОСТ 34028-2016'); return; }
+      P.push('    Ø'+f(r.d,1)+' × '+f(r.L,0)+' мм × '+r.n+' шт. × '+
+             f(r.m1,3)+' кг/м = '+f(r.mass,2)+' кг');
+    });
+    P.push('  Масса арматуры одной: '+f(L.M,2)+' кг');
+    P.push('  Масса арматуры всего: '+f(L.Mt,1)+' кг');
+    P.push('  Расход арматуры: '+f(L.perM3,1)+' кг/м³');
+  }
+  P.push('  Опалубка на объём: '+f(L.opM3,2)+' м²/м³');
+  if(L.dV!=null||L.dM!=null){
+    P.push('');
+    P.push('СВЕРКА С АКТОМ КС-2');
+    if(L.dV!=null){
+      P.push('  Бетон: расчёт '+f(L.Vt,3)+' м³, акт '+f(L.actV,3)+' м³, '+
+             'расхождение '+(L.dV>0?'+':'')+f(L.dV,1)+' %');
+    }
+    if(L.dM!=null){
+      P.push('  Арматура: расчёт '+f(L.Mt,1)+' кг, акт '+f(L.actM,1)+' кг, '+
+             'расхождение '+(L.dM>0?'+':'')+f(L.dM,1)+' %');
+    }
+    const bad=(L.dV!=null&&Math.abs(L.dV)>2)||(L.dM!=null&&Math.abs(L.dM)>2);
+    P.push('  '+(bad?'Расхождение более 2 % — требует проверки.'
+                   :'Расхождение в пределах 2 %.'));
+  }
+  P.push('');
+  P.push('Геометрия и опалубка считаны по проектным размерам конструкции,');
+  P.push('нормативом не нормируются. Объём бетона — без вычета проёмов,');
+  P.push('ниш и закладных, если они не заданы отдельно.');
+  return P.join('\n');
+}
+
+function copyReport(){
+  const txt=reportText();
+  if(!txt) return;
+  const btn=document.getElementById('vCopy');
+  const done=ok=>{
+    if(!btn) return;
+    btn.classList.add('ok');
+    const old=btn.textContent;
+    btn.textContent=ok?'Скопировано в буфер':'Не удалось скопировать';
+    setTimeout(()=>{ btn.classList.remove('ok'); btn.textContent=old; },1800);
+  };
+  try{
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(()=>done(true),()=>done(false));
+      return;
+    }
+  }catch(e){}
+  try{
+    const ta=document.createElement('textarea');
+    ta.value=txt; ta.style.position='fixed'; ta.style.left='-9999px';
+    document.body.appendChild(ta); ta.select();
+    const ok=document.execCommand('copy');
+    document.body.removeChild(ta); done(ok);
+  }catch(e){ done(false); }
+}
+
+function openPan(){ pan.classList.add('show'); syncFields(); calc(); }
+function closePan(){ pan.classList.remove('show'); }
+window.TOOLS.volumes.open=openPan;
+window.TOOLS.volumes.close=closePan;
+
+el('vclose').addEventListener('click',closePan);
+el('vGo').addEventListener('click',calc);
+el('vClear').addEventListener('click',()=>{
+  ['vP1','vP2','vP3','vReb','vActV','vActM'].forEach(id=>{ el(id).value=''; });
+  el('vOut').innerHTML='';
+  save();
+});
+el('vType').addEventListener('change',()=>{ syncFields(); calc(); });
+['vP1','vP2','vP3','vCnt','vActV','vActM'].forEach(id=>{
+  el(id).addEventListener('input',save);
+  el(id).addEventListener('keydown',ev=>{
+    if(ev.key==='Enter'){ ev.preventDefault(); save(); calc(); }
+  });
+});
+el('vReb').addEventListener('input',save);
+
+(function restore(){
+  try{
+    const raw=localStorage.getItem(KEY);
+    if(!raw) return;
+    const d=JSON.parse(raw);
+    if(d.t) el('vType').value=d.t;
+    if(d.p1) el('vP1').value=d.p1;
+    if(d.p2) el('vP2').value=d.p2;
+    if(d.p3) el('vP3').value=d.p3;
+    if(d.cnt) el('vCnt').value=d.cnt;
+    if(d.reb) el('vReb').value=d.reb;
+    if(d.actV) el('vActV').value=d.actV;
+    if(d.actM) el('vActM').value=d.actM;
+  }catch(e){}
+  syncFields();
 })();
 
 })();
