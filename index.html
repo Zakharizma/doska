@@ -375,6 +375,58 @@ canvas{display:block;position:fixed;top:0;left:0;cursor:default;
   padding:10px;box-shadow:0 20px 52px rgba(0,0,0,.66);
   backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
 #tpanel.show{display:block}
+
+/* ---------- ПРОЧНОСТЬ БЕТОНА — ГОСТ 18105-2018 ----------
+   Геометрия панели повторяет теплотехническую: одинаковое поведение
+   на телефоне и на компьютере, ничего нового запоминать не нужно. */
+#bpanel{position:fixed;left:calc(16px + var(--sal));top:calc(60px + var(--sat));z-index:26;
+  width:min(392px,calc(100vw - 32px));
+  max-height:calc(100vh - 84px);overflow:auto;display:none;
+  background:rgba(18,24,33,.985);border:1px solid var(--line2);border-radius:14px;
+  padding:10px;box-shadow:0 20px 52px rgba(0,0,0,.66);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+#bpanel.show{display:block}
+#bpanel .chead{display:flex;align-items:center;justify-content:space-between;
+  padding:2px 4px 9px;font-size:10.5px;letter-spacing:.08em;font-weight:700;
+  color:var(--tx3);border-bottom:1px solid var(--line);margin-bottom:9px}
+#bclose{cursor:pointer;color:var(--tx2);font-size:13px;padding:0 3px}
+#bclose:hover{color:var(--tx)}
+#bpanel .frow{display:flex;align-items:center;gap:7px;margin-bottom:6px}
+#bpanel .frow label{font-size:11.5px;color:var(--tx3);flex:0 0 auto;width:112px;line-height:1.3}
+#bpanel .frow input,#bpanel .frow select{flex:1;min-width:0;background:#0f1620;
+  border:1px solid var(--line2);border-radius:8px;color:var(--tx);padding:6px 8px;
+  outline:none;color-scheme:dark;font:12px ui-monospace,SFMono-Regular,Menlo,monospace}
+#bpanel .frow input:focus,#bpanel .frow select:focus{border-color:var(--acc)}
+#bpanel .frow .u{font-size:10px;color:var(--tx3);flex:0 0 auto;width:30px}
+#bpanel .sect{font-size:10px;letter-spacing:.06em;color:var(--tx3);font-weight:700;
+  margin:11px 0 6px;padding-top:8px;border-top:1px solid var(--line)}
+#bpanel textarea{width:100%;min-height:62px;resize:vertical;background:#0f1620;
+  border:1px solid var(--line2);border-radius:8px;color:var(--tx);padding:7px 8px;
+  outline:none;color-scheme:dark;font:12px ui-monospace,SFMono-Regular,Menlo,monospace;
+  line-height:1.55}
+#bpanel textarea:focus{border-color:var(--acc)}
+#bpanel .bhint{font-size:10.5px;color:var(--tx3);margin:4px 2px 0;line-height:1.4}
+#bpanel .go{display:flex;gap:6px;margin-top:10px}
+#bpanel .go button{flex:1;border:1px solid var(--line2);background:#1a2434;color:var(--tx);
+  border-radius:9px;padding:9px 6px;font-size:12.5px;cursor:pointer;font-family:inherit}
+#bpanel .go button.ok{background:var(--acc);border-color:var(--acc);color:#0b0f14;font-weight:700}
+#bpanel .go button:hover{filter:brightness(1.1)}
+#bpanel .res{margin-top:10px;border-top:1px solid var(--line);padding-top:9px}
+#bpanel .bchips{margin-bottom:7px}
+#bpanel .bchip{display:inline-block;background:#121a25;border:1px solid var(--line);
+  border-radius:8px;padding:5px 8px;font-size:11px;color:var(--tx3);margin:0 4px 5px 0}
+#bpanel .bchip b{color:var(--tx);font-variant-numeric:tabular-nums}
+#bpanel .bkv{display:flex;justify-content:space-between;gap:8px;font-size:11.5px;
+  color:var(--tx3);padding:3px 2px;border-bottom:1px dashed #1e2938}
+#bpanel .bkv b{color:var(--tx);font-variant-numeric:tabular-nums;font-weight:600;text-align:right}
+#bpanel .bkv b.ok{color:#7fe0a3}
+#bpanel .bkv b.bad{color:#ff9a9d}
+#bpanel .bverdict{border-radius:9px;padding:9px 11px;font-size:12px;line-height:1.45;
+  margin:9px 0;font-weight:600}
+#bpanel .bverdict.ok{background:#12291c;border:1px solid #2f9e57;color:#7fe0a3}
+#bpanel .bverdict.bad{background:#2a1416;border:1px solid #a13b3f;color:#ff9a9d}
+#bpanel .bfoot{font-size:10px;color:var(--tx3);line-height:1.45;margin-top:8px;
+  padding-top:7px;border-top:1px solid var(--line)}
 #tpanel .chead{display:flex;align-items:center;justify-content:space-between;
   padding:2px 4px 9px;font-size:10.5px;letter-spacing:.08em;font-weight:700;
   color:var(--tx3);border-bottom:1px solid var(--line);margin-bottom:9px}
@@ -728,6 +780,7 @@ canvas{display:block;position:fixed;top:0;left:0;cursor:default;
     <div class="tmi" data-tool="cut"><span class="tmi-ic">✂</span>Линейный раскрой</div>
     <div class="tmi" data-tool="units"><span class="tmi-ic">⇄</span>Единицы измерения</div>
     <div class="tmi" data-tool="heat"><span class="tmi-ic">🌡</span>Теплотехнический расчёт</div>
+    <div class="tmi" data-tool="concrete"><span class="tmi-ic">🧱</span>Прочность бетона</div>
   </div>
 </div>
 <div id="vchip" title="Версия доски. Обновляется сама.">v—</div>
@@ -864,6 +917,53 @@ canvas{display:block;position:fixed;top:0;left:0;cursor:default;
     <span id="syncState">подключаюсь…</span>
     <span id="verState" style="opacity:.5;font-size:10px"></span>
   </div>
+</div>
+
+<!-- прочность бетона по ГОСТ 18105-2018 -->
+<div id="bpanel">
+  <div class="chead"><span>ПРОЧНОСТЬ БЕТОНА · ГОСТ 18105-2018</span><span id="bclose">✕</span></div>
+
+  <div class="sect">НОРМИРУЕМАЯ ПРОЧНОСТЬ</div>
+  <div class="frow">
+    <label>Класс бетона B</label>
+    <input id="bClass" type="number" step="0.5" min="1" value="25">
+    <span class="u">МПа</span>
+  </div>
+  <div class="frow">
+    <label>Доля нормируемой</label>
+    <input id="bShare" type="number" step="1" min="1" max="100" value="100">
+    <span class="u">%</span>
+  </div>
+  <div class="frow">
+    <label>Вид бетона</label>
+    <select id="bKind">
+      <option value="0">Все виды, кроме силикатного и ячеистого</option>
+      <option value="1">Плотный силикатный</option>
+      <option value="2">Ячеистый</option>
+      <option value="3">Массивные гидротехнические</option>
+    </select>
+  </div>
+  <div class="frow">
+    <label>Схема контроля</label>
+    <select id="bScheme">
+      <option value="А">А — однородность по 30 и более результатам</option>
+      <option value="Б">Б — по 15 и более, скользящий</option>
+      <option value="В">В — по текущей партии или группе</option>
+      <option value="Г">Г — без определения однородности</option>
+    </select>
+  </div>
+
+  <div class="sect">РЕЗУЛЬТАТЫ ИСПЫТАНИЙ</div>
+  <textarea id="bVals" placeholder="28,4  30,1  29,6  27,9"></textarea>
+  <div class="bhint">Единичные значения прочности R<sub>i</sub>, МПа. Через запятую,
+    пробел или с новой строки. Не менее двух значений.</div>
+
+  <div class="go">
+    <button class="ok" id="bGo">РАССЧИТАТЬ</button>
+    <button id="bClear">Очистить</button>
+  </div>
+
+  <div class="res" id="bOut"></div>
 </div>
 
 <div id="toast"></div>
@@ -1162,7 +1262,7 @@ const RTXU_KEY='board.rtxu.v1';
 /* Версия сборки. Видна в панели «Напоминания» мелким шрифтом.
    Нужна ровно для одного: отличить старую страницу из кеша GitHub Pages
    от настоящей ошибки. Если версия старая — правки и не должны сохраняться. */
-const BOARD_VER='2026-11-26 13:27';
+const BOARD_VER='2026-11-28 12:22';
 /* сколько карточек с сохранённым текстом — видно рядом с версией */
 function showVer(){
   const v=document.getElementById('verState');
@@ -7248,6 +7348,326 @@ document.getElementById('tclose').addEventListener('click',closePan);
     lays=[{m:6,d:100,ins:true},{m:25,d:380,ins:false}];
   }
   renderLays();
+})();
+
+})();
+</script>
+
+<script>
+/* ================= ПРОЧНОСТЬ БЕТОНА — ГОСТ 18105-2018 =================
+   Бетоны. Правила контроля и оценки прочности.
+   Принят МГС (протокол от 29.11.2018 № 54), введён в РФ приказом
+   Росстандарта от 12.04.2019 № 130-ст с 01.01.2020, взамен ГОСТ 18105-2010.
+   Действует с Поправками (ИУС № 10-2021 и ИУС № 12-2024).
+   Проверено 28.11.2026 по текстам: meganorm.ru (полный текст с таблицами
+   и приложением А), docs.cntd.ru (ред. с Поправками), официальное издание
+   Стандартинформ 2019 (PDF).
+
+   Что считается:
+     ф.(1)  Rm  = ΣRi / n                        фактическая прочность
+     ф.(2)  Sm  = √(Σ(Ri−Rm)²/(n−1))             СКО, при n ≥ 9
+     ф.(3)  Sm  = Wm / α                         СКО, при n = 2…8 (табл. 2)
+     ф.(4)  Wm  = Rmax − Rmin                    размах
+     ф.(7)  Vm  = Sm / Rm · 100 %                текущий коэффициент вариации
+     ф.(9)  RT  = Kt · Bнорм                     требуемая прочность
+     ф.(10) Kt  = 1/(1 − tα·Vc/100)              схема Б (табл. А.2)
+     ф.(13) Bф  = Rm / Kt                        схема В, n ≥ 20
+     ф.(14) Bф  = Rm − ks·Sm                     n = 6…15 (табл. 4)
+     ф.(16) Bф  = 0,8·Rm                         схема Г
+     ф.(11) Rm ≥ RT,  ф.(12) Rmin ≥ Bнорм,  ф.(17) Bф ≥ Bнорм
+   ---------------------------------------------------------------------- */
+(function(){
+'use strict';
+
+const pan=document.getElementById('bpanel');
+if(!pan) return;
+window.TOOLS=window.TOOLS||{};
+window.TOOLS.concrete={panel:pan, name:'Прочность бетона'};
+
+const KEY='board.concrete.v1';
+
+/* Таблица 2 — коэффициент α, п. 5.2 */
+const ALPHA={2:1.13,3:1.69,4:2.06,5:2.33,6:2.53,7:2.70,8:2.84};
+
+/* Таблица 3 — граничный коэффициент вариации Vr для схемы Г, п. 5.5 */
+const VR=[[3,4],[5,6],[8,7.5],[10,8],[15,9],[20,10],[30,12]];
+
+/* Таблица 4 — коэффициент ks, п. 8.4.2 */
+const KS={6:2.00,7:1.94,8:1.91,9:1.88,10:1.86,11:1.84,12:1.83,13:1.82,14:1.81,15:1.80};
+
+/* Таблица 5 — коэффициент tβ, п. 8.4.3 (справочно, в расчёт не идёт) */
+const TB={6:2.57,7:2.45,8:2.36,9:2.31,10:2.26};
+
+/* Таблица А.1 — Kt при контроле по схемам А и В.
+   Колонки: [V, %, обычный, плотный силикатный, ячеистый, гидротехнический].
+   null — область недопустимых значений по таблице. */
+const A1=[
+  [6,  1.07, 1.06, 1.08, 1.09],
+  [7,  1.08, 1.07, 1.09, 1.10],
+  [8,  1.09, 1.08, 1.10, 1.11],
+  [9,  1.11, 1.09, 1.12, 1.13],
+  [10, 1.14, 1.12, 1.13, 1.14],
+  [11, 1.18, 1.14, 1.14, 1.16],
+  [12, 1.23, 1.18, 1.17, 1.18],
+  [13, 1.28, 1.22, 1.22, 1.20],
+  [14, 1.33, 1.27, 1.26, 1.22],
+  [15, 1.38, 1.33, 1.32, 1.23],
+  [16, 1.43, 1.39, 1.37, 1.25],
+  [17, null, 1.46, 1.43, 1.28],
+  [18, null, null, 1.50, 1.32],
+  [19, null, null, 1.57, 1.36],
+  [20, null, null, null, 1.39]
+];
+
+/* Таблица А.2 — коэффициент tα, схема Б */
+const TA=[[15,1.76],[20,1.73],[25,1.71],[30,1.70]];
+
+/* Таблица А.3 — Kt при контроле по схеме Г */
+const A3=[1.28,1.33,1.43];
+
+const KIND_NAME=['обычный','плотный силикатный','ячеистый','массивный гидротехнический'];
+
+/* Kt по таблице А.1 с линейной интерполяцией (примечание к таблице) */
+function ktA1(V,kind){
+  const col=kind+1;
+  const pts=[];
+  for(const row of A1){ if(row[col]!==null) pts.push([row[0],row[col]]); }
+  if(!pts.length) return null;
+  if(V<=pts[0][0]) return pts[0][1];
+  const last=pts[pts.length-1];
+  if(V>last[0]) return null;           /* область недопустимых значений */
+  for(let i=0;i<pts.length-1;i++){
+    const v0=pts[i][0], k0=pts[i][1], v1=pts[i+1][0], k1=pts[i+1][1];
+    if(V>=v0&&V<=v1){
+      const t=(V-v0)/(v1-v0);
+      return k0+(k1-k0)*t;
+    }
+  }
+  return last[1];
+}
+
+/* Vr по таблице 3 с линейной интерполяцией */
+function vrOf(n){
+  if(n<=VR[0][0]) return VR[0][1];
+  const last=VR[VR.length-1];
+  if(n>=last[0]) return last[1];
+  for(let i=0;i<VR.length-1;i++){
+    const n0=VR[i][0], v0=VR[i][1], n1=VR[i+1][0], v1=VR[i+1][1];
+    if(n>=n0&&n<=n1){
+      const t=(n-n0)/(n1-n0);
+      return v0+(v1-v0)*t;
+    }
+  }
+  return last[1];
+}
+
+/* tα по таблице А.2 с линейной интерполяцией */
+function taOf(n){
+  if(n<=TA[0][0]) return TA[0][1];
+  const last=TA[TA.length-1];
+  if(n>=last[0]) return last[1];
+  for(let i=0;i<TA.length-1;i++){
+    const n0=TA[i][0], v0=TA[i][1], n1=TA[i+1][0], v1=TA[i+1][1];
+    if(n>=n0&&n<=n1){
+      const t=(n-n0)/(n1-n0);
+      return v0+(v1-v0)*t;
+    }
+  }
+  return last[1];
+}
+
+const el=id=>document.getElementById(id);
+const num=v=>{
+  const x=parseFloat(String(v).replace(',','.'));
+  return isFinite(x)?x:0;
+};
+const fmt=(v,d)=>v==null||!isFinite(v)?'—':v.toFixed(d==null?2:d);
+
+function readVals(){
+  const raw=el('bVals').value||'';
+  return raw.split(/[\s;]+/)
+    .map(s=>s.replace(',','.'))
+    .map(s=>parseFloat(s))
+    .filter(v=>isFinite(v)&&v>0);
+}
+
+function save(){
+  try{
+    localStorage.setItem(KEY,JSON.stringify({
+      b:el('bClass').value, sh:el('bShare').value,
+      k:el('bKind').value, sc:el('bScheme').value, v:el('bVals').value
+    }));
+  }catch(e){}
+}
+
+function calc(){
+  const out=el('bOut');
+  const B=num(el('bClass').value);
+  const share=num(el('bShare').value)||100;
+  const kind=parseInt(el('bKind').value,10)||0;
+  const scheme=el('bScheme').value;
+  const vals=readVals();
+
+  if(!B||B<=0){
+    out.innerHTML='<div class="bverdict bad">Укажите класс бетона по прочности, МПа.</div>';
+    return;
+  }
+  if(vals.length<2){
+    out.innerHTML='<div class="bverdict bad">Нужно не менее двух единичных значений прочности. '+
+      'Вставьте результаты испытаний, МПа.</div>';
+    return;
+  }
+
+  const n=vals.length;
+  const Bnorm=B*share/100;                    /* нормируемая прочность */
+  const Rmin=Math.min.apply(null,vals);
+  const Rmax=Math.max.apply(null,vals);
+  const Wm=Rmax-Rmin;                         /* ф. (4) */
+  const Rm=vals.reduce((a,b)=>a+b,0)/n;       /* ф. (1) */
+
+  let Sm,smSrc;
+  if(n>=9){
+    Sm=Math.sqrt(vals.reduce((a,r)=>a+(r-Rm)*(r-Rm),0)/(n-1));  /* ф. (2) */
+    smSrc='ф. (2), n ≥ 9';
+  }else{
+    const al=ALPHA[n];
+    Sm=Wm/al;                                                  /* ф. (3) */
+    smSrc='ф. (3), α = '+al.toFixed(2)+' (табл. 2)';
+  }
+  const Vm=Rm>0?Sm/Rm*100:0;                  /* ф. (7) */
+
+  /* коэффициент требуемой прочности */
+  let Kt=null,ktSrc='',ktBad=false;
+  if(scheme==='А'||scheme==='В'){
+    Kt=ktA1(Vm,kind);
+    ktSrc='табл. А.1 при V = '+fmt(Vm,1)+' %';
+    if(Kt==null) ktBad=true;
+  }else if(scheme==='Б'){
+    const t=taOf(n);
+    const den=1-t*Vm/100;
+    Kt=den>0?1/den:null;
+    ktSrc='ф. (10), tα = '+t.toFixed(2)+' (табл. А.2)';
+    if(Kt==null) ktBad=true;
+  }else{
+    if(kind===3){ Kt=null; ktSrc='табл. А.3 не задаёт значение для массивных гидротехнических конструкций'; ktBad=true; }
+    else { Kt=A3[kind]; ktSrc='табл. А.3'; }
+  }
+
+  const RT=Kt!=null?Kt*Bnorm:null;            /* ф. (9) */
+
+  /* фактический класс бетона */
+  let Bf=null,bfSrc='',bfNote='';
+  if(scheme==='Г'){
+    Bf=0.8*Rm; bfSrc='ф. (16)';               /* п. 8.4.4 */
+  }else if(n>=20){
+    Bf=Kt!=null?Rm/Kt:null; bfSrc='ф. (13)';  /* п. 8.4.1 */
+  }else if(n>=6&&n<=15){
+    const ks=KS[n];
+    if(ks){ Bf=Rm-ks*Sm; bfSrc='ф. (14), ks = '+ks.toFixed(2)+' (табл. 4)'; }
+  }else if(n>15&&n<20){
+    bfNote='Для n = 16…19 фактический класс не определён: ф. (13) требует n ≥ 20, '+
+           'ф. (14) — n ≤ 15. Приведите число участков к 20 или к 15.';
+  }
+
+  /* условия приёмки */
+  const okRT=RT!=null&&Rm>=RT;                /* ф. (11) */
+  const okMin=Rmin>=Bnorm;                    /* ф. (12) */
+  const okBf=Bf!=null?Bf>=Bnorm:null;         /* ф. (17) */
+
+  const vr=vrOf(n);
+  const vLimit=(scheme==='Г')&&Vm>vr;
+
+  /* ---- вывод ---- */
+  let h='';
+  h+='<div class="bchips">';
+  h+='<span class="bchip">n <b>'+n+'</b></span>';
+  h+='<span class="bchip">R<sub>m</sub> <b>'+fmt(Rm)+'</b> МПа</span>';
+  h+='<span class="bchip">S<sub>m</sub> <b>'+fmt(Sm)+'</b> МПа</span>';
+  h+='<span class="bchip">V <b>'+fmt(Vm,1)+'</b> %</span>';
+  h+='<span class="bchip">W<sub>m</sub> <b>'+fmt(Wm)+'</b> МПа</span>';
+  h+='</div>';
+
+  h+='<div class="bkv"><span>Схема контроля</span><b>'+scheme+'</b></div>';
+  h+='<div class="bkv"><span>Вид бетона</span><b>'+KIND_NAME[kind]+'</b></div>';
+  h+='<div class="bkv"><span>Нормируемая прочность B<sub>норм</sub></span><b>'+fmt(Bnorm)+' МПа</b></div>';
+  h+='<div class="bkv"><span>Среднеквадратическое отклонение</span><b>'+smSrc+'</b></div>';
+  h+='<div class="bkv"><span>Коэффициент K<sub>т</sub></span><b>'+
+     (Kt!=null?fmt(Kt,3):'не определён')+'</b></div>';
+  h+='<div class="bkv"><span>Источник K<sub>т</sub></span><b style="font-weight:400">'+ktSrc+'</b></div>';
+  h+='<div class="bkv"><span>Требуемая прочность R<sub>т</sub> — ф. (9)</span><b>'+
+     (RT!=null?fmt(RT)+' МПа':'—')+'</b></div>';
+  h+='<div class="bkv"><span>Фактический класс B<sub>ф</sub></span><b>'+
+     (Bf!=null?fmt(Bf)+' МПа':'—')+'</b></div>';
+  if(bfSrc) h+='<div class="bkv"><span>Расчёт B<sub>ф</sub></span><b style="font-weight:400">'+bfSrc+'</b></div>';
+  h+='<div class="bkv"><span>Минимальное значение R<sub>i,min</sub></span><b>'+fmt(Rmin)+' МПа</b></div>';
+
+  /* вердикт */
+  if(ktBad&&scheme!=='Г'){
+    h+='<div class="bverdict bad">Коэффициент K<sub>т</sub> не определён: при V = '+
+       fmt(Vm,1)+' % таблица А.1 относит такую однородность к области недопустимых значений '+
+       'для '+KIND_NAME[kind]+' бетона. По п. 4.8 нужно увеличить число результатов испытаний '+
+       'или разделить конструкции на партии и зоны с меньшей вариацией. Считать требуемую '+
+       'прочность в этом случае нельзя.</div>';
+  }else if(ktBad&&scheme==='Г'){
+    h+='<div class="bverdict bad">'+ktSrc+'. Проверьте вид бетона или выберите другую схему контроля.</div>';
+  }else{
+    let allOk=okRT&&okMin&&(okBf===null||okBf);
+    h+='<div class="bverdict '+(allOk?'ok':'bad')+'">'+
+       (allOk?'ПАРТИЯ ПРИНИМАЕТСЯ по прочности бетона':'ПАРТИЯ НЕ ПРИНИМАЕТСЯ по прочности бетона')+
+       '</div>';
+    h+='<div class="bkv"><span>ф. (11) R<sub>m</sub> ≥ R<sub>т</sub>: '+fmt(Rm)+' ≥ '+
+       fmt(RT)+'</span><b class="'+(okRT?'ok':'bad')+'">'+(okRT?'выполняется':'НЕ выполняется')+'</b></div>';
+    h+='<div class="bkv"><span>ф. (12) R<sub>i,min</sub> ≥ B<sub>норм</sub>: '+fmt(Rmin)+' ≥ '+
+       fmt(Bnorm)+'</span><b class="'+(okMin?'ok':'bad')+'">'+(okMin?'выполняется':'НЕ выполняется')+'</b></div>';
+    if(okBf!==null){
+      h+='<div class="bkv"><span>ф. (17) B<sub>ф</sub> ≥ B<sub>норм</sub>: '+fmt(Bf)+' ≥ '+
+         fmt(Bnorm)+'</span><b class="'+(okBf?'ok':'bad')+'">'+(okBf?'выполняется':'НЕ выполняется')+'</b></div>';
+    }
+  }
+
+  if(vLimit){
+    h+='<div class="bverdict bad">Схема Г по п. 5.5 применима только при V не более '+
+       fmt(vr,1)+' % (таблица 3 для n = '+n+'), а фактически V = '+fmt(Vm,1)+
+       ' %. Схему Г применять нельзя — нужен контроль по схеме В.</div>';
+  }
+  if(bfNote) h+='<div class="bverdict bad">'+bfNote+'</div>';
+
+  h+='<div class="bfoot">ГОСТ 18105-2018, пп. 5.1–5.5, 8.4, 8.5, приложение А. '+
+     'Расчёт по средним значениям серий; зоны с прочностью ниже средней более чем на 15 % '+
+     'оцениваются отдельно (пп. 3.1.6, 8.1.6).</div>';
+
+  out.innerHTML=h;
+  save();
+}
+
+function openPan(){ pan.classList.add('show'); calc(); }
+function closePan(){ pan.classList.remove('show'); }
+window.TOOLS.concrete.open=openPan;
+window.TOOLS.concrete.close=closePan;
+
+el('bclose').addEventListener('click',closePan);
+el('bGo').addEventListener('click',calc);
+el('bClear').addEventListener('click',()=>{
+  el('bVals').value='';
+  el('bOut').innerHTML='';
+  save();
+});
+['bClass','bShare','bKind','bScheme'].forEach(id=>{
+  el(id).addEventListener('change',calc);
+});
+el('bVals').addEventListener('input',()=>{ save(); });
+
+(function restore(){
+  try{
+    const raw=localStorage.getItem(KEY);
+    if(!raw) return;
+    const d=JSON.parse(raw);
+    if(d.b) el('bClass').value=d.b;
+    if(d.sh) el('bShare').value=d.sh;
+    if(d.k!=null) el('bKind').value=d.k;
+    if(d.sc) el('bScheme').value=d.sc;
+    if(d.v) el('bVals').value=d.v;
+  }catch(e){}
 })();
 
 })();
