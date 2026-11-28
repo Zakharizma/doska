@@ -506,6 +506,69 @@ canvas{display:block;position:fixed;top:0;left:0;cursor:default;
   color:var(--tx2);margin-top:5px;white-space:pre-wrap;word-break:break-word}
 #vpanel .vform i{color:var(--tx3);font-style:normal}
 #vpanel .vform b{color:var(--tx);font-weight:600}
+/* ---------- НЕУСТОЙКА И ШТРАФЫ ---------- */
+#npanel{position:fixed;left:calc(16px + var(--sal));top:calc(60px + var(--sat));z-index:26;
+  width:min(392px,calc(100vw - 32px));
+  max-height:calc(100vh - 84px);overflow:auto;display:none;
+  background:rgba(18,24,33,.985);border:1px solid var(--line2);border-radius:14px;
+  padding:10px;box-shadow:0 20px 52px rgba(0,0,0,.66);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+#npanel.show{display:block}
+#npanel .chead{display:flex;align-items:center;justify-content:space-between;
+  padding:2px 4px 9px;font-size:10.5px;letter-spacing:.08em;font-weight:700;
+  color:var(--tx3);border-bottom:1px solid var(--line);margin-bottom:9px}
+#nclose{cursor:pointer;color:var(--tx2);font-size:13px;padding:0 3px}
+#nclose:hover{color:var(--tx)}
+#npanel .frow{display:flex;align-items:center;gap:7px;margin-bottom:6px}
+#npanel .frow label{font-size:11.5px;color:var(--tx3);flex:0 0 auto;width:112px;line-height:1.3}
+#npanel .frow input,#npanel .frow select{flex:1;min-width:0;background:#0f1620;
+  border:1px solid var(--line2);border-radius:8px;color:var(--tx);padding:6px 8px;
+  outline:none;color-scheme:dark;font:12px ui-monospace,SFMono-Regular,Menlo,monospace}
+#npanel .frow input:focus,#npanel .frow select:focus{border-color:var(--acc)}
+#npanel .frow .u{font-size:10px;color:var(--tx3);flex:0 0 auto;width:30px}
+#npanel .frow.chk{gap:8px}
+#npanel .frow.chk label{width:auto;flex:1;font-size:11.5px;color:var(--tx2);cursor:pointer}
+#npanel .frow.chk input{flex:0 0 auto;width:16px;height:16px;accent-color:var(--acc);
+  cursor:pointer;padding:0}
+#npanel .sect{font-size:10px;letter-spacing:.06em;color:var(--tx3);font-weight:700;
+  margin:11px 0 6px;padding-top:8px;border-top:1px solid var(--line)}
+#npanel .vhint{font-size:10.5px;color:var(--tx3);margin:4px 2px 0;line-height:1.45}
+#npanel .go{display:flex;gap:6px;margin-top:10px}
+#npanel .go button{flex:1;border:1px solid var(--line2);background:#1a2434;color:var(--tx);
+  border-radius:9px;padding:9px 6px;font-size:12.5px;cursor:pointer;font-family:inherit}
+#npanel .go button.ok{background:var(--acc);border-color:var(--acc);color:#0b0f14;font-weight:700}
+#npanel .go button:hover{filter:brightness(1.1)}
+#npanel .res{margin-top:10px;border-top:1px solid var(--line);padding-top:9px}
+#npanel .nchips{margin-bottom:7px}
+#npanel .nchip{display:inline-block;background:#121a25;border:1px solid var(--line);
+  border-radius:8px;padding:5px 8px;font-size:11px;color:var(--tx3);margin:0 4px 5px 0}
+#npanel .nchip b{color:var(--tx);font-variant-numeric:tabular-nums}
+#npanel .nkv{display:flex;justify-content:space-between;gap:8px;font-size:11.5px;
+  color:var(--tx3);padding:3px 2px;border-bottom:1px dashed #1e2938}
+#npanel .nkv b{color:var(--tx);font-variant-numeric:tabular-nums;font-weight:600;
+  text-align:right;max-width:62%}
+#npanel .nsect{font-size:10px;letter-spacing:.06em;color:var(--tx3);font-weight:700;
+  margin:9px 0 4px}
+#npanel .nverdict{border-radius:9px;padding:9px 11px;font-size:11.5px;line-height:1.45;
+  margin:7px 0;font-weight:500}
+#npanel .nverdict.ok{background:#12291c;border:1px solid #2f9e57;color:#7fe0a3}
+#npanel .nverdict.bad{background:#2a1416;border:1px solid #a13b3f;color:#ff9a9d}
+#npanel .nverdict b{color:inherit;font-weight:700}
+#npanel .ncopy{width:100%;margin-top:8px;border:1px solid var(--line2);background:#1a2434;
+  color:var(--tx2);border-radius:8px;padding:8px;font-size:11.5px;cursor:pointer;
+  font-family:inherit}
+#npanel .ncopy:hover{background:#26344a;color:var(--tx);border-color:var(--acc)}
+#npanel .ncopy.ok{background:#12291c;border-color:#2f9e57;color:#7fe0a3}
+#npanel details.nhelp{margin-top:9px;border-top:1px solid var(--line);padding-top:7px}
+#npanel summary{list-style:none;cursor:pointer;font-size:11px;color:var(--acc);
+  font-weight:600;padding:2px 0;user-select:none}
+#npanel summary::-webkit-details-marker{display:none}
+#npanel summary:before{content:'▸';display:inline-block;width:12px;font-size:9px;opacity:.8}
+#npanel details[open] summary:before{content:'▾'}
+#npanel .nform{font:11px/1.62 ui-monospace,SFMono-Regular,Menlo,monospace;
+  color:var(--tx2);margin-top:5px;white-space:pre-wrap;word-break:break-word}
+#npanel .nform i{color:var(--tx3);font-style:normal}
+#npanel .nform b{color:var(--tx);font-weight:600}
 #tpanel .chead{display:flex;align-items:center;justify-content:space-between;
   padding:2px 4px 9px;font-size:10.5px;letter-spacing:.08em;font-weight:700;
   color:var(--tx3);border-bottom:1px solid var(--line);margin-bottom:9px}
@@ -861,6 +924,7 @@ canvas{display:block;position:fixed;top:0;left:0;cursor:default;
     <div class="tmi" data-tool="heat"><span class="tmi-ic">🌡</span>Теплотехнический расчёт</div>
     <div class="tmi" data-tool="concrete"><span class="tmi-ic">🧱</span>Прочность бетона</div>
     <div class="tmi" data-tool="volumes"><span class="tmi-ic">📐</span>Объёмы и расход</div>
+    <div class="tmi" data-tool="penalty"><span class="tmi-ic">⚖️</span>Неустойка и штрафы</div>
   </div>
 </div>
 <div id="vchip" title="Версия доски. Обновляется сама.">v—</div>
@@ -1248,6 +1312,153 @@ B80; B90; B100; B110; B120.
   </details>
 </div>
 
+<!-- неустойка и штрафы -->
+<div id="npanel">
+  <div class="chead"><span>НЕУСТОЙКА И ШТРАФЫ</span><span id="nclose">✕</span></div>
+
+  <div class="sect">ОСНОВАНИЕ</div>
+  <div class="frow">
+    <label>Режим</label>
+    <select id="nMode">
+      <option value="fz44">44-ФЗ · госзаказчик</option>
+      <option value="fz214">214-ФЗ · дольщики</option>
+      <option value="contract">Договор подряда</option>
+    </select>
+  </div>
+  <div class="vhint" id="nModeNote"></div>
+
+  <div class="sect">ИСХОДНЫЕ ДАННЫЕ</div>
+  <div class="frow">
+    <label>Цена контракта</label>
+    <input id="nPrice" type="number" step="1000" min="0">
+    <span class="u">₽</span>
+  </div>
+  <div class="frow" id="nRowDone">
+    <label>Исполнено</label>
+    <input id="nDone" type="number" step="1000" min="0">
+    <span class="u">₽</span>
+  </div>
+  <div class="frow">
+    <label>Ключевая ставка</label>
+    <input id="nRate" type="number" step="0.25" min="0">
+    <span class="u">%</span>
+  </div>
+  <div class="frow">
+    <label>Срок по договору</label>
+    <input id="nDateFrom" type="date">
+  </div>
+  <div class="frow">
+    <label>Дата расчёта</label>
+    <input id="nDateTo" type="date">
+  </div>
+
+  <div class="frow chk" id="nRowCitizen">
+    <input id="nCitizen" type="checkbox">
+    <label for="nCitizen">Участник — гражданин (двойной размер)</label>
+  </div>
+  <div class="frow chk" id="nRowUniq">
+    <input id="nUniq" type="checkbox">
+    <label for="nUniq">Уникальный объект (не более 5 % цены)</label>
+  </div>
+
+  <div class="frow" id="nRowShare">
+    <label>Доля ставки</label>
+    <select id="nShare">
+      <option value="300">1/300</option>
+      <option value="150">1/150</option>
+      <option value="130">1/130</option>
+      <option value="custom">свой % за день</option>
+    </select>
+  </div>
+  <div class="frow" id="nRowCustom">
+    <label>% за день</label>
+    <input id="nCustom" type="number" step="0.01" min="0">
+    <span class="u">%</span>
+  </div>
+
+  <div class="frow chk" id="nRowFine">
+    <input id="nFineOn" type="checkbox" checked>
+    <label for="nFineOn">Считать штраф по ПП № 1042</label>
+  </div>
+  <div class="frow chk" id="nRowSmp">
+    <input id="nSmp" type="checkbox">
+    <label for="nSmp">Закупка у СМП / СОНО (п. 4)</label>
+  </div>
+
+  <div class="go">
+    <button class="ok" id="nGo">РАССЧИТАТЬ</button>
+    <button id="nClear">Очистить</button>
+  </div>
+
+  <div class="res" id="nOut"></div>
+
+  <details class="nhelp">
+    <summary>Формулы и нормативы</summary>
+    <div class="nform"><i>ОБОЗНАЧЕНИЯ</i>
+Ц     цена контракта (договора), ₽
+И     стоимость фактически исполненного, ₽
+С     ключевая ставка ЦБ, % годовых
+Д     дней просрочки
+k     доля ставки за день
+Н     неустойка (пеня), ₽
+
+<i>ДНИ ПРОСРОЧКИ</i>
+  <b>Д = дата расчёта − срок по договору</b>
+  Пеня идёт со дня, СЛЕДУЮЩЕГО после дня истечения
+  срока, поэтому разница дат и есть число дней.
+
+<i>44-ФЗ, ст. 34 ч. 7</i>
+  <b>База = Ц − И</b>   (цена минус исполненное)
+  <b>Н = База · С / 100 · (1/300) · Д</b>
+  Ставка — действующая НА ДАТУ УПЛАТЫ пени.
+
+<i>214-ФЗ, ст. 6 ч. 2</i>
+  <b>Н = Ц · С / 100 · (1/300) · Д · m</b>
+  m = 2, если участник — гражданин, иначе m = 1.
+  Ставка — действующая НА ДЕНЬ ИСПОЛНЕНИЯ.
+  Ч. 2.1 (уникальные объекты): Н ≤ 0,05 · Ц.
+
+<i>ДОГОВОР ПОДРЯДА</i>
+  <b>Н = Ц · С / 100 · (1/n) · Д</b>   n = 300, 150, 130
+  либо <b>Н = Ц · (p/100) · Д</b>, где p — процент за день
+  (от ключевой ставки не зависит).
+  Без условия о неустойке — ст. 395 ГК РФ.
+
+<i>ШТРАФ, ПП РФ № 1042, п. 3</i>
+  Процент от цены контракта (этапа):
+    до 3 млн ₽ ............... 10 %
+    от 3 до 50 млн ₽ ......... 5 %
+    от 50 до 100 млн ₽ ....... 1 %
+    от 100 до 500 млн ₽ ...... 0,5 %
+    от 500 млн до 1 млрд ₽ ... 0,4 %
+    от 1 до 2 млрд ₽ ......... 0,3 %
+    от 2 до 5 млрд ₽ ......... 0,25 %
+    от 5 до 10 млрд ₽ ........ 0,2 %
+    свыше 10 млрд ₽ .......... 0,1 %
+
+<i>П. 4 ПП № 1042 (СМП / СОНО)</i>
+  <b>Штраф = 1 % · Ц</b>, но не более 5 000 ₽
+  и не менее 1 000 ₽.
+
+<i>П. 11 ПП № 1042</i>
+  Сумма штрафов не может превышать цену контракта.
+
+<i>НОРМАТИВЫ</i>
+44-ФЗ от 05.04.2013 (ред. от 04.08.2026, изм. с 01.10.2026),
+ст. 34 ч. 7 — пеня 1/300 ключевой ставки на дату уплаты.
+ПП РФ от 30.08.2017 № 1042 (ред. от 02.08.2019) — штрафы.
+214-ФЗ от 30.12.2004, ст. 6 ч. 2, 2.1 — неустойка дольщику.
+ГК РФ ст. 395 — проценты за пользование чужими средствами.
+Проверено 28.11.2026 по действующим редакциям.
+
+<i>ВАЖНО ПО 214-ФЗ</i>
+Действуют мораторные особенности: до конца 2025 года был
+ряд ограничений, отсрочки продлены до конца 2026 года
+(ПП РФ от 18.03.2024 № 326). Расчёт без учёта моратория
+неполон — период просрочки проверять отдельно.</div>
+  </details>
+</div>
+
 <div id="toast"></div>
 
 <textarea id="ed" spellcheck="false"></textarea>
@@ -1544,7 +1755,7 @@ const RTXU_KEY='board.rtxu.v1';
 /* Версия сборки. Видна в панели «Напоминания» мелким шрифтом.
    Нужна ровно для одного: отличить старую страницу из кеша GitHub Pages
    от настоящей ошибки. Если версия старая — правки и не должны сохраняться. */
-const BOARD_VER='2026-11-28 12:40';
+const BOARD_VER='2026-11-28 12:52';
 /* сколько карточек с сохранённым текстом — видно рядом с версией */
 function showVer(){
   const v=document.getElementById('verState');
@@ -8446,6 +8657,426 @@ el('vReb').addEventListener('input',save);
     if(d.reb) el('vReb').value=d.reb;
     if(d.actV) el('vActV').value=d.actV;
     if(d.actM) el('vActM').value=d.actM;
+  }catch(e){}
+  syncFields();
+})();
+
+})();
+</script>
+
+<script>
+/* ================= НЕУСТОЙКА И ШТРАФЫ =================
+   Три основания — переключаются в панели.
+
+   1) 44-ФЗ, ст. 34 ч. 7 (ред. от 04.08.2026, с изм. с 01.10.2026):
+      пеня за каждый день просрочки подрядчиком, начиная со дня,
+      следующего после дня истечения срока, — 1/300 ключевой ставки ЦБ,
+      действующей НА ДАТУ УПЛАТЫ пени, от цены контракта, уменьшенной
+      на сумму, пропорциональную фактически исполненным обязательствам.
+
+   2) ПП РФ от 30.08.2017 № 1042 (ред. от 02.08.2019) — штрафы:
+      п. 3 — 9 диапазонов цены (10 % / 5 % / 1 % / 0,5 % / 0,4 % /
+      0,3 % / 0,25 % / 0,2 % / 0,1 %);
+      п. 4 — 1 %, но не более 5 000 ₽ и не менее 1 000 ₽ (закупки
+      у СМП и СОНО по п. 1 ч. 1 ст. 30 44-ФЗ);
+      п. 11 — сумма штрафов не может превышать цену контракта.
+
+   3) 214-ФЗ, ст. 6 ч. 2 (ред. от 2026): неустойка за нарушение срока
+      передачи объекта — 1/300 ставки рефинансирования ЦБ, действующей
+      НА ДЕНЬ ИСПОЛНЕНИЯ обязательства, от цены договора; участнику-
+      гражданину — в двойном размере. Ч. 2.1 — уникальные объекты:
+      то же, но не более 5 % цены договора.
+      ВНИМАНИЕ: действуют мораторные особенности — до конца 2025 года
+      был ряд ограничений, отсрочки продлены до конца 2026 года
+      (ПП РФ от 18.03.2024 № 326). Расчёт без учёта моратория неполон.
+
+   4) Договор (коммерческий заказчик) — ставка задаётся договором,
+      по умолчанию 1/300 или свой процент за день.
+
+   Проверено 28.11.2026 по consultant.ru (действующие редакции).
+   ---------------------------------------------------------------------- */
+(function(){
+'use strict';
+
+const pan=document.getElementById('npanel');
+if(!pan) return;
+window.TOOLS=window.TOOLS||{};
+window.TOOLS.penalty={panel:pan, name:'Неустойка и штрафы'};
+
+const KEY='board.penalty.v1';
+let LAST=null;
+
+const el=id=>document.getElementById(id);
+const num=v=>{
+  const x=parseFloat(String(v).replace(',','.').replace(/\s/g,'').replace(/\u00a0/g,''));
+  return isFinite(x)?x:0;
+};
+const fmt=(v,d)=>v==null||!isFinite(v)?'—'
+  :(d==null?v.toFixed(2):v.toFixed(d));
+/* то же, но с запятой — для текста, который идёт в отчёт и на экран */
+const fmtr=(v,d)=>fmt(v,d).replace('.',',');
+
+/* разница в днях между датами YYYY-MM-DD */
+function daysBetween(a,b){
+  if(!a||!b) return null;
+  const d1=new Date(a+'T00:00:00');
+  const d2=new Date(b+'T00:00:00');
+  if(isNaN(d1)||isNaN(d2)) return null;
+  return Math.round((d2-d1)/86400000);
+}
+
+/* ПП 1042, п. 3 — процент штрафа по цене контракта (этапа) */
+function finePercent(price){
+  if(price<=0) return null;
+  if(price<=3e6)      return {p:10,   band:'до 3 млн ₽'};
+  if(price<=50e6)     return {p:5,    band:'от 3 до 50 млн ₽'};
+  if(price<=100e6)    return {p:1,    band:'от 50 до 100 млн ₽'};
+  if(price<=500e6)    return {p:0.5,  band:'от 100 до 500 млн ₽'};
+  if(price<=1e9)      return {p:0.4,  band:'от 500 млн до 1 млрд ₽'};
+  if(price<=2e9)      return {p:0.3,  band:'от 1 до 2 млрд ₽'};
+  if(price<=5e9)      return {p:0.25, band:'от 2 до 5 млрд ₽'};
+  if(price<=10e9)     return {p:0.2,  band:'от 5 до 10 млрд ₽'};
+  return {p:0.1, band:'свыше 10 млрд ₽'};
+}
+
+function mode(){ return el('nMode').value; }
+
+/* какие поля видны для выбранного основания */
+function syncFields(){
+  const m=mode();
+  el('nRowDone').style.display = (m==='fz44')?'':'none';
+  el('nRowCitizen').style.display = (m==='fz214')?'':'none';
+  el('nRowUniq').style.display = (m==='fz214')?'':'none';
+  el('nRowSmp').style.display = (m==='fz44')?'':'none';
+  el('nRowShare').style.display = (m==='contract')?'':'none';
+  /* поле «% за день» нужно только при договорной ставке */
+  el('nRowCustom').style.display =
+    (m==='contract' && el('nShare').value==='custom')?'':'none';
+  el('nRowFine').style.display = (m==='fz44')?'':'none';
+  el('nModeNote').textContent = {
+    fz44:'44-ФЗ, ст. 34 ч. 7: 1/300 ключевой ставки на дату уплаты пени, база — цена минус исполненное.',
+    fz214:'214-ФЗ, ст. 6 ч. 2: 1/300 ставки рефинансирования на день исполнения, гражданину — вдвое.',
+    contract:'Договор: ставка и база задаются условиями договора.'
+  }[m]||'';
+}
+
+function calc(){
+  const out=el('nOut');
+  const m=mode();
+  const price=num(el('nPrice').value);
+  const rate=num(el('nRate').value);
+  const dStart=el('nDateFrom').value;
+  const dEnd=el('nDateTo').value;
+  const days=daysBetween(dStart,dEnd);
+
+  LAST=null;   /* любой ранний выход обнуляет прошлый расчёт */
+  if(!price||price<=0){
+    out.innerHTML='<div class="nverdict bad">Укажите цену контракта (договора), ₽.</div>';
+    return;
+  }
+  /* договорный процент за день задаётся сам по себе — ставка ЦБ не нужна */
+  const needRate=!(m==='contract' && el('nShare').value==='custom');
+  if(needRate && (!rate||rate<=0)){
+    out.innerHTML='<div class="nverdict bad">Укажите ключевую ставку ЦБ, % годовых. '+
+      'Ставка берётся на дату, указанную в норме, — уточняйте на сайте ЦБ.</div>';
+    return;
+  }
+  if(days==null){
+    out.innerHTML='<div class="nverdict bad">Укажите обе даты: срок по договору и дату расчёта.</div>';
+    return;
+  }
+  if(days<=0){
+    out.innerHTML='<div class="nverdict ok">Просрочки нет: дата расчёта не позже срока по договору.</div>';
+    return;
+  }
+
+  let base=price;           /* база начисления */
+  let baseNote='цена договора';
+  let pen=0;
+  let penNote='';
+  let k=1/300;              /* доля ставки за день */
+  let coef=1;               /* множитель (гражданин — 2) */
+  const warns=[];
+
+  if(m==='fz44'){
+    const done=Math.min(num(el('nDone').value),price);
+    base=price-done;
+    baseNote=done>0
+      ? 'цена минус исполненное: '+fmtr(price,2)+' − '+fmtr(done,2)+' = '+fmtr(base,2)+' ₽'
+      : 'цена контракта (исполненного нет)';
+    k=1/300;
+    pen=base*rate/100*k*days;
+    penNote='1/300 ключевой ставки на дату уплаты пени';
+    if(done>0 && done>=price){
+      warns.push('Исполнено не меньше цены — начислять пеню не на что.');
+    }
+  }else if(m==='fz214'){
+    k=1/300;
+    const citizen=el('nCitizen').checked;
+    coef=citizen?2:1;
+    pen=price*rate/100*k*days*coef;
+    baseNote='цена договора';
+    penNote='1/300 ставки рефинансирования на день исполнения'+
+            (citizen?', двойной размер (участник — гражданин)':'');
+    if(el('nUniq').checked){
+      const cap=price*0.05;
+      if(pen>cap){
+        warns.push('Уникальный объект (ч. 2.1 ст. 6): неустойка ограничена 5 % цены договора — '+
+          fmtr(cap,2)+' ₽. Расчётное значение '+fmtr(pen,2)+' ₽ уменьшено до предела.');
+        pen=cap;
+      }else{
+        warns.push('Уникальный объект (ч. 2.1 ст. 6): предел 5 % цены договора — '+fmtr(cap,2)+
+          ' ₽, расчётное значение в предел укладывается.');
+      }
+    }
+    warns.push('Действуют мораторные особенности по 214-ФЗ: отсрочки и ограничения '+
+      'продлены до конца 2026 года (ПП РФ от 18.03.2024 № 326). '+
+      'Расчёт без учёта моратория неполон — проверить период просрочки.');
+  }else{
+    const sh=el('nShare').value;
+    if(sh==='custom'){
+      /* процент за день задан договором напрямую — от ключевой ставки
+         не зависит, поэтому ставка ЦБ в расчёт не входит */
+      k=num(el('nCustom').value)/100;
+      pen=price*k*days;
+      penNote='договорная ставка '+fmt(num(el('nCustom').value),4)+
+              ' % за день (от ключевой ставки не зависит)';
+    }else{
+      k=1/parseFloat(sh);
+      pen=price*rate/100*k*days;
+      penNote='1/'+sh+' ставки за день (по договору)';
+    }
+    baseNote='цена договора';
+    warns.push('Договорная неустойка применяется, если она согласована в договоре. '+
+      'Без условия о неустойке — ст. 395 ГК РФ (ключевая ставка за период).');
+  }
+
+  /* штраф по ПП 1042 — только для 44-ФЗ */
+  let fine=0, fineText='';
+  if(m==='fz44' && el('nFineOn').checked){
+    if(el('nSmp').checked){
+      fine=Math.min(Math.max(price*0.01,1000),5000);
+      fineText='п. 4 ПП № 1042: 1 % цены, но не более 5 000 ₽ и не менее 1 000 ₽ (СМП/СОНО)';
+    }else{
+      const fp=finePercent(price);
+      fine=price*fp.p/100;
+      fineText='п. 3 ПП № 1042: '+String(fp.p).replace('.',',')+' % цены (диапазон '+fp.band+')';
+    }
+  }
+
+  const total=pen+fine;
+
+  let h='';
+  h+='<div class="nchips">';
+  h+='<span class="nchip">Пеня <b>'+fmt(pen,2)+'</b> ₽</span>';
+  if(fine>0) h+='<span class="nchip">Штраф <b>'+fmt(fine,2)+'</b> ₽</span>';
+  h+='<span class="nchip">Итого <b>'+fmt(total,2)+'</b> ₽</span>';
+  h+='</div>';
+
+  h+='<div class="nkv"><span>Дней просрочки</span><b>'+days+'</b></div>';
+  h+='<div class="nkv"><span>База начисления</span><b>'+fmt(base,2)+' ₽</b></div>';
+  h+='<div class="nkv"><span>Ставка</span><b>'+fmt(rate,2)+' % годовых</b></div>';
+  h+='<div class="nkv"><span>Доля ставки за день</span><b>'+
+     (k<0.01?fmt(k,6):fmt(k,4))+'</b></div>';
+  if(coef!==1) h+='<div class="nkv"><span>Множитель</span><b>× '+coef+'</b></div>';
+  h+='<div class="nkv"><span>Пеня</span><b>'+fmt(pen,2)+' ₽</b></div>';
+  h+='<div class="nkv"><span>Формула пени</span><b>'+penNote+'</b></div>';
+  if(fine>0){
+    h+='<div class="nkv"><span>Штраф</span><b>'+fmt(fine,2)+' ₽</b></div>';
+    h+='<div class="nkv"><span>Основание штрафа</span><b>'+fineText+'</b></div>';
+  }
+
+  /* предел по ПП 1042 п. 11 */
+  if(m==='fz44'){
+    const cap=price;
+    if(total>cap){
+      warns.push('П. 11 ПП № 1042: сумма начисленных штрафов не может превышать цену контракта — '+
+        fmtr(cap,2)+' ₽. Начислено '+fmtr(total,2)+' ₽.');
+    }
+  }
+
+  if(warns.length){
+    h+='<div class="nsect">ОГРАНИЧЕНИЯ И ПРОВЕРКИ</div>';
+    warns.forEach(w=>{ h+='<div class="nverdict bad">'+w+'</div>'; });
+  }
+
+  h+='<div class="nverdict ok">Пеня за '+days+' дн. = '+fmt(pen,2)+' ₽'+
+     (fine>0?' + штраф '+fmt(fine,2)+' ₽':'')+
+     '. Итого к предъявлению: <b>'+fmt(total,2)+' ₽</b>.</div>';
+
+  h+='<button class="ncopy" id="nCopy">Скопировать расчёт в претензию</button>';
+
+  out.innerHTML=h;
+  LAST={m:m,price:price,rate:rate,days:days,base:base,baseNote:baseNote,
+        k:k,coef:coef,pen:pen,penNote:penNote,fine:fine,fineText:fineText,
+        total:total,dStart:dStart,dEnd:dEnd,warns:warns,
+        done:num(el('nDone').value),citizen:el('nCitizen').checked,
+        uniq:el('nUniq').checked,smp:el('nSmp').checked};
+  const cp=document.getElementById('nCopy');
+  if(cp) cp.addEventListener('click',copyReport);
+  save();
+}
+
+function modeName(){
+  return {fz44:'44-ФЗ (контрактная система)',
+          fz214:'214-ФЗ (долевое строительство)',
+          contract:'Договор подряда'}[LAST.m]||'';
+}
+
+function reportText(){
+  const L=LAST;
+  if(!L) return '';
+  const f=(v,d)=>v==null||!isFinite(v)?'—'
+    :(d==null?v.toFixed(2):v.toFixed(d)).replace('.',',');
+  const P=[];
+  P.push('РАСЧЁТ НЕУСТОЙКИ (ПЕНИ) И ШТРАФА');
+  P.push('');
+  P.push('ОСНОВАНИЕ');
+  if(L.m==='fz44'){
+    P.push('  Федеральный закон от 05.04.2013 № 44-ФЗ, ст. 34 ч. 7:');
+    P.push('  пеня за каждый день просрочки, начиная со дня, следующего');
+    P.push('  после дня истечения срока, — 1/300 ключевой ставки ЦБ РФ,');
+    P.push('  действующей на дату уплаты пени, от цены контракта,');
+    P.push('  уменьшенной на сумму, пропорциональную фактически');
+    P.push('  исполненным обязательствам.');
+    if(L.fine>0){
+      P.push('  Штраф — Постановление Правительства РФ от 30.08.2017 № 1042');
+      P.push('  (ред. от 02.08.2019).');
+    }
+  }else if(L.m==='fz214'){
+    P.push('  Федеральный закон от 30.12.2004 № 214-ФЗ, ст. 6 ч. 2:');
+    P.push('  неустойка 1/300 ставки рефинансирования ЦБ РФ, действующей');
+    P.push('  на день исполнения обязательства, от цены договора;');
+    P.push('  участнику-гражданину — в двойном размере.');
+    if(L.uniq) P.push('  Ч. 2.1 ст. 6: для уникальных объектов — не более 5 % цены договора.');
+  }else{
+    P.push('  Договор подряда: неустойка в размере, согласованном договором.');
+  }
+  P.push('');
+  P.push('ИСХОДНЫЕ ДАННЫЕ');
+  P.push('  Режим: '+modeName());
+  P.push('  Цена контракта (договора): '+f(L.price,2)+' ₽');
+  if(L.m==='fz44') P.push('  Стоимость исполненного: '+f(L.done,2)+' ₽');
+  if(L.m==='fz214') P.push('  Участник — гражданин: '+(L.citizen?'да (двойной размер)':'нет'));
+  if(L.m==='contract' && L.k>=0.0001){
+    P.push('  Ставка ЦБ не используется: договор задаёт процент за день.');
+  }else{
+    P.push('  Ключевая ставка ЦБ: '+f(L.rate,2)+' % годовых');
+  }
+  P.push('  Срок по договору: '+L.dStart);
+  P.push('  Дата расчёта: '+L.dEnd);
+  P.push('  Дней просрочки: '+L.days);
+  P.push('');
+  P.push('РАСЧЁТ');
+  P.push('  База начисления: '+f(L.base,2)+' ₽  ('+L.baseNote+')');
+  if(L.m==='contract' && L.k>=0.0001){
+    P.push('  Пеня = база × процент за день × дни');
+    P.push('       = '+f(L.base,2)+' × '+f(L.k*100,4)+' / 100 × '+L.days);
+  }else{
+    P.push('  Пеня = база × ставка / 100 × доля / день × дни'+
+           (L.coef!==1?' × '+L.coef:''));
+    P.push('       = '+f(L.base,2)+' × '+f(L.rate,2)+' / 100 × '+
+           f(L.k,6)+' × '+L.days+(L.coef!==1?' × '+L.coef:''));
+  }
+  P.push('       = '+f(L.pen,2)+' ₽');
+  P.push('  Доля ставки за день: '+L.penNote);
+  if(L.fine>0){
+    P.push('  Штраф = '+f(L.fine,2)+' ₽');
+    P.push('  Основание: '+L.fineText);
+  }
+  P.push('  ИТОГО: '+f(L.total,2)+' ₽');
+  if(L.warns.length){
+    P.push('');
+    P.push('ОГРАНИЧЕНИЯ И ОГОВОРКИ');
+    L.warns.forEach(w=>{ P.push('  — '+w); });
+  }
+  P.push('');
+  P.push('Расчёт выполнен по действующим редакциям на 28.11.2026.');
+  P.push('Ключевая ставка принимается на дату, указанную в норме:');
+  P.push('по 44-ФЗ — на дату уплаты пени, по 214-ФЗ — на день');
+  P.push('исполнения обязательства. Значение ставки сверить с ЦБ РФ.');
+  return P.join('\n');
+}
+
+function copyReport(){
+  const txt=reportText();
+  if(!txt) return;
+  const btn=document.getElementById('nCopy');
+  const done=ok=>{
+    if(!btn) return;
+    btn.classList.add('ok');
+    const old=btn.textContent;
+    btn.textContent=ok?'Скопировано в буфер':'Не удалось скопировать';
+    setTimeout(()=>{ btn.classList.remove('ok'); btn.textContent=old; },1800);
+  };
+  try{
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(()=>done(true),()=>done(false));
+      return;
+    }
+  }catch(e){}
+  try{
+    const ta=document.createElement('textarea');
+    ta.value=txt; ta.style.position='fixed'; ta.style.left='-9999px';
+    document.body.appendChild(ta); ta.select();
+    const ok=document.execCommand('copy');
+    document.body.removeChild(ta); done(ok);
+  }catch(e){ done(false); }
+}
+
+function save(){
+  try{
+    localStorage.setItem(KEY,JSON.stringify({
+      m:el('nMode').value, price:el('nPrice').value, done:el('nDone').value,
+      rate:el('nRate').value, from:el('nDateFrom').value, to:el('nDateTo').value,
+      citizen:el('nCitizen').checked, uniq:el('nUniq').checked,
+      smp:el('nSmp').checked, fineOn:el('nFineOn').checked,
+      share:el('nShare').value, custom:el('nCustom').value
+    }));
+  }catch(e){}
+}
+
+function openPan(){ pan.classList.add('show'); syncFields(); calc(); }
+function closePan(){ pan.classList.remove('show'); }
+window.TOOLS.penalty.open=openPan;
+window.TOOLS.penalty.close=closePan;
+
+el('nclose').addEventListener('click',closePan);
+el('nGo').addEventListener('click',calc);
+el('nClear').addEventListener('click',()=>{
+  ['nPrice','nDone','nRate','nDateFrom','nDateTo','nCustom'].forEach(id=>{ el(id).value=''; });
+  el('nOut').innerHTML='';
+  save();
+});
+el('nMode').addEventListener('change',()=>{ syncFields(); calc(); });
+el('nShare').addEventListener('change',()=>{ syncFields(); calc(); });
+['nPrice','nDone','nRate','nCustom','nDateFrom','nDateTo'].forEach(id=>{
+  el(id).addEventListener('input',save);
+  el(id).addEventListener('keydown',ev=>{
+    if(ev.key==='Enter'){ ev.preventDefault(); save(); calc(); }
+  });
+});
+['nCitizen','nUniq','nSmp','nFineOn'].forEach(id=>{
+  el(id).addEventListener('change',()=>{ save(); calc(); });
+});
+
+(function restore(){
+  try{
+    const raw=localStorage.getItem(KEY);
+    if(!raw) return;
+    const d=JSON.parse(raw);
+    if(d.m) el('nMode').value=d.m;
+    if(d.price) el('nPrice').value=d.price;
+    if(d.done) el('nDone').value=d.done;
+    if(d.rate) el('nRate').value=d.rate;
+    if(d.from) el('nDateFrom').value=d.from;
+    if(d.to) el('nDateTo').value=d.to;
+    el('nCitizen').checked=!!d.citizen;
+    el('nUniq').checked=!!d.uniq;
+    el('nSmp').checked=!!d.smp;
+    el('nFineOn').checked=d.fineOn!==false;
+    if(d.share) el('nShare').value=d.share;
+    if(d.custom) el('nCustom').value=d.custom;
   }catch(e){}
   syncFields();
 })();
