@@ -1262,7 +1262,7 @@ const RTXU_KEY='board.rtxu.v1';
 /* Версия сборки. Видна в панели «Напоминания» мелким шрифтом.
    Нужна ровно для одного: отличить старую страницу из кеша GitHub Pages
    от настоящей ошибки. Если версия старая — правки и не должны сохраняться. */
-const BOARD_VER='2026-11-28 12:22';
+const BOARD_VER='2026-11-28 12:28';
 /* сколько карточек с сохранённым текстом — видно рядом с версией */
 function showVer(){
   const v=document.getElementById('verState');
@@ -4255,8 +4255,24 @@ ed.addEventListener('keydown',ev=>{
 });
 
 /* ================= КЛАВИАТУРА ================= */
+
+/* Куда вводят текст? Если фокус в поле, горячие клавиши доски молчат.
+   Раньше здесь проверялось только `editing` (правка карточки), а поля
+   панелей — калькуляторы, поиск, ввод задач — не учитывались. Из-за
+   этого в них НЕ ставился пробел (его перехватывал режим панорамы),
+   Backspace удалял выделенные карточки, а буквы v/n/r/o/t/p/c/e
+   переключали инструменты прямо во время набора. */
+function isTypingTarget(t){
+  if(!t) return false;
+  const tag=(t.tagName||'').toUpperCase();
+  if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT') return true;
+  if(t.isContentEditable) return true;
+  return false;
+}
+
 window.addEventListener('keydown',ev=>{
   if(editing) return;
+  if(isTypingTarget(ev.target)) return;   /* не мешаем набору текста */
   if(ev.code==='Space'){ spaceDown=true; ev.preventDefault(); return; }
 
   const k=ev.key.toLowerCase();
