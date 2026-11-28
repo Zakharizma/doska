@@ -427,6 +427,21 @@ canvas{display:block;position:fixed;top:0;left:0;cursor:default;
 #bpanel .bverdict.bad{background:#2a1416;border:1px solid #a13b3f;color:#ff9a9d}
 #bpanel .bfoot{font-size:10px;color:var(--tx3);line-height:1.45;margin-top:8px;
   padding-top:7px;border-top:1px solid var(--line)}
+#bpanel details.bhelp{margin-top:9px;border-top:1px solid var(--line);padding-top:7px}
+#bpanel summary{list-style:none;cursor:pointer;font-size:11px;color:var(--acc);
+  font-weight:600;padding:2px 0;user-select:none}
+#bpanel summary::-webkit-details-marker{display:none}
+#bpanel summary:before{content:'▸';display:inline-block;width:12px;font-size:9px;opacity:.8}
+#bpanel details[open] summary:before{content:'▾'}
+#bpanel .bform{font:11px/1.62 ui-monospace,SFMono-Regular,Menlo,monospace;
+  color:var(--tx2);margin-top:5px;white-space:pre-wrap;word-break:break-word}
+#bpanel .bform i{color:var(--tx3);font-style:normal}
+#bpanel .bform b{color:var(--tx);font-weight:600}
+#bpanel .bcopy{width:100%;margin-top:8px;border:1px solid var(--line2);background:#1a2434;
+  color:var(--tx2);border-radius:8px;padding:8px;font-size:11.5px;cursor:pointer;
+  font-family:inherit}
+#bpanel .bcopy:hover{background:#26344a;color:var(--tx);border-color:var(--acc)}
+#bpanel .bcopy.ok{background:#12291c;border-color:#2f9e57;color:#7fe0a3}
 #tpanel .chead{display:flex;align-items:center;justify-content:space-between;
   padding:2px 4px 9px;font-size:10.5px;letter-spacing:.08em;font-weight:700;
   color:var(--tx3);border-bottom:1px solid var(--line);margin-bottom:9px}
@@ -964,6 +979,58 @@ canvas{display:block;position:fixed;top:0;left:0;cursor:default;
   </div>
 
   <div class="res" id="bOut"></div>
+
+  <details class="bhelp">
+    <summary>Формулы расчёта — ГОСТ 18105-2018</summary>
+    <div class="bform"><i>ОБОЗНАЧЕНИЯ</i>
+B      класс бетона по прочности, МПа
+Bнорм  нормируемая прочность = B · k / 100, МПа
+k      доля нормируемой прочности, % (100 — проектный возраст)
+Ri     единичное значение прочности, МПа
+n      число единичных значений
+α      коэф. по табл. 2 (при n = 2…8)
+Kт     коэф. требуемой прочности
+tα     коэф. по табл. А.2 (схема Б)
+ks     коэф. по табл. 4 (n = 6…15)
+Vr     граничный коэф. вариации, табл. 3
+
+<i>ПРОЧНОСТЬ И ОДНОРОДНОСТЬ</i>
+<b>(1)</b>   Rm = ( Σ Ri ) / n
+<b>(2)</b>   Sm = √( Σ (Ri − Rm)² / (n − 1) ),   n ≥ 9
+<b>(3)</b>   Sm = Wm / α,   n = 2…8
+<b>(4)</b>   Wm = Rmax − Rmin
+<b>(7)</b>   V = ( Sm / Rm ) · 100, %
+
+<i>ТРЕБУЕМАЯ ПРОЧНОСТЬ</i>
+<b>(9)</b>   Rт = Kт · Bнорм
+<b>(10)</b>  Kт = 1 / ( 1 − tα · Vc / 100 )   — схема Б
+       схема А, В: Kт по табл. А.1 от V
+       схема Г:    Kт по табл. А.3
+
+<i>ФАКТИЧЕСКИЙ КЛАСС БЕТОНА</i>
+<b>(13)</b>  Bф = Rm / Kт,   n ≥ 20
+<b>(14)</b>  Bф = Rm − ks · Sm,   n = 6…15
+<b>(16)</b>  Bф = 0,8 · Rm,   схема Г
+
+<i>УСЛОВИЯ ПРИЁМКИ</i>
+<b>(11)</b>  Rm ≥ Rт
+<b>(12)</b>  Ri,min ≥ Bнорм
+<b>(17)</b>  Bф ≥ Bнорм
+
+<i>Примечания.</i> Значения Kт и Vr для промежуточных V
+и n — по линейной интерполяции (примечания к табл. А.1,
+А.2 и 3). При V выше границы табл. А.1 — область
+недопустимых значений, Kт не определяется (п. 4.8).
+Зоны с прочностью ниже средней более чем на 15 %
+оценивают отдельно (пп. 3.1.6, 8.1.6). Схема Г применима
+при V ≤ Vr (п. 5.5); иначе нужен контроль по схеме В.
+
+<i>Норматив.</i> ГОСТ 18105-2018 «Бетоны. Правила контроля
+и оценки прочности», введён 01.01.2020 приказом
+Росстандарта № 130-ст от 12.04.2019, с Поправками
+ИУС № 10-2021 и № 12-2024. Пункты 5.1–5.5, 8.4, 8.5,
+приложение А.</div>
+  </details>
 </div>
 
 <div id="toast"></div>
@@ -1262,7 +1329,7 @@ const RTXU_KEY='board.rtxu.v1';
 /* Версия сборки. Видна в панели «Напоминания» мелким шрифтом.
    Нужна ровно для одного: отличить старую страницу из кеша GitHub Pages
    от настоящей ошибки. Если версия старая — правки и не должны сохраняться. */
-const BOARD_VER='2026-11-28 12:28';
+const BOARD_VER='2026-11-28 12:33';
 /* сколько карточек с сохранённым текстом — видно рядом с версией */
 function showVer(){
   const v=document.getElementById('verState');
@@ -7401,6 +7468,7 @@ window.TOOLS=window.TOOLS||{};
 window.TOOLS.concrete={panel:pan, name:'Прочность бетона'};
 
 const KEY='board.concrete.v1';
+let LAST=null;   /* последний расчёт — для текста отчёта */
 
 /* Таблица 2 — коэффициент α, п. 5.2 */
 const ALPHA={2:1.13,3:1.69,4:2.06,5:2.33,6:2.53,7:2.70,8:2.84};
@@ -7648,12 +7716,112 @@ function calc(){
   }
   if(bfNote) h+='<div class="bverdict bad">'+bfNote+'</div>';
 
-  h+='<div class="bfoot">ГОСТ 18105-2018, пп. 5.1–5.5, 8.4, 8.5, приложение А. '+
-     'Расчёт по средним значениям серий; зоны с прочностью ниже средней более чем на 15 % '+
-     'оцениваются отдельно (пп. 3.1.6, 8.1.6).</div>';
+  h+='<button class="bcopy" id="bCopy">Скопировать расчёт в отчёт</button>';
 
   out.innerHTML=h;
+
+  /* запоминаем всё для текста отчёта */
+  LAST={B:B,share:share,kind:kind,scheme:scheme,vals:vals,n:n,
+        Bnorm:Bnorm,Rm:Rm,Sm:Sm,Vm:Vm,Wm:Wm,Rmin:Rmin,Rmax:Rmax,
+        Kt:Kt,ktSrc:ktSrc,RT:RT,Bf:Bf,bfSrc:bfSrc,bfNote:bfNote,
+        vr:vr,vLimit:vLimit,okRT:okRT,okMin:okMin,okBf:okBf,ktBad:ktBad,
+        smSrc:smSrc};
+  const cp=document.getElementById('bCopy');
+  if(cp) cp.addEventListener('click',copyReport);
+
   save();
+}
+
+/* Текст расчёта для отчёта: исходные данные, формулы, результат.
+   Копируется в буфер, чтобы вставить в заключение или протокол. */
+function reportText(){
+  const L=LAST;
+  if(!L) return '';
+  /* В отчёте числа идут с запятой как десятичным разделителем —
+     так принято в проектной и исполнительной документации РФ. */
+  const f=(v,d)=>v==null||!isFinite(v)?'—'
+    :(d==null?v.toFixed(2):v.toFixed(d)).replace('.',',');
+  const P=[];
+  P.push('РАСЧЁТ ПРОЧНОСТИ БЕТОНА');
+  P.push('Норматив: ГОСТ 18105-2018 «Бетоны. Правила контроля и оценки прочности»');
+  P.push('(введён 01.01.2020 приказом Росстандарта № 130-ст от 12.04.2019,');
+  P.push(' с Поправками ИУС № 10-2021 и № 12-2024)');
+  P.push('');
+  P.push('ИСХОДНЫЕ ДАННЫЕ');
+  P.push('  Класс бетона B = '+f(L.B,1)+' МПа');
+  P.push('  Доля нормируемой прочности k = '+f(L.share,0)+' %');
+  P.push('  Вид бетона: '+KIND_NAME[L.kind]);
+  P.push('  Схема контроля: '+L.scheme);
+  P.push('  Нормируемая прочность Bнорм = '+f(L.B,1)+' · '+f(L.share,0)+'/100 = '+f(L.Bnorm)+' МПа');
+  P.push('  Единичные значения прочности Ri, МПа ('+L.n+' шт.):');
+  P.push('    '+L.vals.map(v=>String(v).replace('.',',')).join('  '));
+  P.push('');
+  P.push('РАСЧЁТ');
+  P.push('  (1) Rm = (ΣRi)/n = '+f(L.Rm)+' МПа');
+  P.push('  (4) Wm = Rmax − Rmin = '+f(L.Rmax)+' − '+f(L.Rmin)+' = '+f(L.Wm)+' МПа');
+  P.push('      Sm = '+f(L.Sm)+' МПа  ['+L.smSrc+']');
+  P.push('  (7) V = (Sm/Rm)·100 = '+f(L.Vm,1)+' %');
+  P.push('  Kт = '+(L.Kt!=null?f(L.Kt,3):'не определён')+'  ['+L.ktSrc+']');
+  P.push('  (9) Rт = Kт·Bнорм = '+(L.Kt!=null?f(L.Kt,3)+' · '+f(L.Bnorm):'—')+
+         ' = '+(L.RT!=null?f(L.RT)+' МПа':'—'));
+  P.push('  Bф = '+(L.Bf!=null?f(L.Bf)+' МПа':'—')+(L.bfSrc?'  ['+L.bfSrc+']':''));
+  P.push('');
+  P.push('ОЦЕНКА');
+  if(L.ktBad){
+    P.push('  Kт не определён: однородность попадает в область недопустимых');
+    P.push('  значений табл. А.1. По п. 4.8 требуется увеличить число');
+    P.push('  результатов испытаний либо разделить на партии и зоны.');
+  }else{
+    P.push('  (11) Rm ≥ Rт: '+f(L.Rm)+' ≥ '+f(L.RT)+' — '+(L.okRT?'выполняется':'НЕ выполняется'));
+    P.push('  (12) Ri,min ≥ Bнорм: '+f(L.Rmin)+' ≥ '+f(L.Bnorm)+' — '+(L.okMin?'выполняется':'НЕ выполняется'));
+    if(L.okBf!=null){
+      P.push('  (17) Bф ≥ Bнорм: '+f(L.Bf)+' ≥ '+f(L.Bnorm)+' — '+(L.okBf?'выполняется':'НЕ выполняется'));
+    }
+    const all=L.okRT&&L.okMin&&(L.okBf===null||L.okBf);
+    P.push('');
+    P.push('ВЫВОД: бетон '+(all?'ПРИНИМАЕТСЯ':'НЕ ПРИНИМАЕТСЯ')+' по прочности.');
+  }
+  if(L.vLimit){
+    P.push('');
+    P.push('ВНИМАНИЕ: по п. 5.5 схема Г применима при V ≤ '+f(L.vr,1)+' % (табл. 3),');
+    P.push('фактически V = '+f(L.Vm,1)+' %. Требуется контроль по схеме В.');
+  }
+  if(L.bfNote){ P.push(''); P.push('ПРИМЕЧАНИЕ: '+L.bfNote); }
+  P.push('');
+  P.push('Расчёт по средним значениям серий. Зоны с прочностью ниже средней');
+  P.push('более чем на 15 % оцениваются отдельно (пп. 3.1.6, 8.1.6).');
+  return P.join('\n');
+}
+
+function copyReport(){
+  const txt=reportText();
+  if(!txt) return;
+  const btn=document.getElementById('bCopy');
+  const done=(ok)=>{
+    if(!btn) return;
+    btn.classList.add('ok');
+    const old=btn.textContent;
+    btn.textContent=ok?'Скопировано в буфер':'Не удалось скопировать';
+    setTimeout(()=>{ btn.classList.remove('ok'); btn.textContent=old; },1800);
+  };
+  try{
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(()=>done(true),()=>done(false));
+      return;
+    }
+  }catch(e){}
+  /* запасной путь для окружений без clipboard API */
+  try{
+    const ta=document.createElement('textarea');
+    ta.value=txt;
+    ta.style.position='fixed';
+    ta.style.left='-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    const ok=document.execCommand('copy');
+    document.body.removeChild(ta);
+    done(ok);
+  }catch(e){ done(false); }
 }
 
 function openPan(){ pan.classList.add('show'); calc(); }
