@@ -437,7 +437,54 @@ canvas{display:block;position:fixed;top:0;left:0;cursor:default;
   color:var(--tx2);margin-top:5px;white-space:pre-wrap;word-break:break-word}
 #bpanel .bform i{color:var(--tx3);font-style:normal}
 #bpanel .bform b{color:var(--tx);font-weight:600}
-#bpanel .bcopy{width:100%;margin-top:8px;border:1px solid var(--line2);background:#1a2434;
+#bpanel #fopanel{position:fixed;left:calc(16px + var(--sal));top:calc(60px + var(--sat));z-index:26;
+  width:min(392px,calc(100vw - 32px));
+  max-height:calc(100vh - 84px);overflow:auto;display:none;
+  background:rgba(18,24,33,.985);border:1px solid var(--line2);border-radius:14px;
+  padding:10px;box-shadow:0 20px 52px rgba(0,0,0,.66);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+#fopanel.show{display:block}
+#fopanel .frow{display:flex;align-items:center;gap:7px;margin-bottom:6px}
+#fopanel .frow label{font-size:11.5px;color:var(--tx3);flex:0 0 auto;width:132px;line-height:1.3}
+#fopanel .frow input,#fopanel .frow select{flex:1;min-width:0;background:#0f1620;
+  border:1px solid var(--line2);border-radius:8px;color:var(--tx);padding:6px 8px;
+  outline:none;color-scheme:dark;font:12px ui-monospace,SFMono-Regular,Menlo,monospace}
+#fopanel .frow input:focus,#fopanel .frow select:focus{border-color:var(--acc)}
+#fopanel .frow .u{font-size:10px;color:var(--tx3);flex:0 0 auto;width:34px}
+#fopanel .go{display:flex;gap:6px;margin-top:10px}
+#fopanel .go button{flex:1;border:1px solid var(--line2);background:#1a2434;color:var(--tx);
+  border-radius:9px;padding:9px 6px;font-size:12.5px;cursor:pointer;font-family:inherit}
+#fopanel .go button:hover{border-color:var(--acc)}
+#fopanel .foChips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+#fopanel .foChip{font-size:10.5px;color:var(--tx3);background:#0f1620;border:1px solid var(--line);
+  border-radius:7px;padding:4px 8px}
+#fopanel .foChip b{color:var(--tx);font-weight:700}
+#fopanel .foKv{display:flex;justify-content:space-between;gap:8px;font-size:11.5px;
+  color:var(--tx3);padding:3px 2px;border-bottom:1px dashed #1e2938;line-height:1.45}
+#fopanel .foKv b{color:var(--tx);font-weight:600;text-align:right;flex:0 1 auto}
+#fopanel .foKv b.ok{color:#7fe0a3}
+#fopanel .foKv b.bad{color:#ff9a9d}
+#fopanel .foSect{font-size:10px;letter-spacing:.06em;color:var(--tx3);font-weight:700;
+  margin:11px 0 6px;padding-top:8px;border-top:1px solid var(--line)}
+#fopanel .foV{font-size:11px;line-height:1.5;border-radius:8px;padding:7px 9px;margin-top:7px}
+#fopanel .foV.ok{background:#12291c;border:1px solid #2f9e57;color:#7fe0a3}
+#fopanel .foV.bad{background:#241a10;border:1px solid #7a4a12;color:#e0a35c}
+#fopanel .foCopy{width:100%;margin-top:8px;border:1px solid var(--line2);background:#1a2434;
+  color:var(--tx2);border-radius:8px;padding:8px;font-size:11.5px;cursor:pointer;
+  font-family:inherit}
+#fopanel .foCopy.ok{background:#12291c;border-color:#2f9e57;color:#7fe0a3}
+.fhelp{margin-top:9px;border-top:1px solid var(--line);padding-top:7px}
+.fhelp summary{cursor:pointer;font-size:11px;color:var(--tx3);font-weight:700;
+  letter-spacing:.04em;padding:4px 2px;list-style:none}
+.fhelp summary::-webkit-details-marker{display:none}
+.fhelp summary:before{content:'\25B8 ';color:var(--acc)}
+.fhelp[open] summary:before{content:'\25BE '}
+.fhelp-body{font-size:10.5px;color:var(--tx3);line-height:1.6;padding:6px 2px 2px}
+.fhelp-body b{color:var(--tx2);font-weight:600}
+.fhelp-body i{display:block;font-style:normal;font-size:10px;letter-spacing:.05em;
+  color:var(--tx2);font-weight:700;margin:9px 0 3px;padding-top:6px;
+  border-top:1px solid var(--line)}
+.bcopy{width:100%;margin-top:8px;border:1px solid var(--line2);background:#1a2434;
   color:var(--tx2);border-radius:8px;padding:8px;font-size:11.5px;cursor:pointer;
   font-family:inherit}
 #bpanel .bcopy:hover{background:#26344a;color:var(--tx);border-color:var(--acc)}
@@ -1074,8 +1121,173 @@ canvas{display:block;position:fixed;top:0;left:0;cursor:default;
     <div class="tmi" data-tool="penalty"><span class="tmi-ic">⚖️</span>Неустойка и штрафы</div>
     <div class="tmi" data-tool="winter"><span class="tmi-ic">❄️</span>Зимнее бетонирование</div>
     <div class="tmi" data-tool="strength"><span class="tmi-ic">📈</span>Набор прочности</div>
+    <div class="tmi" data-tool="formwork"><span class="tmi-ic">🧱</span>Опалубка и цикл этажа</div>
   </div>
 </div>
+
+<!-- цикл этажа и потребность в опалубке -->
+<div id="fopanel">
+  <div class="chead"><span>ОПАЛУБКА И ЦИКЛ ЭТАЖА</span><span id="foclose">✕</span></div>
+
+  <div class="sect">ТИП И КЛАСС ОПАЛУБКИ</div>
+  <div class="frow">
+    <label>Тип опалубки</label>
+    <select id="foType">
+      <option value="melko_steel">Мелкощитовая, сталь/алюминий</option>
+      <option value="melko_wood">Мелкощитовая, дерево/пластик</option>
+      <option value="melko_ply_wall">Мелкощитовая, фанера (стены)</option>
+      <option value="melko_ply_floor">Мелкощитовая, фанера (перекрытия)</option>
+      <option value="krupno_steel" selected>Крупнощитовая, сталь/алюминий</option>
+      <option value="krupno_wood">Крупнощитовая, дерево/пластик</option>
+      <option value="krupno_ply_wall">Крупнощитовая, фанера (стены)</option>
+      <option value="blok">Блочная</option>
+      <option value="obem">Объёмно-переставная</option>
+    </select>
+  </div>
+  <div class="frow">
+    <label>Класс опалубки</label>
+    <select id="foClass">
+      <option value="0" selected>1 — наивысшая точность</option>
+      <option value="1">2</option>
+      <option value="2">3</option>
+    </select>
+  </div>
+
+  <div class="sect">ГЕОМЕТРИЯ И СРОКИ</div>
+  <div class="frow">
+    <label>Опалубки на этаж</label>
+    <input id="foArea" type="number" step="1" min="0" value="1200"><span class="u">м²</span>
+  </div>
+  <div class="frow">
+    <label>Этажей</label>
+    <input id="foFloors" type="number" step="1" min="1" value="25"><span class="u">шт</span>
+  </div>
+  <div class="frow">
+    <label>Площадь комплекта</label>
+    <input id="foSet" type="number" step="1" min="1" value="600"><span class="u">м²</span>
+  </div>
+  <div class="frow">
+    <label>Цикл на этаж</label>
+    <input id="foCycle" type="number" step="0.5" min="0" value="7"><span class="u">дн</span>
+  </div>
+  <div class="frow">
+    <label>Директивный срок</label>
+    <input id="foTerm" type="number" step="1" min="0" value="180"><span class="u">дн</span>
+  </div>
+  <div class="frow">
+    <label>До распалубки</label>
+    <input id="foStrip" type="number" step="1" min="0" value="14"><span class="u">дн</span>
+  </div>
+
+  <div class="go">
+    <button id="foGo">Рассчитать</button>
+    <button id="foClear">Очистить</button>
+  </div>
+
+  <div id="foOut"></div>
+
+  <details class="fhelp">
+    <summary>Формулы, нормативы и оговорки</summary>
+    <div class="fhelp-body">
+
+    <i>НОРМАТИВЫ</i>
+    <b>ГОСТ 34329-2017</b> «Опалубка. Общие технические условия»,
+    введён 01.04.2018 приказом Росстандарта от 14.12.2017 № 1954-ст,
+    взамен ГОСТ Р 52085-2003.
+    Пункты 3.25 (оборачиваемость), 5.1 (классы 1, 2, 3), таблица 2.
+
+    <b>СП 435.1325800.2018</b> «Конструкции бетонные и железобетонные
+    монолитные. Правила производства и приемки работ», приказ Минстроя
+    России от 26.11.2018 № 746/пр, введён 27.05.2019.
+    Пункты 8.15 (переопирание, поэтажный план нагрузок),
+    8.16 (запрет многоярусных систем из отдельных телескопических стоек).
+
+    <b>СП 70.13330.2012</b> «Несущие и ограждающие конструкции»,
+    ред. от 06.02.2025 (Изменение № 7 — приказ Минстроя от 06.02.2025
+    № 66/пр, введено с 04.03.2025). Таблица 5.11 п. 8 — оборачиваемость
+    подлежит регистрационному контролю с записью в журнале работ.
+
+    <i>ВНИМАНИЕ: ОТМЕНЁННЫЙ СТАНДАРТ</i>
+    ГОСТ Р 52085-2003 <b>утратил силу с 01.04.2018</b>. На него
+    ссылаться нельзя. Нестыковка в самом СП 70.13330: таблица 5.11 п. 8
+    ссылается на отменённый ГОСТ Р 52085, хотя в разделе 2 того же
+    СП стоит уже ГОСТ 34329-2017. Считать по действующему стандарту.
+
+    <i>ОБОРАЧИВАЕМОСТЬ — ГОСТ 34329-2017, ТАБЛИЦА 2</i>
+    Оборачиваемость — количество использования опалубки (циклов
+    бетонирования). Значения для формообразующих элементов,
+    порядок классов: 1-й / 2-й / 3-й.
+
+    Мелкощитовая, сталь/алюминий:      200 / 100 / до 100
+    Мелкощитовая, дерево/пластик:       20 /  15 / до 15
+    Мелкощитовая, фанера, стены:        60 /  30 / до 30
+    Мелкощитовая, фанера, перекрытия:   20 /  10 / до 10
+    Крупнощитовая, сталь/алюминий:     300 / 200 / до 200
+    Крупнощитовая, дерево/пластик:      30 /  20 / до 20
+    Крупнощитовая, фанера, стены:       80 /  60 / до 60
+    Блочная:                           300 / 150 / до 150
+    Объёмно-переставная:               500 / 300 / до 300
+
+    Для 1-го и 2-го классов значение «не менее», для 3-го — «до»,
+    то есть верхний предел.
+
+    Поддерживающие и несущие элементы (там, где установлены):
+    мелкощитовая сталь 250/150/до 150; мелкощитовая дерево 30/20/до 20;
+    крупнощитовая сталь 400/250/до 250; блочная 300/150/до 150;
+    объёмно-переставная 500/300/до 300.
+
+    <i>ПОТРЕБНОСТЬ В КОМПЛЕКТАХ</i>
+    Доступное время на этаж по директивному сроку:
+    <b>t_эт = T_дир / N_эт</b>
+
+    Число параллельных потоков (захваток):
+    <b>n_пот = ceil( T_цикл / t_эт )</b>
+
+    Комплектов на один поток:
+    <b>n_к = ceil( S_эт / S_компл )</b>
+
+    Комплектов всего:
+    <b>N_компл = n_пот · n_к</b>
+
+    Циклов на один комплект:
+    <b>c = ceil( N_эт / n_пот )</b>
+
+    Расчётная продолжительность:
+    <b>T_расч = ceil( N_эт / n_пот ) · T_цикл</b>
+
+    <i>ПЕРЕОПИРАНИЕ ПЕРЕКРЫТИЙ</i>
+    Пока бетон не набрал распалубочную прочность, вес перекрытия
+    воспринимают стойки нижележащих ярусов. Число ярусов:
+    <b>n_яр = ceil( t_расп / T_цикл ) + 1</b>
+    где t_расп — время до распалубочной прочности, плюс один ярус,
+    на котором ведут работы.
+
+    СП 435 п. 8.15: переопирание выполняют исходя из общей массы
+    вышележащих конструкций, и это отражается в поэтажном плане
+    нагрузок. П. 8.16: многоярусные опорные системы из отдельных
+    телескопических стоек <b>не допускаются</b> — нужны опорные башни
+    или системы с инвентарными раскосами.
+
+    <i>ЧТО НОРМА, А ЧТО РАСЧЁТ</i>
+    Оборачиваемость — <b>норматив</b> (ГОСТ 34329-2017, табл. 2).
+    Обязанность считать переопирание — <b>норматив</b> (СП 435 п. 8.15),
+    но методика задаётся ППР.
+    Цикл этажа и число комплектов — <b>производственный расчёт</b>
+    по принятой технологии; норматив задаёт только ресурс комплекта.
+
+    <i>ОГРАНИЧЕНИЯ РАСЧЁТА</i>
+    Цикл этажа задаётся вручную и зависит от технологии: число захваток,
+    сроки выдерживания, монтаж арматуры, подача бетона. Калькулятор
+    не выводит цикл из этих данных, а проверяет принятый цикл на
+    сходимость с ресурсом опалубки и директивным сроком.
+    Время до распалубочной прочности принимается по расчёту набора
+    прочности (отдельный калькулятор) либо по ППР.
+
+    Нормативы проверены 28.11.2026.
+    </div>
+  </details>
+</div>
+
 <div id="vchip" title="Версия доски. Обновляется сама.">v—</div>
 <div id="cpanel">
   <div class="chead"><span>ЛИНЕЙНЫЙ РАСКРОЙ</span><span id="cclose">✕</span></div>
@@ -2516,7 +2728,7 @@ const RTXU_KEY='board.rtxu.v1';
 /* Версия сборки. Видна в панели «Напоминания» мелким шрифтом.
    Нужна ровно для одного: отличить старую страницу из кеша GitHub Pages
    от настоящей ошибки. Если версия старая — правки и не должны сохраняться. */
-const BOARD_VER='2026-11-28 18:00';
+const BOARD_VER='2026-11-28 18:08';
 /* сколько карточек с сохранённым текстом — видно рядом с версией */
 function showVer(){
   const v=document.getElementById('verState');
@@ -11375,6 +11587,462 @@ el('spCalOn').addEventListener('change',()=>{ syncFields(); save(); calc(); });
   }catch(e){}
   calibrate();
   syncFields();
+})();
+
+})();
+</script>
+<script>
+/* ================= ЦИКЛ ЭТАЖА И ПОТРЕБНОСТЬ В ОПАЛУБКЕ =================
+   Нормативы (проверены 28.11.2026):
+
+   1) ГОСТ 34329-2017 «Опалубка. Общие технические условия»,
+      введён 01.04.2018 приказом Росстандарта от 14.12.2017 № 1954-ст,
+      ВЗАМЕН ГОСТ Р 52085-2003.
+        п. 3.25 — определение оборачиваемости;
+        п. 5.1 — классы опалубки 1, 2, 3;
+        табл. 2 — нормативная оборачиваемость по типу, материалу и классу.
+      ВАЖНО: ГОСТ Р 52085-2003 ОТМЕНЁН. На него не ссылаться.
+
+   2) СП 435.1325800.2018 «Конструкции бетонные и железобетонные
+      монолитные. Правила производства и приемки работ»,
+      приказ Минстроя России от 26.11.2018 № 746/пр, введён 27.05.2019.
+        п. 8.15 — переопирание стоек, поэтажный план нагрузок;
+        п. 8.16 — многоярусные системы из отдельных телескопических
+                  стоек не допускаются, нужны опорные башни.
+
+   3) СП 70.13330.2012 «Несущие и ограждающие конструкции»,
+      ред. от 06.02.2025 (Изменение № 7 — приказ Минстроя от 06.02.2025
+      № 66/пр, введено с 04.03.2025).
+        табл. 5.11 п. 8 — оборачиваемость опалубки подлежит
+                          регистрационному контролю с записью в журнале работ.
+
+   НЕСТЫКОВКА В СП 70.13330: таблица 5.11 п. 8 ссылается на
+   ГОСТ Р 52085, который отменён с 01.04.2018. При этом в разделе 2
+   («Нормативные ссылки») того же СП стоит уже ГОСТ 34329-2017.
+   Считать по ГОСТ 34329-2017; расхождение зафиксировано в справке.
+
+   ЧТО НОРМИРУЕТСЯ, А ЧТО СЧИТАЕТСЯ:
+     оборачиваемость (сколько циклов выдерживает комплект) — НОРМА,
+       ГОСТ 34329-2017 табл. 2;
+     число ярусов стоек при переопирании — НОРМА обязывает считать
+       (СП 435 п. 8.15), методика задаётся ППР;
+     цикл этажа и потребность в комплектах — ПРОИЗВОДСТВЕННЫЙ расчёт
+       по принятой технологии; норматив задаёт только ресурс комплекта.
+   ---------------------------------------------------------------------- */
+(function(){
+'use strict';
+
+const pan=document.getElementById('fopanel');
+if(!pan) return;
+window.TOOLS=window.TOOLS||{};
+window.TOOLS.formwork={panel:pan, name:'Опалубка и цикл этажа'};
+
+const KEY='board.formwork.v1';
+let LAST=null;
+
+const el=id=>document.getElementById(id);
+const num=v=>{
+  const x=parseFloat(String(v).replace(',','.').replace(/\s/g,'').replace(/\u00a0/g,''));
+  return isFinite(x)?x:0;
+};
+const fmt=(v,d)=>v==null||!isFinite(v)?'—'
+  :(d==null?v.toFixed(2):v.toFixed(d));
+const fmtr=(v,d)=>fmt(v,d).replace('.',',');
+
+/* ГОСТ 34329-2017, таблица 2.
+   f — оборачиваемость формообразующих элементов,
+   s — поддерживающих и несущих элементов.
+   Индексы: 0 — класс 1, 1 — класс 2, 2 — класс 3.
+   null — показатель для этого класса/типа не устанавливается. */
+const TURN={
+  melko_steel:{
+    name:'Мелкощитовая, сталь или алюминий',
+    f:[200,100,100], s:[250,150,150]
+  },
+  melko_wood:{
+    name:'Мелкощитовая, дерево или пластик',
+    f:[20,15,15], s:[30,20,20]
+  },
+  melko_ply_wall:{
+    name:'Мелкощитовая, фанера (стены)',
+    f:[60,30,30], s:[null,null,null]
+  },
+  melko_ply_floor:{
+    name:'Мелкощитовая, фанера (перекрытия)',
+    f:[20,10,10], s:[null,null,null]
+  },
+  krupno_steel:{
+    name:'Крупнощитовая, сталь или алюминий',
+    f:[300,200,200], s:[400,250,250]
+  },
+  krupno_wood:{
+    name:'Крупнощитовая, дерево или пластик',
+    f:[30,20,20], s:[null,null,null]
+  },
+  krupno_ply_wall:{
+    name:'Крупнощитовая, фанера (стены)',
+    f:[80,60,60], s:[null,null,null]
+  },
+  blok:{
+    name:'Блочная',
+    f:[300,150,150], s:[300,150,150]
+  },
+  obem:{
+    name:'Объёмно-переставная',
+    f:[500,300,300], s:[500,300,300]
+  }
+};
+
+function curType(){ return TURN[el('foType').value]||TURN.krupno_steel; }
+function curClass(){ return parseInt(el('foClass').value,10)||0; }  /* 0,1,2 */
+
+/* нормативная оборачиваемость: {f, s, note} */
+function turnoverNorm(){
+  const t=curType(), c=curClass();
+  const f=t.f[c], s=t.s[c];
+  const note=(c===2)
+    ? 'класс 3 — значение «до», то есть верхний предел'
+    : 'класс '+(c+1)+' — значение «не менее»';
+  return {f:f, s:s, note:note, name:t.name, cls:c+1};
+}
+
+function calc(){
+  const out=el('foOut');
+  LAST=null;
+
+  const Sfloor=num(el('foArea').value);      /* площадь опалубки на этаж, м² */
+  const Nfloor=num(el('foFloors').value);     /* этажей */
+  const Sset=num(el('foSet').value);          /* площадь комплекта, м² */
+  const Tcyc=num(el('foCycle').value);        /* цикл на этаж, дней */
+  const Tdir=num(el('foTerm').value);         /* директивный срок, дней */
+  const Tstr=num(el('foStrip').value);        /* до распалубочной прочности, дней */
+
+  if(!Sfloor||Sfloor<=0){
+    out.innerHTML='<div class="foV bad">Укажите площадь опалубки на один этаж, м².</div>';
+    return;
+  }
+  if(!Nfloor||Nfloor<1){
+    out.innerHTML='<div class="foV bad">Укажите количество этажей (не менее одного).</div>';
+    return;
+  }
+  if(!Sset||Sset<=0){
+    out.innerHTML='<div class="foV bad">Укажите площадь одного комплекта опалубки, м².</div>';
+    return;
+  }
+  if(!Tcyc||Tcyc<=0){
+    out.innerHTML='<div class="foV bad">Укажите цикл на этаж, дней.</div>';
+    return;
+  }
+
+  const norm=turnoverNorm();
+  const warns=[];
+
+  /* --- время --- */
+  const TperFloor = (Tdir>0) ? Tdir/Nfloor : null;   /* доступно на этаж */
+  let flows=1;                                        /* параллельных потоков */
+  if(TperFloor!=null && TperFloor>0){
+    flows=Math.max(1, Math.ceil(Tcyc/TperFloor - 1e-9));
+  }else if(Tdir<=0){
+    warns.push('Директивный срок не задан — число параллельных потоков принято '+
+      'равным 1. Без срока проверить продолжительность нельзя.');
+  }
+
+  /* --- комплекты --- */
+  const setsPerFlow=Math.max(1, Math.ceil(Sfloor/Sset - 1e-9));
+  const setsTotal=setsPerFlow*flows;
+  const areaTotal=Sfloor*Nfloor;                     /* м² опалубки всего */
+  const cyclesPerSet=Math.ceil(Nfloor/flows - 1e-9); /* циклов на комплект */
+
+  /* --- проверка ресурса --- */
+  const cap=norm.f;                                  /* формообразующие */
+  const okCap=(cap==null)?null:(cyclesPerSet<=cap);
+  if(cap!=null && !okCap){
+    warns.push('Ресурс формообразующих элементов исчерпан: требуется '+
+      cyclesPerSet+' циклов, норматив для класса '+norm.cls+' — '+
+      cap+' ('+norm.note+'). Нужно больше комплектов либо опалубка '+
+      'более высокого класса.');
+  }
+  if(cap==null){
+    warns.push('Для этого типа и класса таблица 2 ГОСТ 34329-2017 '+
+      'оборачиваемость формообразующих элементов не устанавливает.');
+  }
+
+  /* --- срок --- */
+  let Tfact=null;
+  if(TperFloor!=null){
+    const floorsPerFlow=Math.ceil(Nfloor/flows);
+    Tfact=floorsPerFlow*Tcyc;
+  }
+
+  /* --- ярусы стоек при переопирании --- */
+  let tiers=null;
+  if(Tstr>0){
+    /* пока бетон не набрал распалубочную прочность, его вес держат стойки;
+       плюс один ярус — тот, на котором ведут работы */
+    tiers=Math.ceil(Tstr/Tcyc - 1e-9)+1;
+  }
+
+  /* --- вывод --- */
+  let h='';
+  h+='<div class="foChips">';
+  h+='<span class="foChip">Комплектов <b>'+setsTotal+'</b></span>';
+  h+='<span class="foChip">Циклов на комплект <b>'+cyclesPerSet+'</b></span>';
+  h+='<span class="foChip">Ресурс <b>'+(cap!=null?cap:'—')+'</b></span>';
+  h+='</div>';
+
+  h+='<div class="foKv"><span>Тип опалубки</span><b>'+norm.name+'</b></div>';
+  h+='<div class="foKv"><span>Класс</span><b>'+norm.cls+'</b></div>';
+  h+='<div class="foKv"><span>Оборачиваемость по ГОСТ 34329-2017</span><b>'+
+     (norm.f!=null?norm.f+' (формообр.)':'—')+
+     (norm.s!=null?' / '+norm.s+' (несущие)':'')+'</b></div>';
+  h+='<div class="foKv"><span>Показатель</span><b>'+norm.note+'</b></div>';
+
+  h+='<div class="foSect">ГЕОМЕТРИЯ И СРОКИ</div>';
+  h+='<div class="foKv"><span>Площадь на этаж</span><b>'+fmtr(Sfloor,0)+' м²</b></div>';
+  h+='<div class="foKv"><span>Этажей</span><b>'+fmtr(Nfloor,0)+'</b></div>';
+  h+='<div class="foKv"><span>Всего опалубки</span><b>'+fmtr(areaTotal,0)+' м²</b></div>';
+  h+='<div class="foKv"><span>Площадь комплекта</span><b>'+fmtr(Sset,0)+' м²</b></div>';
+  h+='<div class="foKv"><span>Цикл на этаж</span><b>'+fmtr(Tcyc,1)+' дн.</b></div>';
+  if(TperFloor!=null){
+    h+='<div class="foKv"><span>Доступно на этаж по сроку</span><b>'+
+       fmtr(TperFloor,1)+' дн.</b></div>';
+  }
+
+  h+='<div class="foSect">ПОТРЕБНОСТЬ В ОПАЛУБКЕ</div>';
+  h+='<div class="foKv"><span>Параллельных потоков (захваток)</span><b>'+flows+'</b></div>';
+  h+='<div class="foKv"><span>Комплектов на поток</span><b>'+setsPerFlow+'</b></div>';
+  h+='<div class="foKv"><span>Комплектов всего</span><b>'+setsTotal+'</b></div>';
+  h+='<div class="foKv"><span>Циклов на один комплект</span><b>'+cyclesPerSet+'</b></div>';
+  if(okCap!=null){
+    h+='<div class="foKv"><span>Ресурс комплекта '+cap+' циклов</span>'+
+       '<b class="'+(okCap?'ok':'bad')+'">'+(okCap?'достаточен':'НЕ достаточен')+'</b></div>';
+  }
+
+  if(Tfact!=null){
+    h+='<div class="foSect">ПРОДОЛЖИТЕЛЬНОСТЬ</div>';
+    h+='<div class="foKv"><span>Расчётная по циклам</span><b>'+fmtr(Tfact,0)+' дн.</b></div>';
+    if(Tdir>0){
+      const okT=Tfact<=Tdir+1e-9;
+      h+='<div class="foKv"><span>Директивный срок '+fmtr(Tdir,0)+' дн.</span>'+
+         '<b class="'+(okT?'ok':'bad')+'">'+(okT?'укладывается':'НЕ укладывается')+'</b></div>';
+      if(!okT){
+        warns.push('Расчётная продолжительность '+fmtr(Tfact,0)+' дн. больше '+
+          'директивного срока '+fmtr(Tdir,0)+' дн. на '+fmtr(Tfact-Tdir,0)+
+          ' дн. Нужно увеличить число потоков, сократить цикл или '+
+          'пересмотреть срок.');
+      }
+    }
+  }
+
+  if(tiers!=null){
+    h+='<div class="foSect">ПЕРЕОПИРАНИЕ · СП 435, П. 8.15</div>';
+    h+='<div class="foKv"><span>Ярусов стоек под перекрытием</span><b>'+tiers+'</b></div>';
+    h+='<div class="foKv"><span>Основание</span><b>пока бетон не набрал '+
+       'распалубочную прочность ('+fmtr(Tstr,0)+' дн.), его вес держат стойки; '+
+       'плюс ярус, на котором ведут работы</b></div>';
+    warns.push('СП 435.1325800.2018, п. 8.15: переопирание выполняется исходя '+
+      'из общей массы вышележащих конструкций, и это должно быть отражено '+
+      'в поэтажном плане нагрузок. П. 8.16: многоярусная опорная система '+
+      'из отдельных телескопических стоек НЕ ДОПУСКАЕТСЯ — нужны опорные '+
+      'башни или системы с инвентарными раскосами.');
+  }
+
+  if(warns.length){
+    h+='<div class="foSect">ЗАМЕЧАНИЯ</div>';
+    warns.forEach(w=>{ h+='<div class="foV bad">'+w+'</div>'; });
+  }
+
+  const hard=(okCap===false)||(Tfact!=null&&Tdir>0&&Tfact>Tdir+1e-9);
+  h+='<div class="foV '+(hard?'bad':'ok')+'">'+
+     (hard?'РЕШЕНИЕ НЕ ПРОХОДИТ — см. замечания'
+          :'Потребность определена, ресурс опалубки и срок сходятся')+
+     '</div>';
+
+  h+='<button class="foCopy" id="foCopy">Скопировать расчёт в ППР</button>';
+
+  out.innerHTML=h;
+  LAST={type:norm.name, cls:norm.cls, capF:norm.f, capS:norm.s, note:norm.note,
+        Sfloor:Sfloor, Nfloor:Nfloor, Sset:Sset, Tcyc:Tcyc, Tdir:Tdir, Tstr:Tstr,
+        TperFloor:TperFloor, flows:flows, setsPerFlow:setsPerFlow,
+        setsTotal:setsTotal, cyclesPerSet:cyclesPerSet, areaTotal:areaTotal,
+        okCap:okCap, Tfact:Tfact, tiers:tiers, warns:warns, hard:hard};
+  const cp=document.getElementById('foCopy');
+  if(cp) cp.addEventListener('click',copyReport);
+  save();
+}
+
+function reportText(){
+  const L=LAST;
+  if(!L) return '';
+  const f=(v,d)=>v==null||!isFinite(v)?'—'
+    :(d==null?v.toFixed(2):v.toFixed(d)).replace('.',',');
+  const P=[];
+  P.push('РАСЧЁТ ЦИКЛА ЭТАЖА И ПОТРЕБНОСТИ В ОПАЛУБКЕ');
+  P.push('');
+  P.push('НОРМАТИВЫ');
+  P.push('  ГОСТ 34329-2017 «Опалубка. Общие технические условия», введён');
+  P.push('  01.04.2018 приказом Росстандарта от 14.12.2017 № 1954-ст,');
+  P.push('  взамен ГОСТ Р 52085-2003 (ОТМЕНЁН). Пункты 3.25, 5.1; таблица 2.');
+  P.push('  СП 435.1325800.2018, приказ Минстроя России от 26.11.2018');
+  P.push('  № 746/пр, введён 27.05.2019. Пункты 8.15, 8.16.');
+  P.push('  СП 70.13330.2012, ред. от 06.02.2025 (Изменение № 7 — приказ');
+  P.push('  Минстроя от 06.02.2025 № 66/пр). Таблица 5.11 п. 8.');
+  P.push('');
+  P.push('ИСХОДНЫЕ ДАННЫЕ');
+  P.push('  Тип опалубки: '+L.type);
+  P.push('  Класс опалубки: '+L.cls+' ('+L.note+')');
+  P.push('  Площадь опалубки на этаж: '+f(L.Sfloor,0)+' м²');
+  P.push('  Количество этажей: '+f(L.Nfloor,0));
+  P.push('  Площадь одного комплекта: '+f(L.Sset,0)+' м²');
+  P.push('  Цикл на этаж: '+f(L.Tcyc,1)+' дн.');
+  if(L.Tdir>0) P.push('  Директивный срок: '+f(L.Tdir,0)+' дн.');
+  if(L.Tstr>0) P.push('  Время до распалубочной прочности: '+f(L.Tstr,0)+' дн.');
+  P.push('');
+  P.push('1. НОРМАТИВНАЯ ОБОРАЧИВАЕМОСТЬ — ГОСТ 34329-2017, табл. 2');
+  P.push('   Формообразующие элементы: '+(L.capF!=null?L.capF+' циклов':'не установлена'));
+  P.push('   Поддерживающие и несущие:  '+(L.capS!=null?L.capS+' циклов':'не установлена'));
+  P.push('   '+L.note+'.');
+  P.push('');
+  P.push('2. ПОТРЕБНОСТЬ В КОМПЛЕКТАХ');
+  if(L.TperFloor!=null){
+    P.push('   Доступное время на этаж: '+f(L.Tdir,0)+' / '+f(L.Nfloor,0)+' = '+
+           f(L.TperFloor,1)+' дн.');
+    P.push('   Параллельных потоков (захваток):');
+    P.push('   ceil('+f(L.Tcyc,1)+' / '+f(L.TperFloor,1)+') = '+L.flows);
+  }else{
+    P.push('   Директивный срок не задан, поток принят один.');
+  }
+  P.push('   Комплектов на поток: ceil('+f(L.Sfloor,0)+' / '+f(L.Sset,0)+') = '+
+         L.setsPerFlow);
+  P.push('   Комплектов всего: '+L.flows+' × '+L.setsPerFlow+' = '+L.setsTotal);
+  P.push('   Всего опалубки: '+f(L.Sfloor,0)+' × '+f(L.Nfloor,0)+' = '+
+         f(L.areaTotal,0)+' м²');
+  P.push('');
+  P.push('3. ПРОВЕРКА РЕСУРСА');
+  P.push('   Циклов на один комплект: ceil('+f(L.Nfloor,0)+' / '+L.flows+') = '+
+         L.cyclesPerSet);
+  if(L.okCap!=null){
+    P.push('   '+L.cyclesPerSet+' ≤ '+(L.capF!=null?L.capF:'—')+' — '+
+           (L.okCap?'ресурс достаточен':'РЕСУРС НЕДОСТАТОЧЕН'));
+  }
+  P.push('');
+  if(L.Tfact!=null){
+    P.push('4. ПРОДОЛЖИТЕЛЬНОСТЬ');
+    P.push('   Этажей на поток: ceil('+f(L.Nfloor,0)+' / '+L.flows+') = '+
+           Math.ceil(L.Nfloor/L.flows));
+    P.push('   Расчётная продолжительность: '+f(L.Tfact,0)+' дн.');
+    if(L.Tdir>0){
+      P.push('   Директивный срок '+f(L.Tdir,0)+' дн. — '+
+             (L.Tfact<=L.Tdir+1e-9?'укладывается':'НЕ укладывается'));
+    }
+    P.push('');
+  }
+  if(L.tiers!=null){
+    P.push('5. ПЕРЕОПИРАНИЕ');
+    P.push('   Ярусов стоек: ceil('+f(L.Tstr,0)+' / '+f(L.Tcyc,1)+') + 1 = '+L.tiers);
+    P.push('   Основание: пока бетон не набрал распалубочную прочность,');
+    P.push('   его вес воспринимают стойки; плюс ярус, на котором ведут работы.');
+    P.push('   СП 435 п. 8.15: переопирание — по общей массе вышележащих');
+    P.push('   конструкций, с отражением в поэтажном плане нагрузок.');
+    P.push('   П. 8.16: многоярусные системы из отдельных телескопических');
+    P.push('   стоек не допускаются — применять опорные башни.');
+    P.push('');
+  }
+  if(L.warns.length){
+    P.push('ЗАМЕЧАНИЯ');
+    L.warns.forEach((w,i)=>{ P.push('  '+(i+1)+'. '+w); });
+    P.push('');
+  }
+  P.push('ВЫВОД: '+(L.hard?'решение не проходит по ресурсу или сроку.'
+                          :'потребность определена, ресурс и срок сходятся.'));
+  P.push('');
+  P.push('ПРИМЕЧАНИЯ');
+  P.push('  Оборачиваемость — норматив (ГОСТ 34329-2017, табл. 2).');
+  P.push('  Цикл этажа и число комплектов — производственный расчёт по');
+  P.push('  принятой технологии; норматив задаёт только ресурс комплекта.');
+  P.push('  СП 70.13330.2012 в таблице 5.11 п. 8 ссылается на ГОСТ Р 52085,');
+  P.push('  отменённый с 01.04.2018; в разделе 2 того же СП стоит');
+  P.push('  ГОСТ 34329-2017. Расчёт выполнен по действующему стандарту.');
+  P.push('  Нормативы проверены 28.11.2026.');
+  return P.join('\n');
+}
+
+function copyReport(){
+  const txt=reportText();
+  if(!txt) return;
+  const btn=document.getElementById('foCopy');
+  const done=ok=>{
+    if(!btn) return;
+    btn.classList.add('ok');
+    const old=btn.textContent;
+    btn.textContent=ok?'Скопировано в буфер':'Не удалось скопировать';
+    setTimeout(()=>{ btn.classList.remove('ok'); btn.textContent=old; },1800);
+  };
+  try{
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(()=>done(true),()=>done(false));
+      return;
+    }
+  }catch(e){}
+  try{
+    const ta=document.createElement('textarea');
+    ta.value=txt; ta.style.position='fixed'; ta.style.left='-9999px';
+    document.body.appendChild(ta); ta.select();
+    const ok=document.execCommand('copy');
+    document.body.removeChild(ta); done(ok);
+  }catch(e){ done(false); }
+}
+
+function save(){
+  try{
+    localStorage.setItem(KEY,JSON.stringify({
+      type:el('foType').value, cls:el('foClass').value,
+      area:el('foArea').value, floors:el('foFloors').value,
+      set:el('foSet').value, cycle:el('foCycle').value,
+      term:el('foTerm').value, strip:el('foStrip').value
+    }));
+  }catch(e){}
+}
+
+function openPan(){ pan.classList.add('show'); calc(); }
+function closePan(){ pan.classList.remove('show'); }
+window.TOOLS.formwork.open=openPan;
+window.TOOLS.formwork.close=closePan;
+
+el('foclose').addEventListener('click',closePan);
+el('foGo').addEventListener('click',calc);
+el('foClear').addEventListener('click',()=>{
+  ['foArea','foFloors','foSet','foCycle','foTerm','foStrip'].forEach(id=>{
+    if(el(id)) el(id).value='';
+  });
+  el('foOut').innerHTML='';
+  save();
+});
+['foType','foClass'].forEach(id=>{
+  if(el(id)) el(id).addEventListener('change',()=>{ save(); calc(); });
+});
+['foArea','foFloors','foSet','foCycle','foTerm','foStrip'].forEach(id=>{
+  if(!el(id)) return;
+  el(id).addEventListener('input',save);
+  el(id).addEventListener('keydown',ev=>{
+    if(ev.key==='Enter'){ ev.preventDefault(); save(); calc(); }
+  });
+});
+
+(function restore(){
+  try{
+    const raw=localStorage.getItem(KEY);
+    if(!raw) return;
+    const d=JSON.parse(raw);
+    if(d.type && el('foType')) el('foType').value=d.type;
+    if(d.cls && el('foClass')) el('foClass').value=d.cls;
+    if(d.area && el('foArea')) el('foArea').value=d.area;
+    if(d.floors && el('foFloors')) el('foFloors').value=d.floors;
+    if(d.set && el('foSet')) el('foSet').value=d.set;
+    if(d.cycle && el('foCycle')) el('foCycle').value=d.cycle;
+    if(d.term && el('foTerm')) el('foTerm').value=d.term;
+    if(d.strip && el('foStrip')) el('foStrip').value=d.strip;
+  }catch(e){}
 })();
 
 })();
