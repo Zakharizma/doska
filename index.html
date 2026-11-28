@@ -569,6 +569,70 @@ canvas{display:block;position:fixed;top:0;left:0;cursor:default;
   color:var(--tx2);margin-top:5px;white-space:pre-wrap;word-break:break-word}
 #npanel .nform i{color:var(--tx3);font-style:normal}
 #npanel .nform b{color:var(--tx);font-weight:600}
+/* ---------- ЗИМНЕЕ БЕТОНИРОВАНИЕ ---------- */
+#wpanel{position:fixed;left:calc(16px + var(--sal));top:calc(60px + var(--sat));z-index:26;
+  width:min(392px,calc(100vw - 32px));
+  max-height:calc(100vh - 84px);overflow:auto;display:none;
+  background:rgba(18,24,33,.985);border:1px solid var(--line2);border-radius:14px;
+  padding:10px;box-shadow:0 20px 52px rgba(0,0,0,.66);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+#wpanel.show{display:block}
+#wpanel .chead{display:flex;align-items:center;justify-content:space-between;
+  padding:2px 4px 9px;font-size:10.5px;letter-spacing:.08em;font-weight:700;
+  color:var(--tx3);border-bottom:1px solid var(--line);margin-bottom:9px}
+#wclose{cursor:pointer;color:var(--tx2);font-size:13px;padding:0 3px}
+#wclose:hover{color:var(--tx)}
+#wpanel .frow{display:flex;align-items:center;gap:7px;margin-bottom:6px}
+#wpanel .frow label{font-size:11.5px;color:var(--tx3);flex:0 0 auto;width:112px;line-height:1.3}
+#wpanel .frow input,#wpanel .frow select{flex:1;min-width:0;background:#0f1620;
+  border:1px solid var(--line2);border-radius:8px;color:var(--tx);padding:6px 8px;
+  outline:none;color-scheme:dark;font:12px ui-monospace,SFMono-Regular,Menlo,monospace}
+#wpanel .frow input:focus,#wpanel .frow select:focus{border-color:var(--acc)}
+#wpanel .frow .u{font-size:10px;color:var(--tx3);flex:0 0 auto;width:34px}
+#wpanel .frow.chk{gap:8px}
+#wpanel .frow.chk label{width:auto;flex:1;font-size:11.5px;color:var(--tx2);cursor:pointer}
+#wpanel .frow.chk input{flex:0 0 auto;width:16px;height:16px;accent-color:var(--acc);
+  cursor:pointer;padding:0}
+#wpanel .sect{font-size:10px;letter-spacing:.06em;color:var(--tx3);font-weight:700;
+  margin:11px 0 6px;padding-top:8px;border-top:1px solid var(--line)}
+#wpanel .vhint{font-size:10.5px;color:var(--tx3);margin:4px 2px 0;line-height:1.45}
+#wpanel .go{display:flex;gap:6px;margin-top:10px}
+#wpanel .go button{flex:1;border:1px solid var(--line2);background:#1a2434;color:var(--tx);
+  border-radius:9px;padding:9px 6px;font-size:12.5px;cursor:pointer;font-family:inherit}
+#wpanel .go button.ok{background:var(--acc);border-color:var(--acc);color:#0b0f14;font-weight:700}
+#wpanel .go button:hover{filter:brightness(1.1)}
+#wpanel .res{margin-top:10px;border-top:1px solid var(--line);padding-top:9px}
+#wpanel .wchips{margin-bottom:7px}
+#wpanel .wchip{display:inline-block;background:#121a25;border:1px solid var(--line);
+  border-radius:8px;padding:5px 8px;font-size:11px;color:var(--tx3);margin:0 4px 5px 0}
+#wpanel .wchip b{color:var(--tx);font-variant-numeric:tabular-nums}
+#wpanel .wkv{display:flex;justify-content:space-between;gap:8px;font-size:11.5px;
+  color:var(--tx3);padding:3px 2px;border-bottom:1px dashed #1e2938}
+#wpanel .wkv b{color:var(--tx);font-variant-numeric:tabular-nums;font-weight:600;
+  text-align:right;max-width:62%}
+#wpanel .wkv b.ok{color:#7fe0a3}
+#wpanel .wkv b.bad{color:#ff9a9d}
+#wpanel .wsect{font-size:10px;letter-spacing:.06em;color:var(--tx3);font-weight:700;
+  margin:9px 0 4px}
+#wpanel .wverdict{border-radius:9px;padding:9px 11px;font-size:11.5px;line-height:1.45;
+  margin:7px 0;font-weight:500}
+#wpanel .wverdict.ok{background:#12291c;border:1px solid #2f9e57;color:#7fe0a3}
+#wpanel .wverdict.bad{background:#2a1416;border:1px solid #a13b3f;color:#ff9a9d}
+#wpanel .wcopy{width:100%;margin-top:8px;border:1px solid var(--line2);background:#1a2434;
+  color:var(--tx2);border-radius:8px;padding:8px;font-size:11.5px;cursor:pointer;
+  font-family:inherit}
+#wpanel .wcopy:hover{background:#26344a;color:var(--tx);border-color:var(--acc)}
+#wpanel .wcopy.ok{background:#12291c;border-color:#2f9e57;color:#7fe0a3}
+#wpanel details.whelp{margin-top:9px;border-top:1px solid var(--line);padding-top:7px}
+#wpanel summary{list-style:none;cursor:pointer;font-size:11px;color:var(--acc);
+  font-weight:600;padding:2px 0;user-select:none}
+#wpanel summary::-webkit-details-marker{display:none}
+#wpanel summary:before{content:'▸';display:inline-block;width:12px;font-size:9px;opacity:.8}
+#wpanel details[open] summary:before{content:'▾'}
+#wpanel .wform{font:11px/1.62 ui-monospace,SFMono-Regular,Menlo,monospace;
+  color:var(--tx2);margin-top:5px;white-space:pre-wrap;word-break:break-word}
+#wpanel .wform i{color:var(--tx3);font-style:normal}
+#wpanel .wform b{color:var(--tx);font-weight:600}
 #tpanel .chead{display:flex;align-items:center;justify-content:space-between;
   padding:2px 4px 9px;font-size:10.5px;letter-spacing:.08em;font-weight:700;
   color:var(--tx3);border-bottom:1px solid var(--line);margin-bottom:9px}
@@ -925,6 +989,7 @@ canvas{display:block;position:fixed;top:0;left:0;cursor:default;
     <div class="tmi" data-tool="concrete"><span class="tmi-ic">🧱</span>Прочность бетона</div>
     <div class="tmi" data-tool="volumes"><span class="tmi-ic">📐</span>Объёмы и расход</div>
     <div class="tmi" data-tool="penalty"><span class="tmi-ic">⚖️</span>Неустойка и штрафы</div>
+    <div class="tmi" data-tool="winter"><span class="tmi-ic">❄️</span>Зимнее бетонирование</div>
   </div>
 </div>
 <div id="vchip" title="Версия доски. Обновляется сама.">v—</div>
@@ -1459,6 +1524,238 @@ k     доля ставки за день
   </details>
 </div>
 
+<!-- зимнее бетонирование -->
+<div id="wpanel">
+  <div class="chead"><span>ЗИМНЕЕ БЕТОНИРОВАНИЕ · ТЕРМОС</span><span id="wclose">✕</span></div>
+
+  <div class="sect">КОНСТРУКЦИЯ</div>
+  <div class="frow">
+    <label>Модуль поверхности</label>
+    <select id="wDimMode">
+      <option value="vs">через V и S</option>
+      <option value="mp">ввести Мп</option>
+    </select>
+  </div>
+  <div class="frow" id="wRowV">
+    <label>Объём V</label>
+    <input id="wV" type="number" step="0.01" min="0">
+    <span class="u">м³</span>
+  </div>
+  <div class="frow" id="wRowS">
+    <label>Поверхность S</label>
+    <input id="wS" type="number" step="0.1" min="0">
+    <span class="u">м²</span>
+  </div>
+  <div class="frow" id="wRowMp">
+    <label>Модуль поверхн. Мп</label>
+    <input id="wMp" type="number" step="0.1" min="0">
+    <span class="u">м⁻¹</span>
+  </div>
+
+  <div class="frow">
+    <label>Класс бетона</label>
+    <select id="wClass">
+      <option value="3.5">B3,5</option>
+      <option value="5">B5</option>
+      <option value="7.5">B7,5</option>
+      <option value="10">B10</option>
+      <option value="12.5">B12,5</option>
+      <option value="15">B15</option>
+      <option value="20">B20</option>
+      <option value="22.5">B22,5</option>
+      <option value="25" selected>B25</option>
+      <option value="27.5">B27,5</option>
+      <option value="30">B30</option>
+      <option value="35">B35</option>
+      <option value="40">B40</option>
+      <option value="45">B45</option>
+      <option value="50">B50</option>
+      <option value="55">B55</option>
+      <option value="60">B60</option>
+      <option value="70">B70</option>
+      <option value="80">B80</option>
+      <option value="90">B90</option>
+      <option value="100">B100</option>
+      <option value="110">B110</option>
+      <option value="120">B120</option>
+    </select>
+  </div>
+  <div class="frow">
+    <label>Назначение</label>
+    <select id="wPurpose">
+      <option value="inside">Внутри зданий, фундамент под оборудование</option>
+      <option value="freeze">Переменное замораживание, водонасыщение</option>
+      <option value="span6">Пролётная, пролёт до 6 м</option>
+      <option value="span6p">Пролётная, пролёт свыше 6 м</option>
+      <option value="prestress">Преднапряжённая</option>
+    </select>
+  </div>
+  <div class="frow chk">
+    <input id="wAdd" type="checkbox">
+    <label for="wAdd">С противоморозной добавкой</label>
+  </div>
+
+  <div class="sect">ТЕМПЕРАТУРЫ И УТЕПЛЕНИЕ</div>
+  <div class="frow">
+    <label>Бетон при укладке</label>
+    <input id="wTinit" type="number" step="1" value="10">
+    <span class="u">°C</span>
+  </div>
+  <div class="frow">
+    <label>Воздух</label>
+    <input id="wTout" type="number" step="1" value="-15">
+    <span class="u">°C</span>
+  </div>
+  <div class="frow">
+    <label>Утепление δ</label>
+    <input id="wIns" type="number" step="5" value="50">
+    <span class="u">мм</span>
+  </div>
+  <div class="frow">
+    <label>Теплопроводн. λ</label>
+    <input id="wLam" type="number" step="0.001" value="0.045">
+    <span class="u">Вт/м·°C</span>
+  </div>
+  <div class="frow">
+    <label>Цемент</label>
+    <select id="wCement">
+      <option value="portland">Портландцемент</option>
+      <option value="slag">Шлакопортландцемент</option>
+    </select>
+  </div>
+  <div class="frow">
+    <label>Расход цемента</label>
+    <input id="wCementQ" type="number" step="10" value="350">
+    <span class="u">кг/м³</span>
+  </div>
+  <div class="frow">
+    <label>Тепловыдел. Э</label>
+    <input id="wHeat" type="number" step="10" value="200">
+    <span class="u">кДж/кг</span>
+  </div>
+
+  <div class="frow chk">
+    <input id="wStrip" type="checkbox">
+    <label for="wStrip">Проверить распалубливание</label>
+  </div>
+  <div class="frow" id="wRowRebar">
+    <label>Армирование</label>
+    <select id="wRebar">
+      <option value="lt1">до 1 %</option>
+      <option value="lt3">до 3 %</option>
+      <option value="gt3">более 3 %</option>
+    </select>
+  </div>
+
+  <div class="go">
+    <button class="ok" id="wGo">РАССЧИТАТЬ</button>
+    <button id="wClear">Очистить</button>
+  </div>
+
+  <div class="res" id="wOut"></div>
+
+  <details class="whelp">
+    <summary>Формулы и норматив</summary>
+    <div class="wform"><i>ОБОЗНАЧЕНИЯ</i>
+Мп   модуль поверхности, м⁻¹ = S / V
+V    объём бетона, м³
+S    площадь поверхности теплоотдачи, м²
+t_н  температура наружного воздуха, °C
+t_нч начальная температура бетона, °C
+K    коэффициент теплопередачи ограждения, Вт/(м²·°С)
+R    сопротивление утепления, м²·°С/Вт
+Ц    расход цемента, кг/м³
+Э    тепловыделение цемента, кДж/кг
+τ    время остывания, ч
+
+<i>МОДУЛЬ ПОВЕРХНОСТИ</i>
+  <b>Мп = S / V</b>, м⁻¹
+  Чем выше Мп, тем тоньше конструкция и быстрее
+  остывает. Ключевая величина для выбора метода.
+
+<i>ВЫБОР МЕТОДА — прил. П, табл. П.1</i>
+  Мп до 3:   −15 °C термос; −20 °C термос с
+             ускорителями (У) и добавками (М)
+  Мп 3…6:   −15 °C термос (в т.ч. с добавками
+             и ускорителями); −25 и −40 °C
+             электротермообработка
+  Мп 6…10:  −15 °C термос с химдобавками либо
+             электротермообработка; −40 °C
+             электротермообработка
+  Мп 10…20: −40 °C электротермообработка
+
+<i>КРИТИЧЕСКАЯ ПРОЧНОСТЬ — табл. 5.7, п. 1</i>
+  Без добавок, % проектной:
+    внутри зданий, фундамент под оборудование:
+      до В10 — 50; до В25 — 40; В30 и выше — 30
+    переменное замораживание в водонасыщенном
+    состоянии — 80 (при ПАВ)
+    пролётные: до 6 м — 70; свыше 6 м — 80
+    преднапряжённые — 80
+  С противоморозными добавками:
+    до В15 — 30; до В25 — 25; В30 и выше — 20
+
+<i>ТЕПЛОТЕХНИЧЕСКИЙ РАСЧЁТ</i>
+  <b>R = (δ/1000) / λ</b>, м²·°С/Вт
+  <b>K = 1 / (0,158 + R)</b>, Вт/(м²·°С)
+      0,158 = 1/23 + 1/8,7 по СП 50.13330
+  <b>τ = [C·ρ·(t_нч − t_кон) + Ц·Э] /
+         [3,6·K·Мп·(t_ср − t_н)]</b>, ч
+      C = 1,05 кДж/(кг·°С) — теплоёмкость бетона
+      ρ = 2400 кг/м³ — плотность бетона
+      t_ср = (t_нч + t_кон) / 2
+
+<i>ПРОВЕРКИ ПО НОРМЕ</i>
+  п. 5.11.1 — зимнее бетонирование при среднесуточной
+    ниже 5 °C и минимальной суточной ниже 0 °C
+  п. 5.11.8 — термос: начальная t 5…10 °C,
+    средняя t в этом интервале 5…7 сут
+  табл. 5.7 п. 4 — температура смеси в опалубке
+    при термосе не ниже 5 °C
+  табл. 5.7 п. 5 — температура выдерживания:
+    портландцемент до 80 °C, шлакопортландцемент
+    до 90 °C
+  табл. 5.7 п. 6 — скорость подъёма: Мп до 4 — 5,
+    5…10 — 10, свыше 10 — 15 °C/ч
+  табл. 5.7 п. 7 — скорость остывания: Мп до 4 — 5,
+    5…10 — 10, свыше 10 — 20 °C/ч
+  табл. 5.7 п. 8 — разность t при распалубке:
+    Мп 2…5 — 20 / 30 / 40 °C, свыше 5 — 30 / 40 / 50 °C
+    (по коэффициенту армирования до 1 %, до 3 %,
+    более 3 %)
+  п. 5.11.11 — противоморозные добавки ЗАПРЕЩЕНЫ
+    в преднапряжённых, в агрессивной среде,
+    в зоне переменного уровня воды, ближе 100 м
+    от источников постоянного тока
+
+<i>НОРМАТИВ</i>
+СП 70.13330.2012 «Несущие и ограждающие конструкции.
+Актуализированная редакция СНиП 3.03.01-87»,
+утв. приказом Госстроя от 25.12.2012 № 109/ГС,
+в редакции от 06.02.2025 (Изменение № 7 утв.
+приказом Минстроя России от 06.02.2025 № 66/пр,
+введено с 04.03.2025). Включён в перечень
+документов добровольного применения по 384-ФЗ
+(приказ Росстандарта от 02.04.2020 № 687).
+Проверено 28.11.2026.
+
+<i>ОГОВОРКА О ФОРМУЛЕ</i>
+СП 70.13330 требует, чтобы температура укладки была
+«установлена расчётом» (табл. 5.7, п. 4), но методику
+расчёта не задаёт. Приведённая зависимость — уравнение
+теплового баланса, а не нормированная формула.
+Прочность к моменту замерзания подтверждается
+испытаниями по ГОСТ 10180, ГОСТ 17624, ГОСТ 22690
+с записью в журнале бетонных работ.
+
+<i>РАЗРЫВЫ В ТАБЛИЦАХ</i>
+Табл. 5.7 п. 1 задаёт «до В25» и «В30 и выше» —
+класс B27,5 не охвачен, принято по ближайшему.
+Табл. 5.7 п. 7 задаёт «до 4» и «от 5 до 10» —
+промежуток 4…5 не нормирован, принято строгшее.</div>
+  </details>
+</div>
+
 <div id="toast"></div>
 
 <textarea id="ed" spellcheck="false"></textarea>
@@ -1755,7 +2052,7 @@ const RTXU_KEY='board.rtxu.v1';
 /* Версия сборки. Видна в панели «Напоминания» мелким шрифтом.
    Нужна ровно для одного: отличить старую страницу из кеша GitHub Pages
    от настоящей ошибки. Если версия старая — правки и не должны сохраняться. */
-const BOARD_VER='2026-11-28 12:52';
+const BOARD_VER='2026-11-28 13:14';
 /* сколько карточек с сохранённым текстом — видно рядом с версией */
 function showVer(){
   const v=document.getElementById('verState');
@@ -9077,6 +9374,592 @@ el('nShare').addEventListener('change',()=>{ syncFields(); calc(); });
     el('nFineOn').checked=d.fineOn!==false;
     if(d.share) el('nShare').value=d.share;
     if(d.custom) el('nCustom').value=d.custom;
+  }catch(e){}
+  syncFields();
+})();
+
+})();
+</script>
+
+<script>
+/* ================= ЗИМНЕЕ БЕТОНИРОВАНИЕ · МЕТОД ТЕРМОСА =================
+   Норматив: СП 70.13330.2012 «Несущие и ограждающие конструкции.
+   Актуализированная редакция СНиП 3.03.01-87», утв. приказом Госстроя
+   от 25.12.2012 № 109/ГС, в редакции от 06.02.2025
+   (Изменение № 7 утв. приказом Минстроя России от 06.02.2025 № 66/пр,
+   введено с 04.03.2025). Включён в перечень документов добровольного
+   применения по 384-ФЗ (приказ Росстандарта от 02.04.2020 № 687).
+   Проверено 28.11.2026 по полному тексту действующей редакции.
+
+   Что берётся из норматива напрямую:
+     п. 5.11.1  — условия зимнего бетонирования;
+     п. 5.11.8  — термос: начальная t 5…10 °C, средняя t в этом
+                  интервале 5…7 сут;
+     п. 5.11.11 — где противоморозные добавки ЗАПРЕЩЕНЫ;
+     п. 5.11.12 — какую температуру наружного воздуха принимать
+                  в расчёт в зависимости от модуля поверхности;
+     табл. 5.7  — критическая прочность к моменту замерзания,
+                  предельная температура смеси, скорость остывания,
+                  разность температур при распалубливании;
+     прил. П, табл. П.1 — выбор метода выдерживания по Мп и температуре.
+
+   Что считается физикой, а не нормой (и это указано в справке):
+     время остывания по уравнению теплового баланса. СП 70.13330
+     требует, чтобы температура укладки была «установлена расчётом»
+     (табл. 5.7, п. 4), но методику расчёта не задаёт.
+   ---------------------------------------------------------------------- */
+(function(){
+'use strict';
+
+const pan=document.getElementById('wpanel');
+if(!pan) return;
+window.TOOLS=window.TOOLS||{};
+window.TOOLS.winter={panel:pan, name:'Зимнее бетонирование'};
+
+const KEY='board.winter.v1';
+let LAST=null;
+
+const el=id=>document.getElementById(id);
+const num=v=>{
+  const x=parseFloat(String(v).replace(',','.').replace(/\s/g,'').replace(/\u00a0/g,''));
+  return isFinite(x)?x:0;
+};
+const fmt=(v,d)=>v==null||!isFinite(v)?'—'
+  :(d==null?v.toFixed(2):v.toFixed(d));
+const fmtr=(v,d)=>fmt(v,d).replace('.',',');
+
+/* классы бетона по ГОСТ 26633-2015, п. 4.3.1 */
+const CLASSES=[3.5,5,7.5,10,12.5,15,20,22.5,25,27.5,30,35,40,45,50,55,60,70,80,90,100,110,120];
+
+/* назначение конструкции — определяет критическую прочность (табл. 5.7, п. 1) */
+const PURPOSE={
+  inside:{name:'Внутри зданий, фундамент под оборудование (без динамики)'},
+  freeze:{name:'Переменное замораживание в водонасыщенном состоянии'},
+  span6:{name:'Пролётная конструкция, пролёт до 6 м'},
+  span6p:{name:'Пролётная конструкция, пролёт свыше 6 м'},
+  prestress:{name:'Преднапряжённая конструкция'}
+};
+
+/* Критическая прочность к моменту замерзания, % проектной — табл. 5.7 п. 1.
+   Возвращает {pct, src, warn}. */
+function criticalStrength(B, withAdd, purpose){
+  const w=[];
+  let pct, src;
+
+  if(withAdd){
+    src='табл. 5.7, п. 1 (бетон с противоморозными добавками)';
+    if(B<=15) pct=30;
+    else if(B<=25) pct=25;
+    else if(B>=30) pct=20;
+    else{
+      /* B27,5 не охвачен таблицей: между «до В25» и «В30 и выше» */
+      pct=25;
+      w.push('Класс B27,5 не охвачен таблицей 5.7: она даёт «до В25» и «В30 и выше», '+
+             'промежутка нет. Принято 25 % по ближайшему В25 — уточнить в ППР.');
+    }
+  }else{
+    src='табл. 5.7, п. 1 (бетон без противоморозных добавок)';
+    if(purpose==='inside'){
+      if(B<=10) pct=50;
+      else if(B<=25) pct=40;
+      else if(B>=30) pct=30;
+      else{
+        pct=40;
+        w.push('Класс B27,5 не охвачен таблицей 5.7: она даёт «до В25» и «В30 и выше». '+
+               'Принято 40 % по ближайшему В25 — уточнить в ППР.');
+      }
+    }else if(purpose==='freeze'){
+      pct=80;
+      src='табл. 5.7, п. 1 (переменное замораживание, водонасыщение)';
+      w.push('80 % нормированы при условии введения воздухововлекающих или '+
+             'газообразующих ПАВ. Проверить состав смеси.');
+    }else if(purpose==='span6'){
+      pct=70;
+      src='табл. 5.7, п. 1 (пролётные конструкции, пролёт до 6 м)';
+    }else if(purpose==='span6p'){
+      pct=80;
+      src='табл. 5.7, п. 1 (пролётные конструкции, пролёт свыше 6 м)';
+    }else{
+      pct=80;
+      src='табл. 5.7, п. 1 (преднапряжённые конструкции)';
+    }
+  }
+  return {pct:pct, src:src, warn:w};
+}
+
+/* Рекомендуемый метод выдерживания — прил. П, табл. П.1.
+   tOut — минимальная температура воздуха, °C (отрицательная). */
+function recommendMethod(Mp, tOut){
+  const rows=[];
+  if(Mp<=3){
+    rows.push({max:-15, m:'Термос'});
+    rows.push({max:-20, m:'Термос с ускорителями твердения (У) и противоморозными добавками (М)'});
+  }else if(Mp<=6){
+    rows.push({max:-15, m:'Термос, в том числе с противоморозными добавками и ускорителями твердения'});
+    rows.push({max:-25, m:'Электротермообработка'});
+    rows.push({max:-40, m:'Электротермообработка'});
+  }else if(Mp<=10){
+    rows.push({max:-15, m:'Термос с химическими добавками либо электротермообработка'});
+    rows.push({max:-40, m:'Электротермообработка'});
+  }else if(Mp<=20){
+    rows.push({max:-40, m:'Электротермообработка'});
+  }else{
+    return {ok:false, m:null,
+      note:'Модуль поверхности '+fmtr(Mp,1)+' м⁻¹ выше 20 — таблица П.1 такой случай '+
+           'не рассматривает. Требуется индивидуальное решение в ППР.'};
+  }
+  for(const r of rows){
+    if(tOut>=r.max) return {ok:true, m:r.m, limit:r.max};
+  }
+  return {ok:false, m:null,
+    note:'Температура '+fmtr(tOut,0)+' °C ниже предела таблицы П.1 (−40 °C) — '+
+         'метод выбирается индивидуально в ППР.'};
+}
+
+/* допустимая скорость остывания по табл. 5.7 п. 7, °C/ч.
+   В таблице разрыв: «до 4» и «от 5 до 10», промежуток 4…5 не задан —
+   принимаем строгшее значение 5 °C/ч. */
+function maxCoolRate(Mp){
+  if(Mp<5) return 5;
+  if(Mp<=10) return 10;
+  return 20;
+}
+/* признак разрыва таблицы 5.7 п. 7 (4 ≤ Мп < 5) */
+function coolRateGap(Mp){ return Mp>=4 && Mp<5; }
+/* допустимая скорость подъёма по табл. 5.7 п. 6, °C/ч */
+function maxHeatRate(Mp){
+  if(Mp<4) return 5;
+  if(Mp<=10) return 10;
+  return 15;
+}
+/* предельная температура выдерживания по табл. 5.7 п. 5 */
+function maxCuringTemp(cement){
+  return cement==='slag'?90:80;
+}
+/* разность температур при распалубливании, табл. 5.7 п. 8 */
+function maxStrippingDiff(Mp, rebar){
+  if(Mp>=2 && Mp<=5){
+    if(rebar==='lt1') return 20;
+    if(rebar==='lt3') return 30;
+    return 40;
+  }
+  if(Mp>5){
+    if(rebar==='lt1') return 30;
+    if(rebar==='lt3') return 40;
+    return 50;
+  }
+  return null;
+}
+
+function modeDims(){ return el('wDimMode').value; }
+
+function syncFields(){
+  const dm=modeDims();
+  el('wRowV').style.display=(dm==='vs')?'':'none';
+  el('wRowS').style.display=(dm==='vs')?'':'none';
+  el('wRowMp').style.display=(dm==='mp')?'':'none';
+  el('wRowRebar').style.display=(el('wStrip').checked)?'':'none';
+}
+
+function getMp(){
+  if(modeDims()==='mp') return num(el('wMp').value);
+  const V=num(el('wV').value);
+  const S=num(el('wS').value);
+  if(V<=0||S<=0) return null;
+  return S/V;
+}
+
+function calc(){
+  const out=el('wOut');
+  LAST=null;
+
+  const Mp=getMp();
+  const B=num(el('wClass').value);
+  const tIn=num(el('wTinit').value);
+  const tOut=num(el('wTout').value);
+  const withAdd=el('wAdd').checked;
+  const purpose=el('wPurpose').value;
+  const cement=el('wCement').value;
+  const Cc=num(el('wCementQ').value);     /* расход цемента, кг/м³ */
+  const E=num(el('wHeat').value);         /* тепловыделение, кДж/кг */
+  const delta=num(el('wIns').value);      /* толщина утепления, мм */
+  const lam=num(el('wLam').value);        /* теплопроводность, Вт/(м·°С) */
+
+  if(Mp==null||Mp<=0){
+    out.innerHTML='<div class="wverdict bad">Задайте модуль поверхности: либо напрямую, '+
+      'либо объём и площадь поверхности конструкции.</div>';
+    return;
+  }
+  if(!tIn){
+    out.innerHTML='<div class="wverdict bad">Укажите начальную температуру бетона, °C.</div>';
+    return;
+  }
+
+  const warns=[];
+
+  /* --- 1. Применимость зимнего бетонирования, п. 5.11.1 --- */
+  const isWinter = tOut<5;
+
+  /* --- 2. Метод по табл. П.1 --- */
+  const rec=recommendMethod(Mp, tOut);
+
+  /* --- 3. Критическая прочность по табл. 5.7 п.1 --- */
+  const crit=criticalStrength(B, withAdd, purpose);
+  crit.warn.forEach(w=>warns.push(w));
+
+  /* --- 4. Запрет противоморозных добавок, п. 5.11.11 --- */
+  if(withAdd && purpose==='prestress'){
+    warns.push('П. 5.11.11: применение бетона с противоморозными добавками в '+
+      'преднапряжённых железобетонных конструкциях ЗАПРЕЩЕНО.');
+  }
+
+  /* --- 5. Теплотехнический расчёт остывания --- */
+  const R_ins = (delta>0 && lam>0) ? (delta/1000)/lam : 0;
+  const R_surf = 0.158;            /* 1/23 + 1/8,7 по СП 50.13330 */
+  const K = 1/(R_surf + R_ins);    /* Вт/(м²·°С) */
+  const rho=2400;                  /* плотность бетона, кг/м³ */
+  const C=1.05;                    /* теплоёмкость бетона, кДж/(кг·°С) */
+
+  /* время остывания от tIn до tTarget, ч (уравнение теплового баланса) */
+  function coolingHours(tTarget){
+    const tSr=(tIn+tTarget)/2;
+    const dT=tSr-tOut;
+    if(dT<=0) return Infinity;
+    const N=C*rho*(tIn-tTarget)+Cc*E;      /* кДж/м³ */
+    const D=3.6*K*Mp*dT;                   /* кДж/(м³·ч) */
+    if(D<=0) return Infinity;
+    return N/D;
+  }
+
+  const tau0=coolingHours(0);
+  const tau5=tIn>5?coolingHours(5):0;
+  const tau10=tIn>10?coolingHours(10):0;
+  const hold5to10 = (tIn>10)? Math.max(0, tau5-tau10) : (tIn>=5? tau5 : 0);
+  const holdDays = hold5to10/24;
+
+  /* --- 6. Скорость остывания --- */
+  const coolRate = isFinite(tau0)&&tau0>0 ? (tIn-0)/tau0 : 0;
+  const rateLimit = maxCoolRate(Mp);
+
+  /* --- 7. Температура смеси в опалубке, табл. 5.7 п. 4 --- */
+  const minPlaceTemp = withAdd ? null : 5;   /* термос — не ниже 5 °C */
+
+  /* --- 8. Предельная температура выдерживания, табл. 5.7 п. 5 --- */
+  const tMaxCure = maxCuringTemp(cement);
+
+  /* --- сборка вывода --- */
+  let h='';
+  h+='<div class="wchips">';
+  h+='<span class="wchip">Мп <b>'+fmtr(Mp,2)+'</b> м⁻¹</span>';
+  h+='<span class="wchip">Критич. прочность <b>'+crit.pct+'</b> %</span>';
+  h+='<span class="wchip">Остывание <b>'+(isFinite(tau0)?fmtr(tau0,0):'∞')+'</b> ч</span>';
+  h+='</div>';
+
+  h+='<div class="wkv"><span>Условия зимнего бетонирования (п. 5.11.1)</span><b>'+
+     (isWinter?'да':'нет — среднесуточная выше 5 °C')+'</b></div>';
+  h+='<div class="wkv"><span>Модуль поверхности Мп</span><b>'+fmtr(Mp,2)+' м⁻¹</b></div>';
+
+  h+='<div class="wsect">МЕТОД ВЫДЕРЖИВАНИЯ · ПРИЛ. П, ТАБЛ. П.1</div>';
+  if(rec.ok){
+    h+='<div class="wkv"><span>Рекомендуемый метод при '+fmtr(tOut,0)+' °C</span><b>'+
+       rec.m+'</b></div>';
+  }else{
+    h+='<div class="wverdict bad">'+rec.note+'</div>';
+  }
+
+  h+='<div class="wsect">КРИТИЧЕСКАЯ ПРОЧНОСТЬ · ТАБЛ. 5.7, П. 1</div>';
+  h+='<div class="wkv"><span>Требуется к моменту замерзания</span><b>'+crit.pct+
+     ' % проектной</b></div>';
+  h+='<div class="wkv"><span>В единицах класса</span><b>'+fmtr(B*crit.pct/100,1)+
+     ' МПа (от B'+fmtr(B,1)+')</b></div>';
+  h+='<div class="wkv"><span>Основание</span><b>'+crit.src+'</b></div>';
+
+  h+='<div class="wsect">ТЕПЛОТЕХНИЧЕСКИЙ РАСЧЁТ</div>';
+  h+='<div class="wkv"><span>Сопротивление утепления R</span><b>'+fmtr(R_ins,3)+
+     ' м²·°С/Вт</b></div>';
+  h+='<div class="wkv"><span>Коэффициент теплопередачи K</span><b>'+fmtr(K,2)+
+     ' Вт/(м²·°С)</b></div>';
+  h+='<div class="wkv"><span>Время остывания до 0 °C</span><b>'+
+     (isFinite(tau0)?fmtr(tau0,0)+' ч = '+fmtr(tau0/24,1)+' сут':'не остынет')+'</b></div>';
+  h+='<div class="wkv"><span>Время в интервале 5…10 °C</span><b>'+
+     (isFinite(holdDays)?fmtr(holdDays,1)+' сут':'—')+'</b></div>';
+  h+='<div class="wkv"><span>Скорость остывания</span><b>'+fmtr(coolRate,2)+
+     ' °C/ч (предел '+rateLimit+')</b></div>';
+
+  /* --- проверки --- */
+  h+='<div class="wsect">ПРОВЕРКИ</div>';
+
+  /* п. 5.11.8 — термос: 5…7 сут при средней 5…10 °C */
+  if(rec.ok && /^Термос/.test(rec.m)){
+    const ok58 = holdDays>=5 && holdDays<=7;
+    h+='<div class="wkv"><span>П. 5.11.8: средняя t 5…10 °C в течение 5…7 сут</span>'+
+       '<b class="'+(ok58?'ok':'bad')+'">'+fmtr(holdDays,1)+' сут</b></div>';
+    if(!ok58){
+      if(holdDays<5){
+        warns.push('П. 5.11.8: время выдерживания в интервале 5…10 °C составляет '+
+          fmtr(holdDays,1)+' сут вместо требуемых 5…7. Термос в таком виде не обеспечивает '+
+          'режим — нужно увеличить начальную температуру, усилить утепление '+
+          'или перейти на другой метод по прил. П.');
+      }else{
+        warns.push('П. 5.11.8: время в интервале 5…10 °C составляет '+fmtr(holdDays,1)+
+          ' сут — больше 7. Режим мягче требуемого, но начальная температура '+
+          'и утепление должны быть обоснованы в ППР.');
+      }
+    }
+  }
+
+  /* начальная температура: п. 5.11.8 — 5…10 °C */
+  if(!withAdd){
+    const okInit = tIn>=5;
+    h+='<div class="wkv"><span>Температура укладки не ниже 5 °C (табл. 5.7, п. 4)</span>'+
+       '<b class="'+(okInit?'ok':'bad')+'">'+fmtr(tIn,0)+' °C</b></div>';
+    if(!okInit){
+      warns.push('Табл. 5.7, п. 4: температура бетонной смеси, уложенной в опалубку '+
+        'при методе термоса, устанавливается расчётом, но НЕ НИЖЕ 5 °C. '+
+        'Задано '+fmtr(tIn,0)+' °C.');
+    }
+    if(tIn>10){
+      warns.push('П. 5.11.8: начальная температура для термоса нормируется в интервале '+
+        '5…10 °C. Задано '+fmtr(tIn,0)+' °C — выше верхней границы.');
+    }
+  }
+
+  /* скорость остывания, табл. 5.7 п. 7 */
+  const okRate = coolRate<=rateLimit;
+  if(coolRateGap(Mp)){
+    warns.push('Таблица 5.7, п. 7 задаёт скорость остывания «до 4» и «от 5 до 10», '+
+      'промежуток 4…5 не нормирован. Принято строгшее значение 5 °C/ч.');
+  }
+  h+='<div class="wkv"><span>Скорость остывания ≤ '+rateLimit+' °C/ч</span>'+
+     '<b class="'+(okRate?'ok':'bad')+'">'+fmtr(coolRate,2)+' °C/ч</b></div>';
+  if(!okRate){
+    warns.push('Табл. 5.7, п. 7: скорость остывания при Мп '+fmtr(Mp,1)+
+      ' не должна превышать '+rateLimit+' °C/ч, расчёт даёт '+fmtr(coolRate,2)+
+      ' °C/ч. Усилить утепление.');
+  }
+
+  /* предельная температура выдерживания */
+  h+='<div class="wkv"><span>Температура выдерживания не выше (табл. 5.7, п. 5)</span>'+
+     '<b>'+tMaxCure+' °C</b></div>';
+
+  /* распалубливание, табл. 5.7 п. 8 */
+  if(el('wStrip').checked){
+    const dMax=maxStrippingDiff(Mp, el('wRebar').value);
+    if(dMax!=null){
+      h+='<div class="wkv"><span>Разность t при распалубке не более</span><b>'+
+         dMax+' °C</b></div>';
+      if(tIn>dMax){
+        warns.push('Табл. 5.7, п. 8: разность температур наружных слоёв бетона и воздуха '+
+          'при распалубливании для Мп '+fmtr(Mp,1)+' не должна превышать '+dMax+
+          ' °C. При температуре бетона '+fmtr(tIn,0)+' °C и воздухе '+fmtr(tOut,0)+
+          ' °C разность составляет '+fmtr(tIn-tOut,0)+' °C — распалубка недопустима.');
+      }
+    }else{
+      warns.push('Модуль поверхности ниже 2 — таблица 5.7, п. 8 такой случай не '+
+        'рассматривает, предел разности температур не задан.');
+    }
+  }
+
+  if(warns.length){
+    h+='<div class="wsect">ЗАМЕЧАНИЯ</div>';
+    warns.forEach(w=>{ h+='<div class="wverdict bad">'+w+'</div>'; });
+  }
+
+  const hard = (withAdd&&purpose==='prestress') ||
+               (!withAdd&&tIn<5) || !okRate || !rec.ok;
+  h+='<div class="wverdict '+(hard?'bad':'ok')+'">'+
+     (hard?'РЕЖИМ НЕ СООТВЕТСТВУЕТ НОРМЕ — см. замечания'
+          :'Режим выдерживания соответствует требованиям СП 70.13330.2012')+
+     '</div>';
+
+  h+='<button class="wcopy" id="wCopy">Скопировать расчёт в ППР</button>';
+
+  out.innerHTML=h;
+  LAST={Mp:Mp,B:B,tIn:tIn,tOut:tOut,withAdd:withAdd,purpose:purpose,
+        purposeName:PURPOSE[purpose].name,cement:cement,
+        Cc:Cc,E:E,delta:delta,lam:lam,R:R_ins,K:K,
+        tau0:tau0,tau5:tau5,tau10:tau10,holdDays:holdDays,
+        coolRate:coolRate,rateLimit:rateLimit,crit:crit,rec:rec,
+        tMaxCure:tMaxCure,isWinter:isWinter,warns:warns,hard:hard,
+        strip:el('wStrip').checked,rebar:el('wRebar').value};
+  const cp=document.getElementById('wCopy');
+  if(cp) cp.addEventListener('click',copyReport);
+  save();
+}
+
+function reportText(){
+  const L=LAST;
+  if(!L) return '';
+  const f=(v,d)=>v==null||!isFinite(v)?'—'
+    :(d==null?v.toFixed(2):v.toFixed(d)).replace('.',',');
+  const P=[];
+  P.push('РАСЧЁТ ЗИМНЕГО БЕТОНИРОВАНИЯ · МЕТОД ТЕРМОСА');
+  P.push('');
+  P.push('НОРМАТИВ');
+  P.push('  СП 70.13330.2012 «Несущие и ограждающие конструкции.');
+  P.push('  Актуализированная редакция СНиП 3.03.01-87», утв. приказом');
+  P.push('  Госстроя от 25.12.2012 № 109/ГС, в редакции от 06.02.2025');
+  P.push('  (Изменение № 7 утв. приказом Минстроя России от 06.02.2025');
+  P.push('  № 66/пр, введено с 04.03.2025). Пункты 5.11.1, 5.11.8,');
+  P.push('  5.11.11, 5.11.12, таблица 5.7, приложение П (таблица П.1).');
+  P.push('');
+  P.push('ИСХОДНЫЕ ДАННЫЕ');
+  P.push('  Модуль поверхности Мп = '+f(L.Mp,2)+' м⁻¹');
+  P.push('  Класс бетона B'+f(L.B,1).replace(',0',''));
+  P.push('  Назначение конструкции: '+L.purposeName);
+  P.push('  Противоморозная добавка: '+(L.withAdd?'да':'нет'));
+  P.push('  Начальная температура бетона: '+f(L.tIn,0)+' °C');
+  P.push('  Температура наружного воздуха: '+f(L.tOut,0)+' °C');
+  P.push('  Утепление: '+f(L.delta,0)+' мм, λ = '+f(L.lam,3)+' Вт/(м·°С)');
+  P.push('  Расход цемента: '+f(L.Cc,0)+' кг/м³');
+  P.push('  Тепловыделение цемента: '+f(L.E,0)+' кДж/кг');
+  P.push('');
+  P.push('1. УСЛОВИЯ ЗИМНЕГО БЕТОНИРОВАНИЯ (п. 5.11.1)');
+  P.push('   '+(L.isWinter
+    ? 'Среднесуточная температура ниже 5 °C — требуются специальные меры.'
+    : 'Среднесуточная температура выше 5 °C — режим зимнего бетонирования не требуется.'));
+  P.push('');
+  P.push('2. МЕТОД ВЫДЕРЖИВАНИЯ (прил. П, табл. П.1)');
+  if(L.rec.ok){
+    P.push('   При Мп = '+f(L.Mp,2)+' м⁻¹ и температуре '+f(L.tOut,0)+' °C:');
+    P.push('   '+L.rec.m);
+  }else{
+    P.push('   '+L.rec.note);
+  }
+  P.push('');
+  P.push('3. КРИТИЧЕСКАЯ ПРОЧНОСТЬ К МОМЕНТУ ЗАМЕРЗАНИЯ (табл. 5.7, п. 1)');
+  P.push('   Не менее '+L.crit.pct+' % проектной прочности.');
+  P.push('   В единицах класса: '+f(L.B*L.crit.pct/100,1)+' МПа от B'+f(L.B,1));
+  P.push('   Основание: '+L.crit.src);
+  P.push('');
+  P.push('4. ТЕПЛОТЕХНИЧЕСКИЙ РАСЧЁТ');
+  P.push('   R утепления = '+f(L.R,3)+' м²·°С/Вт');
+  P.push('   K = 1 / (0,158 + R) = '+f(L.K,2)+' Вт/(м²·°С)');
+  P.push('   Время остывания до 0 °C: '+f(L.tau0,0)+' ч = '+f(L.tau0/24,1)+' сут');
+  P.push('   Время в интервале 5…10 °C: '+f(L.holdDays,1)+' сут');
+  P.push('   Скорость остывания: '+f(L.coolRate,2)+' °C/ч (предел '+L.rateLimit+' °C/ч)');
+  P.push('');
+  P.push('   Методика: уравнение теплового баланса');
+  P.push('   τ = [C·ρ·(t_нач − t_кон) + Ц·Э] / [3,6·K·Мп·(t_ср − t_н)]');
+  P.push('   C = 1,05 кДж/(кг·°С), ρ = 2400 кг/м³.');
+  P.push('   СП 70.13330 требует, чтобы температура укладки была установлена');
+  P.push('   расчётом (табл. 5.7, п. 4), но методику расчёта не задаёт —');
+  P.push('   приведённая зависимость является теплотехническим расчётом,');
+  P.push('   а не нормированной формулой.');
+  P.push('');
+  P.push('5. ПРОВЕРКИ');
+  P.push('   Температура выдерживания не выше '+L.tMaxCure+' °C (табл. 5.7, п. 5).');
+  if(L.rec.ok && /^Термос/.test(L.rec.m)){
+    P.push('   П. 5.11.8: средняя температура 5…10 °C в течение 5…7 сут —');
+    P.push('   фактически '+f(L.holdDays,1)+' сут.');
+  }
+  P.push('');
+  if(L.warns.length){
+    P.push('ЗАМЕЧАНИЯ');
+    L.warns.forEach((w,i)=>{ P.push('  '+(i+1)+'. '+w); });
+    P.push('');
+  }
+  P.push('ВЫВОД: '+(L.hard
+    ? 'режим НЕ соответствует требованиям СП 70.13330.2012.'
+    : 'режим соответствует требованиям СП 70.13330.2012.'));
+  P.push('');
+  P.push('Прочность бетона к моменту замерзания подтверждается испытаниями');
+  P.push('по ГОСТ 10180, ГОСТ 17624, ГОСТ 22690 с записью в журнале');
+  P.push('бетонных работ (табл. 5.7, п. 1). Расчёт не заменяет контроль.');
+  P.push('Норматив проверен 28.11.2026.');
+  return P.join('\n');
+}
+
+function copyReport(){
+  const txt=reportText();
+  if(!txt) return;
+  const btn=document.getElementById('wCopy');
+  const done=ok=>{
+    if(!btn) return;
+    btn.classList.add('ok');
+    const old=btn.textContent;
+    btn.textContent=ok?'Скопировано в буфер':'Не удалось скопировать';
+    setTimeout(()=>{ btn.classList.remove('ok'); btn.textContent=old; },1800);
+  };
+  try{
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(()=>done(true),()=>done(false));
+      return;
+    }
+  }catch(e){}
+  try{
+    const ta=document.createElement('textarea');
+    ta.value=txt; ta.style.position='fixed'; ta.style.left='-9999px';
+    document.body.appendChild(ta); ta.select();
+    const ok=document.execCommand('copy');
+    document.body.removeChild(ta); done(ok);
+  }catch(e){ done(false); }
+}
+
+function save(){
+  try{
+    localStorage.setItem(KEY,JSON.stringify({
+      dm:el('wDimMode').value, V:el('wV').value, S:el('wS').value, Mp:el('wMp').value,
+      cls:el('wClass').value, purpose:el('wPurpose').value, add:el('wAdd').checked,
+      tIn:el('wTinit').value, tOut:el('wTout').value, cement:el('wCement').value,
+      Cc:el('wCementQ').value, E:el('wHeat').value,
+      ins:el('wIns').value, lam:el('wLam').value,
+      strip:el('wStrip').checked, rebar:el('wRebar').value
+    }));
+  }catch(e){}
+}
+
+function openPan(){ pan.classList.add('show'); syncFields(); calc(); }
+function closePan(){ pan.classList.remove('show'); }
+window.TOOLS.winter.open=openPan;
+window.TOOLS.winter.close=closePan;
+
+el('wclose').addEventListener('click',closePan);
+el('wGo').addEventListener('click',calc);
+el('wClear').addEventListener('click',()=>{
+  ['wV','wS','wMp','wTinit','wTout','wCementQ','wHeat','wIns','wLam']
+    .forEach(id=>{ el(id).value=''; });
+  el('wOut').innerHTML='';
+  save();
+});
+el('wDimMode').addEventListener('change',()=>{ syncFields(); calc(); });
+el('wStrip').addEventListener('change',()=>{ syncFields(); calc(); });
+['wV','wS','wMp','wTinit','wTout','wCementQ','wHeat','wIns','wLam'].forEach(id=>{
+  el(id).addEventListener('input',save);
+  el(id).addEventListener('keydown',ev=>{
+    if(ev.key==='Enter'){ ev.preventDefault(); save(); calc(); }
+  });
+});
+['wClass','wPurpose','wCement','wRebar'].forEach(id=>{
+  el(id).addEventListener('change',()=>{ save(); calc(); });
+});
+el('wAdd').addEventListener('change',()=>{ save(); calc(); });
+
+(function restore(){
+  try{
+    const raw=localStorage.getItem(KEY);
+    if(!raw) return;
+    const d=JSON.parse(raw);
+    if(d.dm) el('wDimMode').value=d.dm;
+    if(d.V) el('wV').value=d.V;
+    if(d.S) el('wS').value=d.S;
+    if(d.Mp) el('wMp').value=d.Mp;
+    if(d.cls){
+      const sel=el('wClass');
+      const ok=Array.prototype.some.call(sel.options,o=>o.value===String(d.cls));
+      if(ok) sel.value=String(d.cls);
+    }
+    if(d.purpose) el('wPurpose').value=d.purpose;
+    el('wAdd').checked=!!d.add;
+    if(d.tIn) el('wTinit').value=d.tIn;
+    if(d.tOut) el('wTout').value=d.tOut;
+    if(d.cement) el('wCement').value=d.cement;
+    if(d.Cc) el('wCementQ').value=d.Cc;
+    if(d.E) el('wHeat').value=d.E;
+    if(d.ins) el('wIns').value=d.ins;
+    if(d.lam) el('wLam').value=d.lam;
+    el('wStrip').checked=!!d.strip;
+    if(d.rebar) el('wRebar').value=d.rebar;
   }catch(e){}
   syncFields();
 })();
