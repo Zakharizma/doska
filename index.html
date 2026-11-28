@@ -761,6 +761,10 @@ canvas{display:block;position:fixed;top:0;left:0;cursor:default;
   font-family:inherit}
 #tpanel .tcopy:hover{background:#26344a;color:var(--tx);border-color:var(--acc)}
 #tpanel .tcopy.ok{background:#12291c;border-color:#2f9e57;color:#7fe0a3}
+#tpanel .tchart{display:block;width:100%;height:auto;margin:10px 0 4px;
+  background:#0d131b;border:1px solid var(--line);border-radius:9px}
+#tpanel .tchartcap{font-size:10px;color:var(--tx3);line-height:1.45;margin:0 2px 6px}
+#tpanel .tchartcap b{color:var(--tx2)}
 
 /* ---------- редактор карточки ----------
    Полноценное окно: панель инструментов, поле ввода, сохранение.
@@ -1162,6 +1166,10 @@ canvas{display:block;position:fixed;top:0;left:0;cursor:default;
     <input id="hPhi" type="number" step="1" value="50"><span class="u">%</span>
   </div>
   <div class="frow">
+    <label>Влажность снаружи</label>
+    <input id="hPhiOut" type="number" step="1" value="80"><span class="u">%</span>
+  </div>
+  <div class="frow">
     <label>Условия эксплуатации</label>
     <select id="hCond">
       <option value="A">А (сухие)</option>
@@ -1265,6 +1273,34 @@ q      удельные потери теплоты, Вт/м²
 
 <i>УДЕЛЬНЫЕ ПОТЕРИ</i>
   <b>q = ( t_в − t_н ) / R_усл</b>, Вт/м²
+
+<i>ВЛАЖНОСТНЫЙ РЕЖИМ — метод Глазера</i>
+  Проверка конденсации по давлению пара, а НЕ по
+  температуре. Температура у наружной поверхности
+  всегда ниже точки росы — это нормально и само
+  по себе конденсации не означает.
+
+  Давление насыщенного пара, Па:
+  <b>E(t) = 610,94 · exp(17,625·t / (t + 243,04))</b>  при t ≥ 0
+  <b>E(t) = 611,21 · exp(22,46·t / (t + 272,62))</b>   при t < 0
+  (над водой и над льдом соответственно)
+
+  Парциальное давление пара в воздухе:
+  <b>e_в = (φ_в/100) · E(t_в)</b>
+  <b>e_н = (φ_н/100) · E(t_н)</b>
+
+  Сопротивление паропроницанию слоя:
+  <b>R_p,i = δ_i / μ_i</b>, м²·ч·Па/мг
+  μ — коэффициент паропроницаемости материала,
+  мг/(м·ч·Па), приложение М.
+
+  Распределение пара по сечению — линейно по R_p:
+  <b>e(x) = e_в − (e_в − e_н) · ΣR_p / R_p,общ</b>
+
+  Конденсация возможна там, где
+  <b>e(x) &gt; E(t(x))</b>
+  Граница зоны находится линейной интерполяцией
+  по точке, где разность e − E меняет знак.
 
 <i>ТОЧКА РОСЫ — формула Магнуса</i>
   <b>γ = a·t_в / (b + t_в) + ln(φ/100)</b>
@@ -1974,6 +2010,20 @@ R    сопротивление утепления, м²·°С/Вт
 испытаниями по ГОСТ 10180, ГОСТ 17624, ГОСТ 22690
 с записью в журнале бетонных работ.
 
+<i>ГРАФИКИ В РАСЧЁТЕ</i>
+  Верхний — разрез по толщинам слоёв и эпюра
+  температур. Наклон эпюры внутри слоя обратно
+  пропорционален R = δ/λ, поэтому в утеплителе
+  линия падает круто, в кирпиче — полого.
+  Пунктир — точка росы внутреннего воздуха,
+  дана справочно.
+
+  Нижний — влажностный режим: зелёная линия —
+  парциальное давление пара e(x), красная
+  пунктирная — давление насыщения E(t).
+  Заштриховано там, где зелёная выше красной,
+  то есть где возможна конденсация.
+
 <i>РАЗРЫВЫ В ТАБЛИЦАХ</i>
 Табл. 5.7 п. 1 задаёт «до В25» и «В30 и выше» —
 класс B27,5 не охвачен, принято по ближайшему.
@@ -2466,7 +2516,7 @@ const RTXU_KEY='board.rtxu.v1';
 /* Версия сборки. Видна в панели «Напоминания» мелким шрифтом.
    Нужна ровно для одного: отличить старую страницу из кеша GitHub Pages
    от настоящей ошибки. Если версия старая — правки и не должны сохраняться. */
-const BOARD_VER='2026-11-28 14:44';
+const BOARD_VER='2026-11-28 18:00';
 /* сколько карточек с сохранённым текстом — видно рядом с версией */
 function showVer(){
   const v=document.getElementById('verState');
@@ -8318,6 +8368,7 @@ const elTot=document.getElementById('hTot');
 const elZot=document.getElementById('hZot');
 const elTn=document.getElementById('hTn');
 const elPhi=document.getElementById('hPhi');
+const elPhiOut=document.getElementById('hPhiOut');
 const elCond=document.getElementById('hCond');
 const elMr=document.getElementById('hMr');
 const elLays=document.getElementById('hLays');
@@ -8410,9 +8461,230 @@ function save(){
     localStorage.setItem(KEY,JSON.stringify({
       cat:elCat.value, kind:elKind.value,
       tv:elTv.value, tot:elTot.value, zot:elZot.value, tn:elTn.value,
-      phi:elPhi.value, cond:elCond.value, mr:elMr.value, lays:lays
+      phi:elPhi.value, phiOut:elPhiOut.value,
+      cond:elCond.value, mr:elMr.value, lays:lays
     }));
   }catch(e){}
+}
+
+/* ---------- ДАВЛЕНИЕ НАСЫЩЕННОГО ВОДЯНОГО ПАРА ----------
+   Па. Над водой при t ≥ 0, над льдом при t < 0.
+   Формула Магнуса—Тетенса. СП 50.13330.2024 таблицу E(t) не даёт,
+   поэтому используется стандартная аппроксимация; это оговорено в справке. */
+function satPressure(t){
+  if(t>=0) return 610.94*Math.exp(17.625*t/(t+243.04));
+  return 611.21*Math.exp(22.46*t/(t+272.62));
+}
+
+/* ---------- ГРАФИКА: РАЗРЕЗ И ЭПЮРА ТЕМПЕРАТУР ---------- */
+
+/* светлая палитра — на ней читается тёмный текст подписей */
+const MAT_COLORS=['#cfd8e3','#e3ddcf','#d5e2cf','#e2d3d3','#d9d5e3',
+                  '#d3dee3','#e3dccf','#cfe0dc','#e0d7d7','#dde4e8'];
+function matColor(i){ return MAT_COLORS[i%MAT_COLORS.length]; }
+
+/* короткое имя материала для подписи внутри слоя */
+function shortName(n){
+  return String(n)
+    .replace(/\s+\d+([,.]\d+)?\s*[–-]\s*\d+.*$/,'')   /* диапазон плотности */
+    .replace(/\s+\d{3,}.*$/,'')                        /* одиночная плотность */
+    .replace(/\s*\(.*?\)\s*/g,' ')
+    .trim();
+}
+function escXml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* Строит SVG: сверху разрез по толщинам слоёв, снизу эпюра температур
+   с линией точки росы и зоной возможной конденсации.
+   bands   — [{x0,x1,name,d,lam,Rs,t0,t1,ins}]
+   ifaces  — [{x,t}] от внутренней поверхности к наружной
+   tv, tn  — температуры воздуха
+   dew     — точка росы, tauIn — температура внутренней поверхности */
+function buildChart(bands, ifaces, tv, tn, dew, tauIn){
+  const VW=360, LX=26, RX=334;
+  const SEC_Y=16, SEC_H=56;
+  const GR_Y=104, GR_H=118;
+  const totalD=bands.reduce((s,b)=>s+(b.x1-b.x0),0)||1;
+  const sx=x=>LX+(x/totalD)*(RX-LX);
+
+  /* вертикальный масштаб эпюры: от минимальной до максимальной температуры */
+  const tLo=Math.min(tn, dew)-3;
+  const tHi=Math.max(tv, tauIn)+3;
+  const ty=v=>GR_Y+GR_H-((v-tLo)/(tHi-tLo))*GR_H;
+
+  const f=(v,d)=>(v==null||!isFinite(v)?'—':v.toFixed(d==null?1:d)).replace('.',',');
+
+  let s='';
+  s+='<svg class="tchart" viewBox="0 0 '+VW+' 244" preserveAspectRatio="xMidYMid meet">';
+
+  /* --- разрез --- */
+  bands.forEach((b,i)=>{
+    const x0=sx(b.x0), x1=sx(b.x1), w=Math.max(1.2,x1-x0);
+    const fill=b.ins?'#f0c98a':matColor(i);
+    s+='<rect x="'+x0.toFixed(1)+'" y="'+SEC_Y+'" width="'+w.toFixed(1)+
+       '" height="'+SEC_H+'" fill="'+fill+'" stroke="#0b0f14" stroke-width="1"/>';
+    const cx=((x0+x1)/2).toFixed(1);
+    if(w>=54){
+      s+='<text x="'+cx+'" y="'+(SEC_Y+20)+'" text-anchor="middle" font-size="8.2" '+
+         'fill="#0b0f14" font-weight="700">'+escXml(shortName(b.name))+'</text>';
+      s+='<text x="'+cx+'" y="'+(SEC_Y+32)+'" text-anchor="middle" font-size="8" '+
+         'fill="#1c2733">'+b.d+' мм</text>';
+      s+='<text x="'+cx+'" y="'+(SEC_Y+43)+'" text-anchor="middle" font-size="7.4" '+
+         'fill="#1c2733">λ '+f(b.lam,3)+'</text>';
+    }else if(w>=26){
+      s+='<text x="'+cx+'" y="'+(SEC_Y+26)+'" text-anchor="middle" font-size="7.4" '+
+         'fill="#0b0f14" font-weight="600">'+b.d+'</text>';
+      s+='<text x="'+cx+'" y="'+(SEC_Y+37)+'" text-anchor="middle" font-size="7" '+
+         'fill="#1c2733">'+f(b.lam,2)+'</text>';
+    }else{
+      s+='<text x="'+cx+'" y="'+(SEC_Y+SEC_H/2+3)+'" text-anchor="middle" font-size="7" '+
+         'fill="#0b0f14">'+b.d+'</text>';
+    }
+  });
+
+  /* подписи «внутри» / «снаружи» */
+  s+='<text x="'+LX+'" y="'+(SEC_Y-5)+'" font-size="7.6" fill="#8fa0b3">внутри</text>';
+  s+='<text x="'+RX+'" y="'+(SEC_Y-5)+'" text-anchor="end" font-size="7.6" '+
+     'fill="#8fa0b3">снаружи</text>';
+
+  /* Линия точки росы — СПРАВОЧНАЯ. Пересечение эпюры с ней НЕ означает
+     конденсацию: парциальное давление пара тоже падает по сечению.
+     Действительная проверка — по методу Глазера, см. buildMoistChart. */
+
+  /* --- сетка эпюры --- */
+  const gridT=[tHi, dew, tLo];
+  gridT.forEach(gt=>{
+    const y=ty(gt).toFixed(1);
+    s+='<line x1="'+LX+'" y1="'+y+'" x2="'+RX+'" y2="'+y+'" stroke="#1e2938" '+
+       'stroke-width="0.8" stroke-dasharray="3 3"/>';
+  });
+
+  /* --- линия точки росы --- */
+  const yDew=ty(dew).toFixed(1);
+  s+='<line x1="'+LX+'" y1="'+yDew+'" x2="'+RX+'" y2="'+yDew+'" stroke="#ff5a5a" '+
+     'stroke-width="1.2" stroke-dasharray="5 3"/>';
+  s+='<text x="'+LX+'" y="'+(ty(dew)-4).toFixed(1)+'" font-size="7.6" fill="#ff9a9d">'+
+     't росы внутр. воздуха '+f(dew,1)+' °C (справочно)</text>';
+
+  /* --- эпюра температур --- */
+  const pts=ifaces.map(p=>sx(p.x).toFixed(1)+','+ty(p.t).toFixed(1)).join(' ');
+  s+='<polyline points="'+pts+'" fill="none" stroke="#5aa9e6" stroke-width="2.2" '+
+     'stroke-linejoin="round" stroke-linecap="round"/>';
+
+  /* точки на эпюре */
+  ifaces.forEach((p,i)=>{
+    const x=sx(p.x), y=ty(p.t);
+    const isEnd=(i===0||i===ifaces.length-1);
+    s+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(isEnd?2.6:1.9)+
+       '" fill="#5aa9e6"/>';
+  });
+
+  /* подписи температур: на поверхностях всегда, внутри — если слоёв немного */
+  const many=bands.length>4;
+  ifaces.forEach((p,i)=>{
+    const x=sx(p.x), y=ty(p.t);
+    const isIn=(i===0), isOut=(i===ifaces.length-1);
+    if(!isIn && !isOut && many) return;
+    const anchor=isIn?'start':(isOut?'end':'middle');
+    const dy=isIn?-7:(isOut?-7:11);
+    const xx=isIn?x+3:(isOut?x-3:x);
+    s+='<text x="'+xx.toFixed(1)+'" y="'+(y+dy).toFixed(1)+'" text-anchor="'+anchor+
+       '" font-size="7.6" fill="#c8d4e0">'+f(p.t,1)+'</text>';
+  });
+
+  /* подписи осей */
+  s+='<text x="'+LX+'" y="'+(GR_Y-8)+'" font-size="7.6" fill="#8fa0b3">t, °C</text>';
+  s+='<text x="'+RX+'" y="'+(GR_Y-8)+'" text-anchor="end" font-size="7.6" fill="#8fa0b3">'+
+     't внутри '+f(tv,1)+' · снаружи '+f(tn,1)+'</text>';
+
+  s+='</svg>';
+  return s;
+}
+
+/* где эпюра пересекает точку росы: возвращает x или null */
+function xCrossMarker(ifaces, dew){
+  for(let i=0;i<ifaces.length-1;i++){
+    const a=ifaces[i], b=ifaces[i+1];
+    if(a.t>=dew && b.t<dew) return a.x+(b.x-a.x)*((a.t-dew)/(a.t-b.t));
+  }
+  return null;
+}
+
+
+/* ---------- ГРАФИК ВЛАЖНОСТНОГО РЕЖИМА (метод Глазера) ----------
+   Сравниваются парциальное давление пара e(x) и давление насыщения
+   E(t(x)). Конденсация возможна там, где e > E.
+   e(x) распределяется линейно по сопротивлению паропроницанию
+   R_p = δ/μ, а не по толщине. */
+function buildMoistChart(bands, mIfaces, totalD){
+  const VW=360, LX=26, RX=334;
+  const GY=30, GH=104;
+  const f=(v,d)=>(v==null||!isFinite(v)?'—':v.toFixed(d==null?0:d)).replace('.',',');
+
+  const sx=x=>LX+(x/(totalD||1))*(RX-LX);
+  let eMax=0;
+  mIfaces.forEach(p=>{ eMax=Math.max(eMax,p.e,p.Es); });
+  eMax=eMax*1.15||1;
+  const py=v=>GY+GH-(v/eMax)*GH;
+
+  let s='';
+  s+='<svg class="tchart" viewBox="0 0 '+VW+' 156" preserveAspectRatio="xMidYMid meet">';
+
+  /* зона конденсации */
+  let xc=null;
+  for(let i=0;i<mIfaces.length;i++){
+    if(mIfaces[i].e>mIfaces[i].Es){
+      if(i===0) xc=0;
+      else{
+        const a=mIfaces[i-1], b=mIfaces[i];
+        const da=a.e-a.Es, db=b.e-b.Es;
+        xc=a.x+(b.x-a.x)*(da/(da-db));
+      }
+      break;
+    }
+  }
+  if(xc!=null){
+    const x0=sx(xc);
+    s+='<rect x="'+x0.toFixed(1)+'" y="'+GY+'" width="'+Math.max(0,RX-x0).toFixed(1)+
+       '" height="'+GH+'" fill="#ff5a5a" opacity="0.14"/>';
+  }
+
+  /* сетка */
+  [0, eMax/2, eMax].forEach(v=>{
+    s+='<line x1="'+LX+'" y1="'+py(v).toFixed(1)+'" x2="'+RX+'" y2="'+py(v).toFixed(1)+
+       '" stroke="#1e2938" stroke-width="0.8" stroke-dasharray="3 3"/>';
+  });
+
+  /* E(t) — насыщение */
+  const ptsE=mIfaces.map(p=>sx(p.x).toFixed(1)+','+py(p.Es).toFixed(1)).join(' ');
+  s+='<polyline points="'+ptsE+'" fill="none" stroke="#ff5a5a" stroke-width="1.6" '+
+     'stroke-dasharray="5 3"/>';
+
+  /* e(x) — пар */
+  const ptsP=mIfaces.map(p=>sx(p.x).toFixed(1)+','+py(p.e).toFixed(1)).join(' ');
+  s+='<polyline points="'+ptsP+'" fill="none" stroke="#7fe0a3" stroke-width="2"/>';
+
+  mIfaces.forEach(p=>{
+    s+='<circle cx="'+sx(p.x).toFixed(1)+'" cy="'+py(p.e).toFixed(1)+'" r="1.8" fill="#7fe0a3"/>';
+    s+='<circle cx="'+sx(p.x).toFixed(1)+'" cy="'+py(p.Es).toFixed(1)+'" r="1.5" fill="#ff5a5a"/>';
+  });
+
+  s+='<text x="'+LX+'" y="'+(GY-8)+'" font-size="7.6" fill="#8fa0b3">e, Па</text>';
+  s+='<text x="'+RX+'" y="'+(GY-8)+'" text-anchor="end" font-size="7.6" fill="#8fa0b3">'+
+     'зелёная — пар e(x) · красная — насыщение E(t)</text>';
+  s+='<text x="'+LX+'" y="'+(GY+GH+14)+'" font-size="7.6" fill="#7fe0a3">'+
+     'e внутр. '+f(mIfaces[0].e,0)+' Па</text>';
+  s+='<text x="'+RX+'" y="'+(GY+GH+14)+'" text-anchor="end" font-size="7.6" fill="#7fe0a3">'+
+     'e наружн. '+f(mIfaces[mIfaces.length-1].e,0)+' Па</text>';
+  if(xc!=null){
+    s+='<text x="'+sx(xc).toFixed(1)+'" y="'+(GY+12)+'" text-anchor="middle" font-size="7.6" '+
+       'fill="#ff9a9d" font-weight="700">конденсация</text>';
+  }
+
+  s+='</svg>';
+  return s;
 }
 
 function calc(){
@@ -8461,6 +8733,58 @@ function calc(){
   const okR=r0>=rNorm-1e-9;
   const okTau=tauIn>=dew-1e-9;
   const okDt=dtNorm===undefined ? true : dtFact<=dtNorm+1e-9;
+
+  /* ---- распределение температуры по слоям ----
+     Температура на границе k: t_k = t_в − (t_в − t_н) · R_нак / R_о,
+     где R_нак включает 1/α_в и все слои до этой границы. */
+  const dtn=tv-tn;
+  const bands=[];
+  let xcum=0, Rcum=1/aIn;
+  const tauOut=tv-dtn*(r0-1/aOut)/r0;
+  const ifaces=[{x:0, t:tauIn}];
+  lays.forEach(L=>{
+    const m=MAT[L.m];
+    if(!m) return;
+    const lam=lamCol===2?m[2]:m[3];
+    const Rs=(L.d/1000)/lam;
+    const x0=xcum, x1=xcum+L.d;
+    Rcum+=Rs;
+    const t1=tv-dtn*Rcum/r0;
+    bands.push({x0:x0, x1:x1, name:m[1], d:L.d, lam:lam, Rs:Rs, mu:m[4],
+                mi:L.m, t0:ifaces[ifaces.length-1].t, t1:t1, ins:!!L.ins});
+    ifaces.push({x:x1, t:t1});
+    xcum=x1;
+  });
+  if(ifaces.length>1) ifaces[ifaces.length-1].t=tauOut;
+
+  /* ---- влажностный режим по методу Глазера ----
+     e_в = (φ_в/100)·E(t_в),  e_н = (φ_н/100)·E(t_н)
+     R_p,i = δ_i / μ_i;  e(x) линейно по R_p
+     конденсация там, где e(x) > E(t(x)) */
+  const phiOutRaw=elPhiOut?parseFloat(elPhiOut.value):NaN;
+  const phiOutOk=isFinite(phiOutRaw)?Math.max(1,Math.min(100,phiOutRaw)):80;
+  const eIn=(Math.max(1,Math.min(100,phi))/100)*satPressure(tv);
+  const eOut=(phiOutOk/100)*satPressure(tn);
+  const RpTot=bands.reduce((s2,b)=>s2+((b.d/1000)/(b.mu||1)),0)||1;
+  const mIfaces=[{x:0, e:eIn, Es:satPressure(tauIn), t:tauIn}];
+  let rpCum=0;
+  bands.forEach(b=>{
+    rpCum+=(b.d/1000)/(b.mu||1);
+    const e=eIn-(eIn-eOut)*(rpCum/RpTot);
+    mIfaces.push({x:b.x1, e:e, Es:satPressure(b.t1), t:b.t1});
+  });
+  let condIdx=-1;
+  for(let i2=0;i2<mIfaces.length;i2++){
+    if(mIfaces[i2].e>mIfaces[i2].Es){ condIdx=i2; break; }
+  }
+  let xCond=null;
+  if(condIdx===0) xCond=0;
+  else if(condIdx>0){
+    const a=mIfaces[condIdx-1], b=mIfaces[condIdx];
+    const da=a.e-a.Es, db=b.e-b.Es;
+    xCond=a.x+(b.x-a.x)*(da/(da-db));
+  }
+  const okMoist=(condIdx<0);
 
   /* подбор толщины утеплителя */
   const insIdx=lays.map((L,i)=>L.ins?i:-1).filter(i=>i>=0);
@@ -8511,6 +8835,15 @@ function calc(){
        fmt(dtFact)+' °C больше нормы '+fmt(dtNorm)+' °C (таблица 5).</div>';
   }
 
+  if(!okMoist){
+    h+='<div class="warn">Влажностный режим: в сечении есть зона, где давление '+
+       'пара превышает давление насыщения. Возможна конденсация внутри '+
+       'конструкции'+(xCond!=null?' (примерно с '+fmt(xCond,0)+' мм от внутренней '+
+       'поверхности)':'')+'. Требуется проверка сопротивления паропроницанию '+
+       'по разделу 8 СП 50.13330.2024; при необходимости — пароизоляция '+
+       'с тёплой стороны или вентилируемая прослойка.</div>';
+  }
+
   if(need){
     if(need.mm<=0){
       h+='<div class="verdict ok">Утеплитель не нужен: конструкция проходит по норме и без него.</div>';
@@ -8527,6 +8860,30 @@ function calc(){
     h+='<div class="warn">Отметь слой утеплителя кнопкой «ут» — тогда посчитаю нужную толщину.</div>';
   }
 
+  /* графики: разрез с эпюрой температур и влажностный режим */
+  if(bands.length){
+    h+='<div class="sect">СЕЧЕНИЕ И РАСПРЕДЕЛЕНИЕ ТЕМПЕРАТУРЫ</div>';
+    h+=buildChart(bands, ifaces, tv, tn, dew, tauIn);
+    h+='<div class="tchartcap">Слои показаны пропорционально толщине, высота '+
+       'сечения условная. Наклон эпюры внутри слоя обратно пропорционален '+
+       'его сопротивлению R = δ/λ. Линия точки росы дана <b>справочно</b>: '+
+       'то, что температура где-то ниже неё, ещё не означает конденсацию — '+
+       'парциальное давление пара тоже падает по сечению. Действительная '+
+       'проверка — на графике влажностного режима ниже.</div>';
+
+    h+='<div class="sect">ВЛАЖНОСТНЫЙ РЕЖИМ · МЕТОД ГЛАЗЕРА</div>';
+    h+=buildMoistChart(bands, mIfaces, xcum);
+    if(okMoist){
+      h+='<div class="tchartcap">Давление пара e(x) нигде не превышает давление '+
+         'насыщения E(t): конденсации в сечении нет.</div>';
+    }else{
+      h+='<div class="tchartcap"><b>e(x) превышает E(t) — возможна конденсация '+
+         'внутри конструкции.</b>'+
+         (xCond!=null?' Зона начинается на '+fmt(xCond,0)+' мм от внутренней '+
+         'поверхности.':'')+'</div>';
+    }
+  }
+
   /* кнопка копирования и запоминание расчёта */
   h+='<button class="tcopy" id="hCopy">Скопировать расчёт в отчёт</button>';
   elOut.innerHTML=h;
@@ -8535,7 +8892,10 @@ function calc(){
         g:g, rTr:rTr, rNorm:rNorm, rk:rk, r0:r0, aIn:aIn, aOut:aOut,
         tauIn:tauIn, dew:dew, dtNorm:dtNorm, dtFact:dtFact,
         okR:okR, okTau:okTau, okDt:okDt, need:need, cond:elCond.value,
-        lays:lays.map(L=>({m:L.m, d:L.d, ins:!!L.ins}))};
+        lays:lays.map(L=>({m:L.m, d:L.d, ins:!!L.ins})),
+        bands:bands, ifaces:ifaces, tauOut:tauOut,
+        mIfaces:mIfaces, eIn:eIn, eOut:eOut, phiOut:phiOutOk,
+        okMoist:okMoist, xCond:xCond, xCross:xCrossMarker(ifaces, dew)};
   const cp=document.getElementById('hCopy');
   if(cp) cp.addEventListener('click',copyReport);
   save();
@@ -8599,6 +8959,16 @@ function reportText(){
   P.push('  q = ('+f(L.tv,1)+' − '+f(L.tn,1)+') / '+f(L.r0)+' = '+
          f((L.tv-L.tn)/L.r0)+' Вт/м²');
   P.push('');
+  P.push('РАСПРЕДЕЛЕНИЕ ТЕМПЕРАТУРЫ ПО СЕЧЕНИЮ');
+  P.push('  (t_k = t_в − (t_в − t_н) · R_нак / R_о)');
+  if(L.bands && L.bands.length){
+    L.bands.forEach((b,i)=>{
+      P.push('  '+f(b.t0,1)+' °C → '+f(b.t1,1)+' °C   '+
+             shortName(b.name)+', '+b.d+' мм, R = '+f(b.Rs,3));
+    });
+    P.push('  Наружная поверхность: '+f(L.tauOut,1)+' °C');
+  }
+  P.push('');
   P.push('ПРОВЕРКИ');
   P.push('  Приведённое сопротивление: '+f(L.r0)+' ≥ '+f(L.rNorm)+' — '+
          (L.okR?'выполняется':'НЕ выполняется'));
@@ -8608,6 +8978,26 @@ function reportText(){
   if(L.dtNorm!==undefined){
     P.push('  Перепад t_в − τ_в = '+f(L.dtFact)+' °C, норма '+f(L.dtNorm)+
            ' °C (табл. 5) — '+(L.okDt?'выполняется':'НЕ выполняется'));
+  }
+  P.push('');
+  P.push('ВЛАЖНОСТНЫЙ РЕЖИМ (метод Глазера)');
+  P.push('   e_в = (φ_в/100)·E(t_в) = ('+f(L.phi,0)+'/100)·E('+f(L.tv,1)+') = '+
+         f(L.eIn,0)+' Па');
+  P.push('   e_н = (φ_н/100)·E(t_н) = ('+f(L.phiOut,0)+'/100)·E('+f(L.tn,1)+') = '+
+         f(L.eOut,0)+' Па');
+  P.push('   R_p,i = δ_i / μ_i;  e(x) распределяется по R_p');
+  if(L.mIfaces){
+    L.mIfaces.forEach(p=>{
+      P.push('   x = '+f(p.x,0)+' мм:  e = '+f(p.e,0)+' Па,  E(t) = '+f(p.Es,0)+
+             ' Па,  t = '+f(p.t,1)+' °C'+(p.e>p.Es?'   <- КОНДЕНСАЦИЯ':''));
+    });
+  }
+  if(L.okMoist){
+    P.push('   Конденсации в сечении нет: e(x) < E(t) во всех точках.');
+  }else{
+    P.push('   ВНИМАНИЕ: e(x) превышает E(t) — возможна конденсация внутри');
+    P.push('   конструкции'+(L.xCond!=null?' примерно с '+f(L.xCond,0)+' мм от внутренней':'')+'.');
+    P.push('   Требуется проверка по разделу 8 СП 50.13330.2024.');
   }
   P.push('');
   if(L.need){
@@ -8671,7 +9061,9 @@ document.getElementById('hClear').addEventListener('click',()=>{
 document.getElementById('hGo').addEventListener('click',()=>{ save(); calc(); });
 
 [elCat,elKind,elCond].forEach(e=>e.addEventListener('change',()=>{ save(); calc(); }));
-[elTv,elTot,elZot,elTn,elPhi,elMr].forEach(e=>{
+/* filter(Boolean) — если какого-то поля нет в разметке (устаревший
+   кэш), панель не должна падать целиком */
+[elTv,elTot,elZot,elTn,elPhi,elPhiOut,elMr].filter(Boolean).forEach(e=>{
   e.addEventListener('input',save);
   e.addEventListener('keydown',ev=>{
     if(ev.key==='Enter'){ ev.preventDefault(); save(); calc(); }
@@ -8695,6 +9087,7 @@ document.getElementById('tclose').addEventListener('click',closePan);
     if(c.zot!==undefined) elZot.value=c.zot;
     if(c.tn!==undefined) elTn.value=c.tn;
     if(c.phi!==undefined) elPhi.value=c.phi;
+    if(c.phiOut!==undefined) elPhiOut.value=c.phiOut;
     if(c.cond) elCond.value=c.cond;
     if(c.mr!==undefined) elMr.value=c.mr;
     if(Array.isArray(c.lays)) lays=c.lays.map(x=>({m:x.m|0,d:x.d||0,ins:!!x.ins}));
