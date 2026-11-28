@@ -633,6 +633,70 @@ canvas{display:block;position:fixed;top:0;left:0;cursor:default;
   color:var(--tx2);margin-top:5px;white-space:pre-wrap;word-break:break-word}
 #wpanel .wform i{color:var(--tx3);font-style:normal}
 #wpanel .wform b{color:var(--tx);font-weight:600}
+/* ---------- ТЕМП НАБОРА ПРОЧНОСТИ ---------- */
+#sppanel{position:fixed;left:calc(16px + var(--sal));top:calc(60px + var(--sat));z-index:26;
+  width:min(392px,calc(100vw - 32px));
+  max-height:calc(100vh - 84px);overflow:auto;display:none;
+  background:rgba(18,24,33,.985);border:1px solid var(--line2);border-radius:14px;
+  padding:10px;box-shadow:0 20px 52px rgba(0,0,0,.66);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+#sppanel.show{display:block}
+#sppanel .chead{display:flex;align-items:center;justify-content:space-between;
+  padding:2px 4px 9px;font-size:10.5px;letter-spacing:.08em;font-weight:700;
+  color:var(--tx3);border-bottom:1px solid var(--line);margin-bottom:9px}
+#spclose{cursor:pointer;color:var(--tx2);font-size:13px;padding:0 3px}
+#spclose:hover{color:var(--tx)}
+#sppanel .frow{display:flex;align-items:center;gap:7px;margin-bottom:6px}
+#sppanel .frow label{font-size:11.5px;color:var(--tx3);flex:0 0 auto;width:112px;line-height:1.3}
+#sppanel .frow input,#sppanel .frow select{flex:1;min-width:0;background:#0f1620;
+  border:1px solid var(--line2);border-radius:8px;color:var(--tx);padding:6px 8px;
+  outline:none;color-scheme:dark;font:12px ui-monospace,SFMono-Regular,Menlo,monospace}
+#sppanel .frow input:focus,#sppanel .frow select:focus{border-color:var(--acc)}
+#sppanel .frow .u{font-size:10px;color:var(--tx3);flex:0 0 auto;width:34px}
+#sppanel .frow.chk{gap:8px}
+#sppanel .frow.chk label{width:auto;flex:1;font-size:11.5px;color:var(--tx2);cursor:pointer}
+#sppanel .frow.chk input{flex:0 0 auto;width:16px;height:16px;accent-color:var(--acc);
+  cursor:pointer;padding:0}
+#sppanel .sect{font-size:10px;letter-spacing:.06em;color:var(--tx3);font-weight:700;
+  margin:11px 0 6px;padding-top:8px;border-top:1px solid var(--line)}
+#sppanel .vhint{font-size:10.5px;color:var(--tx3);margin:4px 2px 0;line-height:1.45}
+#sppanel .go{display:flex;gap:6px;margin-top:10px}
+#sppanel .go button{flex:1;border:1px solid var(--line2);background:#1a2434;color:var(--tx);
+  border-radius:9px;padding:9px 6px;font-size:12.5px;cursor:pointer;font-family:inherit}
+#sppanel .go button.ok{background:var(--acc);border-color:var(--acc);color:#0b0f14;font-weight:700}
+#sppanel .go button:hover{filter:brightness(1.1)}
+#sppanel .res{margin-top:10px;border-top:1px solid var(--line);padding-top:9px}
+#sppanel .spchips{margin-bottom:7px}
+#sppanel .spchip{display:inline-block;background:#121a25;border:1px solid var(--line);
+  border-radius:8px;padding:5px 8px;font-size:11px;color:var(--tx3);margin:0 4px 5px 0}
+#sppanel .spchip b{color:var(--tx);font-variant-numeric:tabular-nums}
+#sppanel .spkv{display:flex;justify-content:space-between;gap:8px;font-size:11.5px;
+  color:var(--tx3);padding:3px 2px;border-bottom:1px dashed #1e2938}
+#sppanel .spkv b{color:var(--tx);font-variant-numeric:tabular-nums;font-weight:600;
+  text-align:right;max-width:62%}
+#sppanel .spkv b.ok{color:#7fe0a3}
+#sppanel .spkv b.bad{color:#ff9a9d}
+#sppanel .spsect{font-size:10px;letter-spacing:.06em;color:var(--tx3);font-weight:700;
+  margin:9px 0 4px}
+#sppanel .spverdict{border-radius:9px;padding:9px 11px;font-size:11.5px;line-height:1.45;
+  margin:7px 0;font-weight:500}
+#sppanel .spverdict.ok{background:#12291c;border:1px solid #2f9e57;color:#7fe0a3}
+#sppanel .spverdict.bad{background:#2a1416;border:1px solid #a13b3f;color:#ff9a9d}
+#sppanel .spcopy{width:100%;margin-top:8px;border:1px solid var(--line2);background:#1a2434;
+  color:var(--tx2);border-radius:8px;padding:8px;font-size:11.5px;cursor:pointer;
+  font-family:inherit}
+#sppanel .spcopy:hover{background:#26344a;color:var(--tx);border-color:var(--acc)}
+#sppanel .spcopy.ok{background:#12291c;border-color:#2f9e57;color:#7fe0a3}
+#sppanel details.sphelp{margin-top:9px;border-top:1px solid var(--line);padding-top:7px}
+#sppanel summary{list-style:none;cursor:pointer;font-size:11px;color:var(--acc);
+  font-weight:600;padding:2px 0;user-select:none}
+#sppanel summary::-webkit-details-marker{display:none}
+#sppanel summary:before{content:'▸';display:inline-block;width:12px;font-size:9px;opacity:.8}
+#sppanel details[open] summary:before{content:'▾'}
+#sppanel .spform{font:11px/1.62 ui-monospace,SFMono-Regular,Menlo,monospace;
+  color:var(--tx2);margin-top:5px;white-space:pre-wrap;word-break:break-word}
+#sppanel .spform i{color:var(--tx3);font-style:normal}
+#sppanel .spform b{color:var(--tx);font-weight:600}
 #tpanel .chead{display:flex;align-items:center;justify-content:space-between;
   padding:2px 4px 9px;font-size:10.5px;letter-spacing:.08em;font-weight:700;
   color:var(--tx3);border-bottom:1px solid var(--line);margin-bottom:9px}
@@ -990,6 +1054,7 @@ canvas{display:block;position:fixed;top:0;left:0;cursor:default;
     <div class="tmi" data-tool="volumes"><span class="tmi-ic">📐</span>Объёмы и расход</div>
     <div class="tmi" data-tool="penalty"><span class="tmi-ic">⚖️</span>Неустойка и штрафы</div>
     <div class="tmi" data-tool="winter"><span class="tmi-ic">❄️</span>Зимнее бетонирование</div>
+    <div class="tmi" data-tool="strength"><span class="tmi-ic">📈</span>Набор прочности</div>
   </div>
 </div>
 <div id="vchip" title="Версия доски. Обновляется сама.">v—</div>
@@ -1756,6 +1821,194 @@ R    сопротивление утепления, м²·°С/Вт
   </details>
 </div>
 
+<!-- темп набора прочности и распалубочная прочность -->
+<div id="sppanel">
+  <div class="chead"><span>ТЕМП НАБОРА ПРОЧНОСТИ</span><span id="spclose">✕</span></div>
+
+  <div class="sect">БЕТОН И УСЛОВИЯ</div>
+  <div class="frow">
+    <label>Класс бетона</label>
+    <select id="spClass">
+      <option value="3.5">B3,5</option>
+      <option value="5">B5</option>
+      <option value="7.5">B7,5</option>
+      <option value="10">B10</option>
+      <option value="12.5">B12,5</option>
+      <option value="15">B15</option>
+      <option value="20">B20</option>
+      <option value="22.5">B22,5</option>
+      <option value="25" selected>B25</option>
+      <option value="27.5">B27,5</option>
+      <option value="30">B30</option>
+      <option value="35">B35</option>
+      <option value="40">B40</option>
+      <option value="45">B45</option>
+      <option value="50">B50</option>
+      <option value="55">B55</option>
+      <option value="60">B60</option>
+      <option value="70">B70</option>
+      <option value="80">B80</option>
+      <option value="90">B90</option>
+      <option value="100">B100</option>
+      <option value="110">B110</option>
+      <option value="120">B120</option>
+    </select>
+  </div>
+  <div class="frow">
+    <label>Температура</label>
+    <input id="spTemp" type="number" step="1" value="20">
+    <span class="u">°C</span>
+  </div>
+  <div class="frow">
+    <label>Выдержано</label>
+    <input id="spHours" type="number" step="1" value="72">
+    <span class="u">ч</span>
+  </div>
+
+  <div class="sect">ЧТО ПРОВЕРЯЕМ</div>
+  <div class="frow">
+    <label>Случай</label>
+    <select id="spCase">
+      <option value="bearing_lt6">Несущая, пролёт менее 6 м</option>
+      <option value="bearing_ge6">Несущая, пролёт 6 м и более</option>
+      <option value="frozen">Находящаяся в мёрзлом грунте</option>
+      <option value="frames">Опалубка несёт массу, каркасы</option>
+      <option value="people">Движение людей, опалубка выше</option>
+      <option value="curing">Окончание ухода за бетоном</option>
+      <option value="loading">Загружение расчётной нагрузкой</option>
+      <option value="side">Боковые элементы опалубки</option>
+    </select>
+  </div>
+  <div class="frow" id="spRowLoad">
+    <label>Фактич. нагрузка</label>
+    <select id="spLoad">
+      <option value="lt70">менее 70 % расчётной</option>
+      <option value="gt70">свыше 70 % расчётной</option>
+    </select>
+  </div>
+
+  <div class="frow chk">
+    <input id="spCalOn" type="checkbox">
+    <label for="spCalOn">Калибровать по фактическим данным</label>
+  </div>
+  <div class="frow" id="spRowCalAge">
+    <label>Известно: возраст</label>
+    <input id="spCalAge" type="number" step="0.5" min="0">
+    <span class="u">сут</span>
+  </div>
+  <div class="frow" id="spRowCalPct">
+    <label>Известно: прочность</label>
+    <input id="spCalPct" type="number" step="1" min="0" max="100">
+    <span class="u">%</span>
+  </div>
+
+  <div class="go">
+    <button class="ok" id="spGo">РАССЧИТАТЬ</button>
+    <button id="spClear">Очистить</button>
+  </div>
+
+  <div class="res" id="spOut"></div>
+
+  <details class="sphelp">
+    <summary>Формулы и нормативы</summary>
+    <div class="spform"><i>ОБОЗНАЧЕНИЯ</i>
+t     температура выдерживания, °C
+τ     время выдерживания, ч
+M     градусо-часы, °C·ч
+τ_экв эквивалентный возраст при 20 °C, сут
+R/R28 доля проектной прочности
+A, B  коэффициенты модели набора
+
+<i>ГРАДУСО-ЧАСЫ</i>
+  <b>M = t · τ</b>, °C·ч
+  <b>τ_экв = M / 480</b>, сут
+  480 = 20 °C · 24 ч — градусо-часов в сутках
+  при эталонной температуре 20 °C.
+  Пример: 20 °C за 72 ч → M = 1440,
+  τ_экв = 3 сут.
+
+<i>МОДЕЛЬ НАБОРА ПРОЧНОСТИ</i>
+  <b>R/R28 = A + B · lg(τ_экв)</b>
+  По умолчанию A = 0,32; B = 0,47 — по типовой
+  кривой нормальнотвердеющего портландцемента
+  при 20 °C: 1 сут ≈ 32 %, 3 сут ≈ 54 %,
+  7 сут ≈ 72 %, 14 сут ≈ 86 %, 28 сут = 100 %.
+  Прочность в МПа: <b>R = B_класс · R/R28</b>
+
+  Калибровка по одной известной точке:
+  <b>B = (R₁/100 − A) / lg(τ₁)</b>
+  Если поставщик дал, что за 3 сут набрано 55 %,
+  то B = (0,55 − 0,32)/lg 3 = 0,482.
+
+<i>ОБРАТНАЯ ЗАДАЧА — когда можно распалубить</i>
+  <b>τ_экв = 10^((R_треб − A) / B)</b>, сут
+  <b>τ = τ_экв · 480 / t</b>, ч
+
+<i>ТРЕБУЕМАЯ ПРОЧНОСТЬ ПРИ РАСПАЛУБКЕ</i>
+  СП 435.1325800.2018, таблица 10.1:
+    в мёрзлом грунте:
+      нагрузка свыше 70 % — 100 %
+      менее 70 % — 70…85 %
+    несущие длиной менее 6 м:
+      свыше 70 % — 100 %; менее 70 % — 70 %
+    несущие длиной 6 м и более:
+      свыше 70 % — 100 %; менее 70 % — 80 %
+  СП 435.1325800.2018, п. 10.13:
+    боковые элементы — по сохранности поверхности
+    опалубка, воспринимающая массу бетона,
+    армированного несущими сварными каркасами — 25 %
+  СП 70.13330.2012, таблица 5.11 п. 10:
+    вертикальные поверхности — 0,5 МПа
+    горизонтальные и наклонные: до 6 м — 70 %,
+    свыше 6 м — 80 %
+  СП 70.13330.2012, п. 5.4.3:
+    движение людей и установка опалубки
+    вышележащих конструкций — 2,5 МПа
+  СП 70.13330.2012, таблица 5.7 п. 2:
+    загружение расчётной нагрузкой — 100 %
+  СП 435 п. 12.7 / СП 70 п. 5.12.3:
+    окончание ухода — 70 %, при обосновании 50 %
+
+<i>НОРМАТИВЫ</i>
+СП 435.1325800.2018 «Конструкции бетонные
+и железобетонные монолитные. Правила производства
+и приемки работ», утв. приказом Минстроя России
+от 26.11.2018 № 746/пр, введён 27.05.2019,
+введён впервые. Включён в перечень по 384-ФЗ
+(приказ Росстандарта от 02.04.2020 № 687).
+СП 70.13330.2012, ред. от 06.02.2025
+(Изменение № 7 — приказ Минстроя от 06.02.2025
+№ 66/пр, введено с 04.03.2025).
+Проверено 28.11.2026.
+
+<i>ОГОВОРКА О МОДЕЛИ</i>
+СП 435 п. 8.20 допускает проверку прогнозируемой
+прочности «на основании данных температурного
+контроля твердения (градусо-часов)». Но перевод
+градусо-часов в проценты прочности нормативом
+НЕ задан — он определяется для конкретного состава
+бетона по паспорту смеси или по испытаниям.
+Поэтому модель выведена явно, с коэффициентами,
+и её можно откалибровать по фактическим данным.
+Это расчётная модель, а не нормированная формула.
+
+Фактическую прочность подтверждают испытаниями
+по ГОСТ 10180, ГОСТ 17624, ГОСТ 22690 с записью
+в журнале бетонных работ.
+
+<i>РАСХОЖДЕНИЯ МЕЖДУ ДОКУМЕНТАМИ</i>
+СП 435 и СП 70 дают одинаковые значения 70 и 80 %
+для несущих конструкций при нагрузке менее 70 %
+расчётной. Разница в том, что СП 435 добавляет
+колонку для нагрузки свыше 70 % (100 %) и требует
+согласования с проектной организацией для
+загруженных конструкций. Для мёрзлого грунта
+СП 435 даёт диапазон 70…85 % — нижняя граница
+только при отсутствии добавок-ускорителей
+и противоморозных.</div>
+  </details>
+</div>
+
 <div id="toast"></div>
 
 <textarea id="ed" spellcheck="false"></textarea>
@@ -2052,7 +2305,7 @@ const RTXU_KEY='board.rtxu.v1';
 /* Версия сборки. Видна в панели «Напоминания» мелким шрифтом.
    Нужна ровно для одного: отличить старую страницу из кеша GitHub Pages
    от настоящей ошибки. Если версия старая — правки и не должны сохраняться. */
-const BOARD_VER='2026-11-28 13:14';
+const BOARD_VER='2026-11-28 13:54';
 /* сколько карточек с сохранённым текстом — видно рядом с версией */
 function showVer(){
   const v=document.getElementById('verState');
@@ -9961,6 +10214,476 @@ el('wAdd').addEventListener('change',()=>{ save(); calc(); });
     el('wStrip').checked=!!d.strip;
     if(d.rebar) el('wRebar').value=d.rebar;
   }catch(e){}
+  syncFields();
+})();
+
+})();
+</script>
+
+<script>
+/* ================= ТЕМП НАБОРА ПРОЧНОСТИ И РАСПАЛУБОЧНАЯ ПРОЧНОСТЬ =================
+   Нормативы (проверены 28.11.2026):
+
+   1) СП 435.1325800.2018 «Конструкции бетонные и железобетонные монолитные.
+      Правила производства и приемки работ», утв. приказом Минстроя России
+      от 26.11.2018 № 746/пр, введён 27.05.2019, ВВЕДЁН ВПЕРВЫЕ.
+      Включён в перечень по 384-ФЗ (приказ Росстандарта от 02.04.2020 № 687).
+        п. 10.13 — сроки распалубливания;
+        табл. 10.1 — прочность бетона от проектной для распалубливания;
+        п. 12.7 — уход за бетоном до 70 % (при обосновании 50 %);
+        п. 8.20 — проверка прогнозируемой прочности по градусо-часам.
+
+   2) СП 70.13330.2012 «Несущие и ограждающие конструкции», утв. приказом
+      Госстроя от 25.12.2012 № 109/ГС, ред. от 06.02.2025 (Изм. № 7 —
+      приказ Минстроя от 06.02.2025 № 66/пр, введено с 04.03.2025).
+        табл. 5.11 п. 10 — минимальная прочность при распалубке;
+        п. 5.4.3 — движение людей и установка опалубки вышележащих, 2,5 МПа;
+        табл. 5.7 п. 2 — загружение расчётной нагрузкой, 100 %;
+        табл. 5.7 п. 5 — температура выдерживания.
+
+   ЧТО НОРМИРУЕТСЯ, А ЧТО СЧИТАЕТСЯ:
+     требуемая распалубочная прочность — нормируется (табл. 10.1 СП 435,
+       табл. 5.11 СП 70);
+     прогноз набора прочности по градусо-часам — СП 435 п. 8.20 допускает
+       такой прогноз как способ проверки, но перевод градусо-часов
+       в проценты прочности нормативом НЕ задан: он определяется для
+       конкретного состава бетона. Поэтому модель набора выведена явно,
+       с коэффициентами, и может быть откалибрована по данным поставщика.
+   ---------------------------------------------------------------------- */
+(function(){
+'use strict';
+
+const pan=document.getElementById('sppanel');
+if(!pan) return;
+window.TOOLS=window.TOOLS||{};
+window.TOOLS.strength={panel:pan, name:'Темп набора прочности'};
+
+const KEY='board.strength.v1';
+let LAST=null;
+
+const el=id=>document.getElementById(id);
+const num=v=>{
+  const x=parseFloat(String(v).replace(',','.').replace(/\s/g,'').replace(/\u00a0/g,''));
+  return isFinite(x)?x:0;
+};
+const fmt=(v,d)=>v==null||!isFinite(v)?'—'
+  :(d==null?v.toFixed(2):v.toFixed(d));
+const fmtr=(v,d)=>fmt(v,d).replace('.',',');
+
+const CLASSES=[3.5,5,7.5,10,12.5,15,20,22.5,25,27.5,30,35,40,45,50,55,60,70,80,90,100,110,120];
+
+/* ---- МОДЕЛЬ НАБОРА ПРОЧНОСТИ ----
+   R/R28 = A + B · lg(τ_экв),  τ_экв — эквивалентный возраст при 20 °C, сут.
+   Значения по умолчанию A = 0,32 и B = 0,47 подобраны по типовой кривой
+   набора прочности нормальнотвердеющего портландцемента при 20 °C:
+   1 сут ≈ 32 %, 3 сут ≈ 54 %, 7 сут ≈ 72 %, 14 сут ≈ 86 %, 28 сут = 100 %.
+   Коэффициенты КАЛИБРУЮТСЯ по фактическим данным: если известна прочность
+   в каком-то возрасте, B пересчитывается. Это не нормированная формула —
+   см. справку. */
+const MODEL_A=0.32;
+let modelB=0.47;
+
+/* градусо-часы за один день при 20 °C */
+const DEG_HOURS_PER_DAY_20=480;
+/* нормативный возраст, сут */
+const AGE_28=28;
+
+function strengthRatio(tauDays, A, B){
+  if(tauDays<=0) return 0;
+  const v=A+B*Math.log10(tauDays);
+  return Math.max(0, Math.min(1, v));
+}
+function tauForRatio(ratio, A, B){
+  if(B<=0) return Infinity;
+  return Math.pow(10, (ratio-A)/B);
+}
+
+/* ---- ТРЕБУЕМАЯ ПРОЧНОСТЬ ПРИ РАСПАЛУБКЕ ----
+   Возвращает {pct} для процентов проектной либо {mpa} для абсолютной
+   величины, плюс основание и предупреждения. */
+function requiredStrength(){
+  const m=el('spCase').value;
+  const load=el('spLoad').value;      /* 'gt70' | 'lt70' */
+  const w=[];
+  let pct=null, mpa=null, src='';
+
+  switch(m){
+    case 'bearing_lt6':
+      src='СП 435.1325800.2018, табл. 10.1, п. 2 (несущие длиной менее 6 м)';
+      if(load==='gt70'){ pct=100; }
+      else { pct=70; }
+      w.push('СП 70.13330.2012, табл. 5.11 п. 10 для горизонтальных и наклонных '+
+             'конструкций при пролёте до 6 м даёт 70 % — совпадает с СП 435 при '+
+             'нагрузке менее 70 % расчётной.');
+      break;
+    case 'bearing_ge6':
+      src='СП 435.1325800.2018, табл. 10.1, п. 3 (несущие длиной 6 м и более)';
+      if(load==='gt70'){ pct=100; }
+      else { pct=80; }
+      w.push('СП 70.13330.2012, табл. 5.11 п. 10 для пролёта свыше 6 м даёт 80 % — '+
+             'совпадает с СП 435 при нагрузке менее 70 % расчётной.');
+      break;
+    case 'frozen':
+      src='СП 435.1325800.2018, табл. 10.1, п. 1 (находящиеся в мёрзлом грунте)';
+      if(load==='gt70'){ pct=100; }
+      else {
+        pct=70;
+        w.push('Табл. 10.1 п. 1 даёт диапазон 70…85 % при нагрузке менее 70 % '+
+               'расчётной. Принята нижняя граница 70 % — она допустима только '+
+               'при отсутствии в бетоне добавок-ускорителей твердения и '+
+               'противоморозных. При наличии таких добавок принимать 85 %. '+
+               'Уточнить в ППР и согласовать с проектной организацией.');
+      }
+      break;
+    case 'frames':
+      pct=25;
+      src='СП 435.1325800.2018, п. 10.13 (опалубка, воспринимающая массу бетона '+
+          'конструкций, армированных несущими сварными каркасами)';
+      break;
+    case 'people':
+      mpa=2.5;
+      src='СП 70.13330.2012, п. 5.4.3 (движение людей и установка опалубки '+
+          'вышележащих конструкций)';
+      break;
+    case 'curing':
+      pct=70;
+      src='СП 435.1325800.2018, п. 12.7 и СП 70.13330.2012, п. 5.12.3 '+
+          '(окончание ухода за бетоном)';
+      w.push('П. 12.7 СП 435 и п. 5.12.3 СП 70 допускают снижение до 50 % '+
+             'при соответствующем обосновании. Принято 70 % как общее правило.');
+      break;
+    case 'loading':
+      pct=100;
+      src='СП 70.13330.2012, табл. 5.7 п. 2 (загружение расчётной нагрузкой)';
+      break;
+    case 'side':
+      src='СП 435.1325800.2018, п. 10.13 (боковые элементы опалубки, '+
+          'не несущие нагрузки от массы конструкций)';
+      w.push('Для боковых элементов опалубки норма не задаёт числового значения: '+
+             'требование — прочность, обеспечивающая сохранность поверхности и '+
+             'кромок углов при снятии опалубки. Решение принимается по осмотру и '+
+             'фиксируется в ППР. Ориентир практики — не менее 0,2…0,5 МПа '+
+             '(СП 70.13330.2012, табл. 5.11 п. 10 для вертикальных поверхностей '+
+             'даёт 0,5 МПа), но это не норма для данного случая.');
+      break;
+  }
+  return {pct:pct, mpa:mpa, src:src, warn:w, case:m, load:load};
+}
+
+function calc(){
+  const out=el('spOut');
+  LAST=null;
+
+  /* коэффициенты модели пересчитываем перед каждым расчётом:
+     иначе после восстановления из localStorage или смены галочки
+     расчёт пойдёт по старым */
+  calibrate();
+
+  const B=num(el('spClass').value);
+  const tCure=num(el('spTemp').value);
+  const hours=num(el('spHours').value);
+  const A=MODEL_A;
+  const Bc=modelB;
+
+  if(!B||B<=0){
+    out.innerHTML='<div class="spverdict bad">Укажите класс бетона.</div>';
+    return;
+  }
+  if(!hours||hours<=0){
+    out.innerHTML='<div class="spverdict bad">Укажите время выдерживания, ч.</div>';
+    return;
+  }
+
+  const warns=[];
+
+  /* ---- градусо-часы и эквивалентный возраст ---- */
+  const effT = Math.max(0, tCure);   /* ниже 0 °C набор практически прекращается */
+  const M = effT*hours;                       /* градусо-часы */
+  const tauEq = M/DEG_HOURS_PER_DAY_20;       /* эквивалентный возраст, сут при 20 °C */
+
+  if(tCure<=0){
+    warns.push('Температура выдерживания '+fmtr(tCure,1)+' °C: при отрицательной '+
+      'температуре набор прочности практически прекращается. Расчёт ведётся '+
+      'по нулевой температуре, то есть прочность не растёт. Для зимних условий '+
+      'см. калькулятор «Зимнее бетонирование».');
+  }
+  if(tCure>80){
+    warns.push('СП 70.13330.2012, табл. 5.7 п. 5: температура выдерживания бетона '+
+      'на портландцементе не должна превышать 80 °C (на шлакопортландцементе 90 °C). '+
+      'Задано '+fmtr(tCure,1)+' °C.');
+  }
+
+  const ratio = strengthRatio(tauEq, A, Bc);
+  const Rnow = B*ratio;                 /* МПа, прогноз на текущий момент */
+  const pctNow = ratio*100;
+
+  /* ---- требуемая прочность ---- */
+  const req = requiredStrength();
+  req.warn.forEach(w=>warns.push(w));
+
+  let reqPct = req.pct;                 /* в процентах проектной */
+  let reqMpa = req.mpa;                 /* абсолютная, МПа */
+  if(reqMpa!=null){
+    reqPct = B>0 ? reqMpa/B*100 : null;
+  }
+  if(reqPct==null){
+    /* случай «боковые элементы» — числа нет */
+    out.innerHTML='<div class="spverdict bad">'+req.warn[0]+'</div>';
+    LAST=null;
+    return;
+  }
+  const reqMpaCalc = B*reqPct/100;
+
+  /* ---- время до достижения требуемой прочности ---- */
+  let tauReq=null, hoursReq=null;
+  if(reqPct>0 && reqPct<=100){
+    tauReq = tauForRatio(reqPct/100, A, Bc);
+    if(isFinite(tauReq) && effT>0){
+      const Mreq = tauReq*DEG_HOURS_PER_DAY_20;
+      hoursReq = Mreq/effT;
+    }
+  }
+
+  const okNow = ratio*100 >= reqPct - 1e-9;
+
+  /* ---- вывод ---- */
+  let h='';
+  h+='<div class="spchips">';
+  h+='<span class="spchip">Прочность <b>'+fmtr(pctNow,0)+'</b> %</span>';
+  h+='<span class="spchip">Требуется <b>'+fmtr(reqPct,0)+'</b> %</span>';
+  h+='<span class="spchip">Градусо-часы <b>'+fmtr(M,0)+'</b></span>';
+  h+='</div>';
+
+  h+='<div class="spkv"><span>Класс бетона</span><b>B'+fmtr(B,1).replace(',0','')+'</b></div>';
+  h+='<div class="spkv"><span>Температура выдерживания</span><b>'+fmtr(tCure,1)+' °C</b></div>';
+  h+='<div class="spkv"><span>Время выдерживания</span><b>'+fmtr(hours,1)+' ч = '+
+     fmtr(hours/24,2)+' сут</b></div>';
+
+  h+='<div class="spsect">НАБОР ПРОЧНОСТИ</div>';
+  h+='<div class="spkv"><span>Градусо-часы M = t · τ</span><b>'+fmtr(M,0)+' °C·ч</b></div>';
+  h+='<div class="spkv"><span>Эквивалентный возраст при 20 °C</span><b>'+
+     fmtr(tauEq,2)+' сут</b></div>';
+  h+='<div class="spkv"><span>Прочность от проектной</span><b>'+fmtr(pctNow,1)+' %</b></div>';
+  h+='<div class="spkv"><span>Прочность в МПа</span><b>'+fmtr(Rnow,2)+' МПа</b></div>';
+
+  h+='<div class="spsect">ТРЕБУЕМАЯ ПРОЧНОСТЬ</div>';
+  h+='<div class="spkv"><span>Требуется</span><b>'+fmtr(reqPct,1)+' % = '+
+     fmtr(reqMpaCalc,2)+' МПа</b></div>';
+  h+='<div class="spkv"><span>Основание</span><b>'+req.src+'</b></div>';
+
+  h+='<div class="spsect">ПРОВЕРКА</div>';
+  h+='<div class="spkv"><span>Условие '+fmtr(pctNow,1)+' % ≥ '+fmtr(reqPct,1)+' %</span>'+
+     '<b class="'+(okNow?'ok':'bad')+'">'+(okNow?'выполняется':'НЕ выполняется')+'</b></div>';
+
+  if(!okNow && hoursReq!=null && isFinite(hoursReq)){
+    const needDays = hoursReq/24;
+    const extra = hoursReq-hours;
+    h+='<div class="spkv"><span>Нужно времени при '+fmtr(tCure,1)+' °C</span><b>'+
+       fmtr(hoursReq,1)+' ч = '+fmtr(needDays,1)+' сут</b></div>';
+    h+='<div class="spkv"><span>Осталось выдержать</span><b>'+fmtr(extra,1)+
+       ' ч = '+fmtr(extra/24,1)+' сут</b></div>';
+  }else if(okNow){
+    h+='<div class="spkv"><span>Запас по времени</span><b>прочность уже достигнута</b></div>';
+  }else{
+    h+='<div class="spkv"><span>Время до требуемой прочности</span><b>не определяется</b></div>';
+    warns.push('Требуемая прочность не достигается при заданной температуре '+
+      '(температура нулевая или модель не позволяет решить обратную задачу).');
+  }
+
+  if(warns.length){
+    h+='<div class="spsect">ЗАМЕЧАНИЯ</div>';
+    warns.forEach(w=>{ h+='<div class="spverdict bad">'+w+'</div>'; });
+  }
+
+  h+='<div class="spverdict '+(okNow?'ok':'bad')+'">'+
+     (okNow
+       ? 'РАСПАЛУБКА ВОЗМОЖНА: прогноз '+fmtr(pctNow,0)+' % при требуемых '+
+         fmtr(reqPct,0)+' %.'
+       : 'РАСПАЛУБКА НЕДОПУСТИМА: прогноз '+fmtr(pctNow,0)+' % при требуемых '+
+         fmtr(reqPct,0)+ '%.'+
+         (hoursReq!=null&&isFinite(hoursReq)?' Нужно выдержать ещё '+fmtr(hoursReq-hours,1)+' ч.':''))+
+     '</div>';
+
+  h+='<button class="spcopy" id="spCopy">Скопировать расчёт в ППР</button>';
+
+  out.innerHTML=h;
+  LAST={B:B,tCure:tCure,hours:hours,M:M,tauEq:tauEq,ratio:ratio,pctNow:pctNow,
+        Rnow:Rnow,reqPct:reqPct,reqMpaCalc:reqMpaCalc,reqSrc:req.src,
+        reqCase:req.case,okNow:okNow,hoursReq:hoursReq,A:A,Bc:Bc,warns:warns,
+        calibrated:el('spCalOn').checked};
+  const cp=document.getElementById('spCopy');
+  if(cp) cp.addEventListener('click',copyReport);
+  save();
+}
+
+/* калибровка коэффициента B по известной точке */
+function calibrate(){
+  const on=el('spCalOn').checked;
+  el('spRowCalAge').style.display=on?'':'none';
+  el('spRowCalPct').style.display=on?'':'none';
+  if(!on){ modelB=0.47; return; }
+  const age=num(el('spCalAge').value);
+  const pct=num(el('spCalPct').value);
+  if(age>0 && pct>0 && pct<100){
+    const b=(pct/100-MODEL_A)/Math.log10(age);
+    if(b>0 && isFinite(b)) modelB=b;
+  }
+}
+
+function reportText(){
+  const L=LAST;
+  if(!L) return '';
+  const f=(v,d)=>v==null||!isFinite(v)?'—'
+    :(d==null?v.toFixed(2):v.toFixed(d)).replace('.',',');
+  const P=[];
+  P.push('РАСЧЁТ ТЕМПА НАБОРА ПРОЧНОСТИ И РАСПАЛУБОЧНОЙ ПРОЧНОСТИ');
+  P.push('');
+  P.push('НОРМАТИВЫ');
+  P.push('  СП 435.1325800.2018 «Конструкции бетонные и железобетонные');
+  P.push('  монолитные. Правила производства и приемки работ», утв. приказом');
+  P.push('  Минстроя России от 26.11.2018 № 746/пр, введён 27.05.2019.');
+  P.push('  Пункт 10.13, таблица 10.1, пункты 12.7 и 8.20.');
+  P.push('  СП 70.13330.2012 «Несущие и ограждающие конструкции», ред. от');
+  P.push('  06.02.2025 (Изменение № 7, приказ Минстроя от 06.02.2025 № 66/пр).');
+  P.push('  Таблица 5.11 п. 10, пункт 5.4.3, таблица 5.7 пп. 2 и 5.');
+  P.push('');
+  P.push('ИСХОДНЫЕ ДАННЫЕ');
+  P.push('  Класс бетона B'+f(L.B,1).replace(',0',''));
+  P.push('  Температура выдерживания: '+f(L.tCure,1)+' °C');
+  P.push('  Время выдерживания: '+f(L.hours,1)+' ч = '+f(L.hours/24,2)+' сут');
+  P.push('');
+  P.push('1. НАБОР ПРОЧНОСТИ (градусо-часы)');
+  P.push('   M = t · τ = '+f(L.tCure,1)+' · '+f(L.hours,1)+' = '+f(L.M,0)+' °C·ч');
+  P.push('   Эквивалентный возраст при 20 °C:');
+  P.push('   τ_экв = M / 480 = '+f(L.tauEq,2)+' сут');
+  P.push('   Модель: R/R28 = '+f(L.A,2)+' + '+f(L.Bc,3)+' · lg(τ_экв)');
+  P.push('   Прогноз прочности: '+f(L.pctNow,1)+' % = '+f(L.Rnow,2)+' МПа');
+  if(L.calibrated){
+    P.push('   Коэффициент B откалиброван по фактическим данным.');
+  }else{
+    P.push('   Коэффициент B принят по типовой кривой набора прочности');
+    P.push('   нормальнотвердеющего портландцемента при 20 °C.');
+  }
+  P.push('');
+  P.push('2. ТРЕБУЕМАЯ ПРОЧНОСТЬ ПРИ РАСПАЛУБКЕ');
+  P.push('   '+f(L.reqPct,1)+' % проектной = '+f(L.reqMpaCalc,2)+' МПа');
+  P.push('   Основание: '+L.reqSrc);
+  P.push('');
+  P.push('3. ПРОВЕРКА');
+  P.push('   '+f(L.pctNow,1)+' % ≥ '+f(L.reqPct,1)+' % — '+
+         (L.okNow?'выполняется':'НЕ выполняется'));
+  if(!L.okNow && L.hoursReq!=null && isFinite(L.hoursReq)){
+    P.push('   Требуемое время выдерживания при '+f(L.tCure,1)+' °C:');
+    P.push('   '+f(L.hoursReq,1)+' ч = '+f(L.hoursReq/24,1)+' сут');
+    P.push('   Осталось выдержать: '+f(L.hoursReq-L.hours,1)+' ч');
+  }
+  P.push('');
+  if(L.warns.length){
+    P.push('ЗАМЕЧАНИЯ');
+    L.warns.forEach((w,i)=>{ P.push('  '+(i+1)+'. '+w); });
+    P.push('');
+  }
+  P.push('ВЫВОД: распалубливание '+(L.okNow?'ВОЗМОЖНО':'НЕДОПУСТИМО')+'.');
+  P.push('');
+  P.push('ОГОВОРКА О МОДЕЛИ');
+  P.push('  СП 435.1325800.2018 (п. 8.20) допускает проверку прогнозируемой');
+  P.push('  прочности на основании данных температурного контроля твердения');
+  P.push('  (градусо-часов). Однако перевод градусо-часов в проценты прочности');
+  P.push('  нормативом НЕ задан: он определяется для конкретного состава бетона');
+  P.push('  по паспорту смеси или по результатам испытаний. Приведённая');
+  P.push('  зависимость — расчётная модель, а не нормированная формула.');
+  P.push('  Фактическую прочность подтверждают испытаниями по ГОСТ 10180,');
+  P.push('  ГОСТ 17624, ГОСТ 22690 с записью в журнале бетонных работ.');
+  P.push('  Нормативы проверены 28.11.2026.');
+  return P.join('\n');
+}
+
+function copyReport(){
+  const txt=reportText();
+  if(!txt) return;
+  const btn=document.getElementById('spCopy');
+  const done=ok=>{
+    if(!btn) return;
+    btn.classList.add('ok');
+    const old=btn.textContent;
+    btn.textContent=ok?'Скопировано в буфер':'Не удалось скопировать';
+    setTimeout(()=>{ btn.classList.remove('ok'); btn.textContent=old; },1800);
+  };
+  try{
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(()=>done(true),()=>done(false));
+      return;
+    }
+  }catch(e){}
+  try{
+    const ta=document.createElement('textarea');
+    ta.value=txt; ta.style.position='fixed'; ta.style.left='-9999px';
+    document.body.appendChild(ta); ta.select();
+    const ok=document.execCommand('copy');
+    document.body.removeChild(ta); done(ok);
+  }catch(e){ done(false); }
+}
+
+function save(){
+  try{
+    localStorage.setItem(KEY,JSON.stringify({
+      cls:el('spClass').value, case_:el('spCase').value, load:el('spLoad').value,
+      temp:el('spTemp').value, hours:el('spHours').value,
+      calOn:el('spCalOn').checked, calAge:el('spCalAge').value, calPct:el('spCalPct').value
+    }));
+  }catch(e){}
+}
+
+function syncFields(){
+  const m=el('spCase').value;
+  /* фактическая нагрузка влияет только на несущие и мёрзлый грунт */
+  const needLoad=(m==='bearing_lt6'||m==='bearing_ge6'||m==='frozen');
+  el('spRowLoad').style.display=needLoad?'':'none';
+  calibrate();
+}
+
+function openPan(){ pan.classList.add('show'); syncFields(); calc(); }
+function closePan(){ pan.classList.remove('show'); }
+window.TOOLS.strength.open=openPan;
+window.TOOLS.strength.close=closePan;
+
+el('spclose').addEventListener('click',closePan);
+el('spGo').addEventListener('click',calc);
+el('spClear').addEventListener('click',()=>{
+  ['spTemp','spHours','spCalAge','spCalPct'].forEach(id=>{ el(id).value=''; });
+  el('spOut').innerHTML='';
+  save();
+});
+['spCase','spLoad','spClass'].forEach(id=>{
+  el(id).addEventListener('change',()=>{ syncFields(); save(); calc(); });
+});
+el('spCalOn').addEventListener('change',()=>{ syncFields(); save(); calc(); });
+['spTemp','spHours','spCalAge','spCalPct'].forEach(id=>{
+  el(id).addEventListener('input',()=>{ calibrate(); save(); });
+  el(id).addEventListener('keydown',ev=>{
+    if(ev.key==='Enter'){ ev.preventDefault(); calibrate(); save(); calc(); }
+  });
+});
+
+(function restore(){
+  try{
+    const raw=localStorage.getItem(KEY);
+    if(!raw) return;
+    const d=JSON.parse(raw);
+    if(d.cls){
+      const sel=el('spClass');
+      const ok=Array.prototype.some.call(sel.options,o=>o.value===String(d.cls));
+      if(ok) sel.value=String(d.cls);
+    }
+    if(d.case_) el('spCase').value=d.case_;
+    if(d.load) el('spLoad').value=d.load;
+    if(d.temp) el('spTemp').value=d.temp;
+    if(d.hours) el('spHours').value=d.hours;
+    el('spCalOn').checked=!!d.calOn;
+    if(d.calAge) el('spCalAge').value=d.calAge;
+    if(d.calPct) el('spCalPct').value=d.calPct;
+  }catch(e){}
+  calibrate();
   syncFields();
 })();
 
